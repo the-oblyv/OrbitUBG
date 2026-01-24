@@ -174,3 +174,19 @@ body {
   margin-top:10px;
   font-size:.95rem;
 }
+
+.settings {
+  display:flex;
+  flex-direction:column;
+  gap:14px;
+  margin-top:18px;
+}
+
+.setting {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:14px;
+  background:var(--panel);
+  border-radius:18px;
+}

@@ -68,3 +68,23 @@ if(aboutBtn){
   }
 }
 
+const proxyPrefix="/scramjet/"
+
+const search=document.getElementById("proxySearch")
+if(search){
+  search.addEventListener("keydown",e=>{
+    if(e.key!=="Enter") return
+    let q=search.value.trim()
+    if(!q) return
+
+    let url
+    if(q.includes(" ") || !q.includes(".")){
+      url="https://duckduckgo.com/?q="+encodeURIComponent(q)
+    }else{
+      if(!q.startsWith("http")) q="https://"+q
+      url=q
+    }
+
+    location.href=proxyPrefix+encodeURIComponent(url)
+  })
+}

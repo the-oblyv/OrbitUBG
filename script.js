@@ -1,5 +1,5 @@
-const autoBlank=false
-if(autoBlank && location.protocol!=="about:" && !location.search.includes("noblank")){
+const settings=getSettings()
+if(settings.autoBlank && location.protocol!=="about:" && !location.search.includes("noblank")){
   const w=window.open("about:blank","_blank")
   const i=w.document.createElement("iframe")
   i.src=location.href+"?noblank=1"
@@ -10,11 +10,55 @@ if(autoBlank && location.protocol!=="about:" && !location.search.includes("nobla
   w.document.body.appendChild(i)
   location.replace("https://classroom.google.com")
 }
+if(settings.panic){
+  document.addEventListener("keydown",e=>{
+    if(e.key==="`"){
+      location.href="https://classroom.google.com"
+    }
+  })
+}
+if(settings.cloak){
+  function cloak(title,icon){
+    document.title=title
+    let link=document.querySelector("link[rel='icon']")
+    if(!link){
+      link=document.createElement("link")
+      link.rel="icon"
+      document.head.appendChild(link)
+    }
+    link.href=icon
+  }
+
+  cloak(
+    "Google Classroom",
+    "https://ssl.gstatic.com/classroom/favicon.png"
+  )
+}
 const menuBtn=document.getElementById("menuBtn")
 const menu=document.getElementById("menu")
 if(menuBtn){
   menuBtn.onclick=()=>menu.classList.toggle("open")
 }
+const SETTINGS_KEY="orbitSettings"
+
+const defaultSettings={
+  autoBlank:false,
+  cloak:false,
+  panic:false,
+  proxy:true
+}
+
+function getSettings(){
+  const saved=localStorage.getItem(SETTINGS_KEY)
+  return saved ? JSON.parse(saved) : defaultSettings
+}
+
+function saveSettings(settings){
+  localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings))
+}
+
+const settings=getSettings()
+
 
 async function loadGames(){
   const res=await fetch("games.json")
@@ -122,3 +166,46 @@ cloak(
   "Google Classroom",
   "https://ssl.gstatic.com/classroom/favicon.png"
 )
+
+if(document.getElementById("autoBlankToggle")){
+  const auto=document.getElementById("autoBlankToggle")
+  const cloak=document.getElementById("cloakToggle")
+  const panic=document.getElementById("panicToggle")
+  const proxy=document.getElementById("proxyToggle")
+  const reset=document.getElementById("resetBtn")
+
+  auto.checked=settings.autoBlank
+  cloak.checked=settings.cloak
+  panic.checked=settings.panic
+  proxy.checked=settings.proxy
+
+  auto.onchange=()=>{
+    settings.autoBlank=auto.checked
+    saveSettings(settings)
+  }
+
+  cloak.onchange=()=>{
+    settings.cloak=cloak.checked
+    saveSettings(settings)
+  }
+
+  panic.onchange=()=>{
+    settings.panic=panic.checked
+    saveSettings(settings)
+  }
+
+  proxy.onchange=()=>{
+    settings.proxy=proxy.checked
+    saveSettings(settings)
+  }
+
+  reset.onclick=()=>{
+    Object.assign(settings, defaultSettings)
+    saveSettings(settings)
+    auto.checked=settings.autoBlank
+    cloak.checked=settings.cloak
+    panic.checked=settings.panic
+    proxy.checked=settings.proxy
+    location.reload()
+  }
+}

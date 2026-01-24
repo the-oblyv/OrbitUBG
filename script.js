@@ -1,3 +1,15 @@
+const autoBlank=false
+if(autoBlank && location.protocol!=="about:" && !location.search.includes("noblank")){
+  const w=window.open("about:blank","_blank")
+  const i=w.document.createElement("iframe")
+  i.src=location.href+"?noblank=1"
+  i.style.border="none"
+  i.style.width="100%"
+  i.style.height="100%"
+  w.document.body.style.margin="0"
+  w.document.body.appendChild(i)
+  location.replace("https://classroom.google.com")
+}
 const menuBtn=document.getElementById("menuBtn")
 const menu=document.getElementById("menu")
 if(menuBtn){
@@ -88,3 +100,25 @@ if(search){
     location.href=proxyPrefix+encodeURIComponent(url)
   })
 }
+
+document.addEventListener("keydown",e=>{
+  if(e.key==="`"){
+    location.href="https://classroom.google.com"
+  }
+})
+
+function cloak(title,icon){
+  document.title=title
+  let link=document.querySelector("link[rel='icon']")
+  if(!link){
+    link=document.createElement("link")
+    link.rel="icon"
+    document.head.appendChild(link)
+  }
+  link.href=icon
+}
+
+cloak(
+  "Google Classroom",
+  "https://ssl.gstatic.com/classroom/favicon.png"
+)

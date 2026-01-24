@@ -53,3 +53,18 @@ if(document.getElementById("gameFrame")){
     }
   })
 }
+
+const aboutBtn=document.getElementById("aboutBlankBtn")
+if(aboutBtn){
+  aboutBtn.onclick=()=>{
+    const w=window.open("about:blank","_blank")
+    const iframe=w.document.createElement("iframe")
+    iframe.src=location.href
+    iframe.style.border="none"
+    iframe.style.width="100%"
+    iframe.style.height="100%"
+    w.document.body.style.margin="0"
+    w.document.body.appendChild(iframe)
+  }
+}
+

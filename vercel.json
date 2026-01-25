@@ -1,0 +1,5 @@
+{
+  "rewrites": [
+    { "source": "/uv/:path*", "destination": "/uv/index.html" }
+  ]
+}

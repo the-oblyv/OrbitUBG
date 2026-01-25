@@ -80,7 +80,7 @@ if(search){
       if(!q.startsWith("http")) q="https://"+q
       url=q
     }
-    location.href=UV_PREFIX+encodeURIComponent(url)
+    location.href=SJ_PREFIX+encodeURIComponent(url)
   })
 }
 

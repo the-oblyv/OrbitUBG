@@ -91,12 +91,14 @@ body {
 }
 
 .searchbox {
-  max-width:520px;
-  margin:0 auto 28px;
+  width:100%;
   padding:16px;
-  border-radius:999px;
+  border-radius:14px;
+  border:none;
+  outline:none;
   background:var(--panel2);
-  color:var(--muted);
+  color:var(--text);
+  margin-bottom:24px;
 }
 
 .hero-buttons {

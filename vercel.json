@@ -1,0 +1,8 @@
+{
+  "rewrites": [
+    {
+      "source": "/uv/:path*",
+      "destination": "/api/uv/:path*"
+    }
+  ]
+}

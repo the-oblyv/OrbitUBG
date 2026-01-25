@@ -1,4 +1,4 @@
-1<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -25,6 +25,11 @@
 
   <div class="settings">
     <label class="setting">
+      <span>Auto About:Blank</span>
+      <input type="checkbox" id="autoBlankToggle">
+    </label>
+
+    <label class="setting">
       <span>Cloak Title + Favicon</span>
       <input type="checkbox" id="cloakToggle">
     </label>
@@ -33,6 +38,12 @@
       <span>Panic Key Enabled (` key)</span>
       <input type="checkbox" id="panicToggle">
     </label>
+
+    <label class="setting">
+      <span>Proxy Search Enabled</span>
+      <input type="checkbox" id="proxyToggle">
+    </label>
+
     <button class="btn primary" id="resetBtn">
       <i class="fa-solid fa-rotate"></i> Reset to Default
     </button>

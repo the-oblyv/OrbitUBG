@@ -4,5 +4,11 @@
     "name": "DELTARUNE",
     "image": "/games/deltarune/Deltarune.webp",
     "url": "/games/deltarune/index.html"
+  },
+  {
+    "id": "drivemad",
+    "name": "Drive Mad",
+    "image": "/games/drivemad/DriveMad.webp",
+    "url": "/games/drivemad/index.html"
   }
 ]

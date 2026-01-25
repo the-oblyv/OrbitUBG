@@ -18,10 +18,6 @@ function saveSettings(s){
 
 const settings=getSettings()
 
-const sj=window.__scramjet$config||{}
-const SJ_PREFIX=sj.prefix||"/service/"
-const sjEncode=url=>sj.encodeUrl?sj.encodeUrl(url):encodeURIComponent(url)
-
 const menuBtn=document.getElementById("menuBtn")
 const menu=document.getElementById("menu")
 if(menuBtn) menuBtn.onclick=()=>menu.classList.toggle("open")
@@ -72,7 +68,7 @@ if(search && settings.proxy){
       url=q
     }
 
-    location.href=SJ_PREFIX+sjEncode(url)
+    location.href=url
   })
 }
 
@@ -110,9 +106,8 @@ if(frame){
     const id=new URLSearchParams(location.search).get("id")
     const game=g.find(x=>x.id===id)
     if(!game) return
-    const url=settings.proxy?SJ_PREFIX+sjEncode(game.url):game.url
     document.getElementById("gameTitle").textContent=game.name
-    frame.src=url
+    frame.src=game.url
   })
 }
 

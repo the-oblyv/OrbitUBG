@@ -112,16 +112,44 @@ if (document.getElementById("gamesGrid")) {
   };
 }
 
-if (document.getElementById("gameFrame")) {
-  loadGames().then(games => {
-    const id = new URLSearchParams(location.search).get("id");
-    const game = games.find(x => x.id === id);
-    if (game) {
-      document.title = game.name + " - Orbit";
-      document.getElementById("gameTitle").textContent = game.name;
-      document.getElementById("gameFrame").src = game.url;
-    }
-  });
+if(document.getElementById("gameFrame")){
+  fetch("games.json").then(r=>r.json()).then(games=>{
+    const id=new URLSearchParams(location.search).get("id")
+    const game=games.find(x=>x.id===id)
+    if(!game)return
+
+    const finalUrl=settings.proxy
+      ? SCRAMJET_PREFIX+encodeURIComponent(game.url)
+      : game.url
+
+    document.getElementById("gameTitle").textContent=game.name
+    document.getElementById("gameFrame").src=finalUrl
+  })
+}
+
+const frame=document.getElementById("gameFrame")
+const fsBtn=document.getElementById("fullscreenBtn")
+
+if(fsBtn&&frame){
+  fsBtn.onclick=()=>{
+    if(frame.requestFullscreen)frame.requestFullscreen()
+    else if(frame.webkitRequestFullscreen)frame.webkitRequestFullscreen()
+  }
+}
+
+const blankBtn=document.getElementById("blankBtn")
+
+if(blankBtn&&frame){
+  blankBtn.onclick=()=>{
+    const w=window.open("about:blank","_blank")
+    const i=w.document.createElement("iframe")
+    i.src=frame.src
+    i.style.border="none"
+    i.style.width="100%"
+    i.style.height="100%"
+    w.document.body.style.margin="0"
+    w.document.body.appendChild(i)
+  }
 }
 
 const aboutBtn = document.getElementById("aboutBlankBtn");

@@ -24,9 +24,9 @@ const menuBtn=document.getElementById("menuBtn")
 const menu=document.getElementById("menu")
 if(menuBtn) menuBtn.onclick=()=>menu.classList.toggle("open")
 
-const originalTitle=document.title
-let originalIcon=document.querySelector("link[rel='icon']")
-originalIcon=originalIcon?originalIcon.href:null
+const defaultTitle = document.title
+let defaultIcon = document.querySelector("link[rel='icon']")
+defaultIcon = defaultIcon ? defaultIcon.href : null
 
 function applyCloak(){
   document.title=settings.cloakTitle
@@ -40,15 +40,15 @@ function applyCloak(){
 }
 
 function removeCloak(){
-  document.title=originalTitle
-  if(originalIcon){
+  document.title=defaultTitle
+  if(defaultIcon){
     let l=document.querySelector("link[rel='icon']")
     if(!l){
       l=document.createElement("link")
       l.rel="icon"
       document.head.appendChild(l)
     }
-    l.href=originalIcon
+    l.href=defaultIcon
   }
 }
 

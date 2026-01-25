@@ -34,5 +34,11 @@
     "name": "2048",
     "image": "/games/2048/41RCIHMHFDL.png",
     "url": "/games/2048/index.html"
+  },
+  {
+    "id": "pokemonemerald",
+    "name": "Pokémon Emerald",
+    "image": "/games/pokemonemerald/Pokemon-Emerald---Game-Boy-Advance.png",
+    "url": "/games/pokemonemerald/index.html"
   }
 ]

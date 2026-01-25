@@ -1,8 +1,0 @@
-{
-  "name": "orbit",
-  "version": "1.0.0",
-  "type": "module",
-  "dependencies": {
-    "ultraviolet": "^1.0.0"
-  }
-}

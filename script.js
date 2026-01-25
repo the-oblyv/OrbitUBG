@@ -4,7 +4,7 @@ const defaultSettings={
   autoBlank:false,
   cloak:true,
   panic:true,
-  proxy:true
+  proxy:false
 }
 
 function getSettings(){
@@ -59,7 +59,6 @@ if(search && settings.proxy){
     if(e.key!=="Enter") return
     let q=search.value.trim()
     if(!q) return
-
     let url
     if(q.includes(" ")||!q.includes(".")){
       url="https://duckduckgo.com/?q="+encodeURIComponent(q)
@@ -67,7 +66,6 @@ if(search && settings.proxy){
       if(!q.startsWith("http")) q="https://"+q
       url=q
     }
-
     location.href=url
   })
 }

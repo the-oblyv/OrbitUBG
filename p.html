@@ -40,15 +40,5 @@
   </main>
 
   <script src="script.js"></script>
-  <script>
-    loadGames().then(g=>{
-      const id=new URLSearchParams(location.search).get("id")
-      const game=g.find(x=>x.id===id)
-      if(!game) return
-      const url=(typeof SJ_PREFIX!=="undefined" && SJ_PREFIX? SJ_PREFIX+encodeURIComponent(game.url):game.url)
-      document.getElementById("gameTitle").textContent=game.name
-      document.getElementById("gameFrame").src=url
-    })
-  </script>
 </body>
 </html>

@@ -4,7 +4,7 @@ const defaultSettings={
   autoBlank:false,
   cloak:true,
   panic:true,
-  proxy:false
+  proxy:true
 }
 
 function getSettings(){
@@ -54,11 +54,12 @@ if(settings.panic){
 }
 
 const search=document.getElementById("proxySearch")
-if(search && settings.proxy){
-  search.addEventListener("keydown",e=>{
+if(search){
+  search.addEventListener("keydown",async e=>{
     if(e.key!=="Enter") return
     let q=search.value.trim()
     if(!q) return
+
     let url
     if(q.includes(" ")||!q.includes(".")){
       url="https://duckduckgo.com/?q="+encodeURIComponent(q)
@@ -66,6 +67,18 @@ if(search && settings.proxy){
       if(!q.startsWith("http")) q="https://"+q
       url=q
     }
+
+    if(settings.proxy){
+      const testUrl="/scramjet/"+encodeURIComponent(url)
+      try{
+        const r=await fetch(testUrl,{method:"HEAD"})
+        if(r.ok){
+          location.href=testUrl
+          return
+        }
+      }catch{}
+    }
+
     location.href=url
   })
 }
@@ -104,7 +117,6 @@ if(frame){
     const id=new URLSearchParams(location.search).get("id")
     const game=g.find(x=>x.id===id)
     if(!game) return
-    document.getElementById("gameTitle").textContent=game.name
     frame.src=game.url
   })
 }

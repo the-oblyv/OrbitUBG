@@ -136,15 +136,15 @@ body {
 }
 
 .search-games {
-  width:100%;
+  width: 100%;
   max-width: 520px;
-  padding:16px;
-  border-radius:14px;
-  border:none;
-  outline:none;
-  background:var(--panel2);
-  color:var(--text);
-  margin-bottom:24px;
+  padding: 16px;
+  border-radius: 14px;
+  border: none;
+  outline: none;
+  background: var(--panel2);
+  color: var(--text);
+  margin-bottom: 24px;
 }
 
 .grid {

@@ -10,5 +10,11 @@
     "name": "Drive Mad",
     "image": "/games/drivemad/DriveMad.webp",
     "url": "/games/drivemad/index.html"
+  },  
+  {
+    "id": "1",
+    "name": "1",
+    "image": "/games/1/1.png",
+    "url": "/games/1/index.html"
   }
 ]

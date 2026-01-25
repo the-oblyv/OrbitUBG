@@ -42,7 +42,7 @@ body {
 }
 
 .nav-logo {
-  height:55px;
+  height:42px;
 }
 
 .nav-links {
@@ -230,13 +230,26 @@ body {
   cursor:pointer;
 }
 
-@media(max-width:720px){
-  .nav-links {
-    display:none;
-  }
-  .menu-btn {
-    display:block;
-  }
+.setting label{
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+}
+
+.setting small{
+  color:var(--muted);
+  font-size:.9rem;
+}
+
+.setting input[type="text"]{
+  width:100%;
+  padding:12px 14px;
+  border-radius:14px;
+  border:none;
+  outline:none;
+  background:var(--panel2);
+  color:var(--text);
+  margin-top:10px;
 }
 
 @media(max-width:720px){
@@ -246,6 +259,14 @@ body {
 
   .nav-logo{
     height:38px;
+  }
+
+  .nav-links{
+    display:none;
+  }
+
+  .menu-btn{
+    display:block;
   }
 
   .menu{

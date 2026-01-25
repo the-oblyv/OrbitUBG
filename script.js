@@ -18,7 +18,7 @@ function saveSettings(s){
 }
 
 const settings=getSettings()
-const UV_PREFIX="/uv/"
+const SJ_PREFIX="/sj/"
 
 const menuBtn=document.getElementById("menuBtn")
 const menu=document.getElementById("menu")

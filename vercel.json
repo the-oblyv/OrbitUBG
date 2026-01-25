@@ -1,9 +1,9 @@
 {
   "version": 2,
-  "routes": [
+  "rewrites": [
     {
-      "src": "/sj/(.*)",
-      "dest": "/api/sj.js"
+      "source": "/sj/:path*",
+      "destination": "/api/sj.js"
     }
   ]
 }

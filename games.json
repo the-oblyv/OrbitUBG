@@ -28,5 +28,11 @@
     "name": "1v1.LOL",
     "image": "/games/1v1lol/images (8).jpeg",
     "url": "/games/1v1lol/index.html"
+  },
+  {
+    "id": "2048",
+    "name": "2048",
+    "image": "/games/2048/41RCIHMHFDL.png",
+    "url": "/games/2048/index.html"
   }
 ]

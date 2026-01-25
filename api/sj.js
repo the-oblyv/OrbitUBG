@@ -1,8 +1,9 @@
 import fetch from "node-fetch";
 
 export default async function handler(req, res) {
-  const url = req.url.replace("/api/sj/", "");
-  const decoded = decodeURIComponent(url);
+  const urlObj = new URL(req.url, `https://${req.headers.host}`);
+  const path = urlObj.pathname.replace("/sj/", "");
+  const decoded = decodeURIComponent(path);
   const target = decoded.startsWith("http") ? decoded : "https://" + decoded;
 
   const response = await fetch(target);

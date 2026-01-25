@@ -21,24 +21,52 @@ body {
 }
 
 .topbar {
-  margin:18px auto 0;
+  position:fixed;
+  top:18px;
+  left:50%;
+  transform:translateX(-50%);
   width:calc(100% - 32px);
-  max-width:1100px;
+  max-width:900px;
   background:var(--panel);
-  border-radius:var(--radius);
-  padding:16px 20px;
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  box-shadow:0 10px 30px rgba(0,0,0,.35);
+  border-radius:999px;
+  padding:14px 22px;
+  z-index:20;
+  box-shadow:0 14px 35px rgba(0,0,0,.45);
 }
 
-.brand {
-  font-weight:800;
-  font-size:1.3rem;
+.nav-inner {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:20px;
+}
+
+.nav-logo {
+  height:34px;
+}
+
+.nav-links {
+  display:flex;
+  gap:26px;
+  align-items:center;
+}
+
+.nav-links a {
+  color:var(--text);
+  text-decoration:none;
+  font-weight:600;
+  display:flex;
+  align-items:center;
+  gap:8px;
+  opacity:.9;
+}
+
+.nav-links a:hover {
+  opacity:1;
 }
 
 .menu-btn {
+  display:none;
   font-size:1.3rem;
   cursor:pointer;
 }
@@ -49,7 +77,7 @@ body {
   left:50%;
   transform:translateX(-50%);
   width:calc(100% - 32px);
-  max-width:1100px;
+  max-width:900px;
   background:var(--panel2);
   border-radius:var(--radius);
   padding:18px;
@@ -75,7 +103,7 @@ body {
 
 .hero {
   text-align:center;
-  padding:90px 16px 40px;
+  padding:130px 16px 40px;
 }
 
 .hero h1 {
@@ -91,15 +119,15 @@ body {
 }
 
 .searchbox {
-  width: 100%;
-  max-width: 520px;
-  padding: 16px;
-  border-radius: 14px;
-  border: none;
-  outline: none;
-  background: var(--panel2);
-  color: var(--text);
-  margin-bottom: 24px;
+  width:100%;
+  max-width:520px;
+  padding:16px;
+  border-radius:14px;
+  border:none;
+  outline:none;
+  background:var(--panel2);
+  color:var(--text);
+  margin-bottom:24px;
 }
 
 .hero-buttons {
@@ -117,6 +145,7 @@ body {
   display:flex;
   gap:10px;
   align-items:center;
+  cursor:pointer;
 }
 
 .primary {
@@ -130,20 +159,20 @@ body {
 }
 
 .page {
-  padding:110px 16px 40px;
+  padding:130px 16px 40px;
   max-width:1100px;
   margin:auto;
 }
 
 .search-games {
-  width: 100%;
-  padding: 16px;
-  border-radius: 14px;
-  border: none;
-  outline: none;
-  background: var(--panel2);
-  color: var(--text);
-  margin-bottom: 24px;
+  width:100%;
+  padding:16px;
+  border-radius:14px;
+  border:none;
+  outline:none;
+  background:var(--panel2);
+  color:var(--text);
+  margin-bottom:24px;
 }
 
 .grid {
@@ -192,4 +221,13 @@ body {
   padding:14px;
   background:var(--panel);
   border-radius:18px;
+}
+
+@media(max-width:720px){
+  .nav-links {
+    display:none;
+  }
+  .menu-btn {
+    display:block;
+  }
 }

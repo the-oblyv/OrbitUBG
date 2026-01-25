@@ -3,33 +3,33 @@
 <head>
   <base href="https://cdn.jsdelivr.net/gh/technonyte00/deltarune@main/">
   <meta charset="UTF-8">
-  <link rel="stylesheet" href="https://g-mcb.github.io/deltarune/style.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/the-oblyv/deltarune@main/style.css">
 </head>
 <body>
   <div class="logo-container">
-    <img src="https://g-mcb.github.io/deltarune/logo.png" alt="Logo" class="logo">
+    <img src="https://cdn.jsdelivr.net/gh/the-oblyv/deltarune@main/logo.png" alt="Logo" class="logo">
   </div>
   
   <div class="menu">
     <a href="javascript:loadChapter(1)" class="row">
       <span class="chapter">Chapter 1</span>
       <span class="title">The Beginning</span>
-      <img src="https://g-mcb.github.io/deltarune/icons/1.png">
+      <img src="https://cdn.jsdelivr.net/gh/the-oblyv/deltarune@main/icons/1.png">
     </a>
     <a href="javascript:loadChapter(2)" class="row">
       <span class="chapter">Chapter 2</span>
       <span class="title">A Cyber's World</span>
-      <img src="https://g-mcb.github.io/deltarune/icons/2.png">
+      <img src="https://cdn.jsdelivr.net/gh/the-oblyv/deltarune@main/icons/2.png">
     </a>
     <a href="javascript:loadChapter(3)" class="row">
       <span class="chapter">Chapter 3</span>
       <span class="title">Late Night</span>
-      <img src="https://g-mcb.github.io/deltarune/icons/3.png">
+      <img src="https://cdn.jsdelivr.net/gh/the-oblyv/deltarune@main/icons/3.png">
     </a>
     <a href="javascript:loadChapter(4)" class="row">
       <span class="chapter">Chapter 4</span>
       <span class="title">Prophecy</span>
-      <img src="https://g-mcb.github.io/deltarune/icons/4.png">
+      <img src="https://cdn.jsdelivr.net/gh/the-oblyv/deltarune@main/icons/4.png">
     </a>
     <a href="javascript:window.open('https://truffled.lol', '_blank')" class="row">
       <span class="chapter"></span>
@@ -38,7 +38,7 @@
     </a>
   </div>
   <audio id="drone" controls loop autoplay hidden>
-    <source src="https://g-mcb.github.io/deltarune/audios/AUDIO_DRONE.ogg" type="audio/ogg">
+    <source src="https://cdn.jsdelivr.net/gh/the-oblyv/deltarune@main/audios/AUDIO_DRONE.ogg" type="audio/ogg">
     your slow ass browser doesnt support AUDIO?
   </audio>
   <button id="mute">🔊</button>
@@ -80,8 +80,8 @@
 
     const hoverSound = document.getElementById('hover-sound');
 
-    const menumoveaudio = new Audio('https://g-mcb.github.io/deltarune/audios/snd_menumove.mp3');
-    const menuselectaudio = new Audio('https://g-mcb.github.io/deltarune/audios/snd_select.mp3');
+    const menumoveaudio = new Audio('https://cdn.jsdelivr.net/gh/the-oblyv/deltarune@main/audios/snd_menumove.mp3');
+    const menuselectaudio = new Audio('https://cdn.jsdelivr.net/gh/the-oblyv/deltarune@main/audios/snd_select.mp3');
     document.querySelectorAll('.row').forEach(row => {
       row.addEventListener('mouseenter', () => {
         if (!gamestarted) {

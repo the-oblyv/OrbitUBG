@@ -1,4 +1,3 @@
-const SCRAMJET_PREFIX="/scramjet/"
 const SETTINGS_KEY="orbitSettings"
 
 const defaultSettings={
@@ -19,24 +18,26 @@ function saveSettings(s){
 
 const settings=getSettings()
 
+const sj=window.__scramjet$config||{}
+const SJ_PREFIX=sj.prefix||"/service/"
+const sjEncode=url=>sj.encodeUrl?sj.encodeUrl(url):encodeURIComponent(url)
+
 const menuBtn=document.getElementById("menuBtn")
 const menu=document.getElementById("menu")
-if(menuBtn){
-  menuBtn.onclick=()=>menu.classList.toggle("open")
-}
+if(menuBtn) menuBtn.onclick=()=>menu.classList.toggle("open")
 
 if(settings.cloak){
-  const cloakTitle="Google Classroom"
-  const cloakIcon="https://ssl.gstatic.com/classroom/favicon.png"
+  const title="Google Classroom"
+  const icon="https://ssl.gstatic.com/classroom/favicon.png"
   const apply=()=>{
-    document.title=cloakTitle
-    let icon=document.querySelector("link[rel='icon']")
-    if(!icon){
-      icon=document.createElement("link")
-      icon.rel="icon"
-      document.head.appendChild(icon)
+    document.title=title
+    let l=document.querySelector("link[rel='icon']")
+    if(!l){
+      l=document.createElement("link")
+      l.rel="icon"
+      document.head.appendChild(l)
     }
-    icon.href=cloakIcon
+    l.href=icon
   }
   apply()
   setInterval(apply,500)
@@ -44,58 +45,51 @@ if(settings.cloak){
 
 if(settings.autoBlank && location.protocol!=="about:" && !location.search.includes("noblank")){
   const w=window.open("about:blank","_blank")
-  const i=w.document.createElement("iframe")
-  i.src=location.href+"?noblank=1"
-  i.style.border="none"
-  i.style.width="100%"
-  i.style.height="100%"
-  w.document.body.style.margin="0"
-  w.document.body.appendChild(i)
-  location.replace("https://classroom.google.com")
+  if(w){
+    w.document.write(`<iframe src="${location.href}?noblank=1" style="border:none;width:100%;height:100%"></iframe>`)
+    location.replace("https://classroom.google.com")
+  }
 }
 
 if(settings.panic){
   document.addEventListener("keydown",e=>{
-    if(e.key==="`"){
-      location.href="https://classroom.google.com"
-    }
+    if(e.key==="`") location.href="https://classroom.google.com"
   })
 }
 
 const search=document.getElementById("proxySearch")
 if(search && settings.proxy){
   search.addEventListener("keydown",e=>{
-    if(e.key!=="Enter")return
+    if(e.key!=="Enter") return
     let q=search.value.trim()
-    if(!q)return
+    if(!q) return
+
     let url
     if(q.includes(" ")||!q.includes(".")){
       url="https://duckduckgo.com/?q="+encodeURIComponent(q)
     }else{
-      if(!q.startsWith("http"))q="https://"+q
+      if(!q.startsWith("http")) q="https://"+q
       url=q
     }
-    location.href=SCRAMJET_PREFIX+encodeURIComponent(url)
+
+    location.href=SJ_PREFIX+sjEncode(url)
   })
 }
 
 async function loadGames(){
   const r=await fetch("games.json")
-  return await r.json()
+  return r.json()
 }
 
-function renderGames(games){
+function renderGames(g){
   const grid=document.getElementById("gamesGrid")
-  if(!grid)return
+  if(!grid) return
   grid.innerHTML=""
-  games.forEach(g=>{
+  g.forEach(x=>{
     const c=document.createElement("div")
     c.className="card"
-    c.onclick=()=>location.href=`p.html?id=${g.id}`
-    c.innerHTML=`
-      <img class="thumb" src="${g.image}">
-      <div class="card-title">${g.name}</div>
-    `
+    c.onclick=()=>location.href=`p.html?id=${x.id}`
+    c.innerHTML=`<img class="thumb" src="${x.image}"><div class="card-title">${x.name}</div>`
     grid.appendChild(c)
   })
 }
@@ -107,31 +101,26 @@ if(document.getElementById("gamesGrid")){
     renderGames(all)
   })
   const s=document.getElementById("gameSearch")
-  s.oninput=()=>{
-    renderGames(all.filter(x=>x.name.toLowerCase().includes(s.value.toLowerCase())))
-  }
+  s.oninput=()=>renderGames(all.filter(x=>x.name.toLowerCase().includes(s.value.toLowerCase())))
 }
 
 const frame=document.getElementById("gameFrame")
-
 if(frame){
-  loadGames().then(games=>{
+  loadGames().then(g=>{
     const id=new URLSearchParams(location.search).get("id")
-    const game=games.find(x=>x.id===id)
-    if(!game)return
-    const final=settings.proxy
-      ? SCRAMJET_PREFIX+encodeURIComponent(game.url)
-      : game.url
+    const game=g.find(x=>x.id===id)
+    if(!game) return
+    const url=settings.proxy?SJ_PREFIX+sjEncode(game.url):game.url
     document.getElementById("gameTitle").textContent=game.name
-    frame.src=final
+    frame.src=url
   })
 }
 
 const fsBtn=document.getElementById("fullscreenBtn")
 if(fsBtn && frame){
   fsBtn.onclick=()=>{
-    if(frame.requestFullscreen)frame.requestFullscreen()
-    else if(frame.webkitRequestFullscreen)frame.webkitRequestFullscreen()
+    if(frame.requestFullscreen) frame.requestFullscreen()
+    else if(frame.webkitRequestFullscreen) frame.webkitRequestFullscreen()
   }
 }
 
@@ -139,51 +128,36 @@ const blankBtn=document.getElementById("blankBtn")
 if(blankBtn && frame){
   blankBtn.onclick=()=>{
     const w=window.open("about:blank","_blank")
-    const i=w.document.createElement("iframe")
-    i.src=frame.src
-    i.style.border="none"
-    i.style.width="100%"
-    i.style.height="100%"
-    w.document.body.style.margin="0"
-    w.document.body.appendChild(i)
+    if(!w) return
+    w.document.write(`<iframe src="${frame.src}" style="border:none;width:100%;height:100%"></iframe>`)
+  }
+}
+
+const aboutBtn=document.getElementById("aboutBlankBtn")
+if(aboutBtn){
+  aboutBtn.onclick=()=>{
+    const w=window.open("about:blank","_blank")
+    if(!w) return
+    w.document.write(`<iframe src="${location.href}?noblank=1" style="border:none;width:100%;height:100%"></iframe>`)
   }
 }
 
 if(document.getElementById("autoBlankToggle")){
-  const auto=document.getElementById("autoBlankToggle")
-  const cloak=document.getElementById("cloakToggle")
-  const panic=document.getElementById("panicToggle")
-  const proxy=document.getElementById("proxyToggle")
-  const reset=document.getElementById("resetBtn")
+  const a=document.getElementById("autoBlankToggle")
+  const c=document.getElementById("cloakToggle")
+  const p=document.getElementById("panicToggle")
+  const pr=document.getElementById("proxyToggle")
+  const r=document.getElementById("resetBtn")
 
-  auto.checked=settings.autoBlank
-  cloak.checked=settings.cloak
-  panic.checked=settings.panic
-  proxy.checked=settings.proxy
+  a.checked=settings.autoBlank
+  c.checked=settings.cloak
+  p.checked=settings.panic
+  pr.checked=settings.proxy
 
-  auto.onchange=()=>{
-    settings.autoBlank=auto.checked
-    saveSettings(settings)
-  }
+  a.onchange=()=>{settings.autoBlank=a.checked;saveSettings(settings)}
+  c.onchange=()=>{settings.cloak=c.checked;saveSettings(settings);location.reload()}
+  p.onchange=()=>{settings.panic=p.checked;saveSettings(settings)}
+  pr.onchange=()=>{settings.proxy=pr.checked;saveSettings(settings)}
 
-  cloak.onchange=()=>{
-    settings.cloak=cloak.checked
-    saveSettings(settings)
-    location.reload()
-  }
-
-  panic.onchange=()=>{
-    settings.panic=panic.checked
-    saveSettings(settings)
-  }
-
-  proxy.onchange=()=>{
-    settings.proxy=proxy.checked
-    saveSettings(settings)
-  }
-
-  reset.onclick=()=>{
-    saveSettings(defaultSettings)
-    location.reload()
-  }
+  r.onclick=()=>{saveSettings(defaultSettings);location.reload()}
 }

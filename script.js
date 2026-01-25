@@ -18,7 +18,7 @@ function saveSettings(s){
 }
 
 const settings=getSettings()
-const SJ_PREFIX="/sj/"
+const UV_PREFIX="/uv/"
 
 const menuBtn=document.getElementById("menuBtn")
 const menu=document.getElementById("menu")
@@ -80,7 +80,7 @@ if(search){
       if(!q.startsWith("http")) q="https://"+q
       url=q
     }
-    location.href=SJ_PREFIX+encodeURIComponent(url)
+    location.href=UV_PREFIX+encodeURIComponent(url)
   })
 }
 

@@ -4,7 +4,8 @@ const defaultSettings={
   autoBlank:false,
   cloak:true,
   panic:true,
-  proxy:true
+  proxy:true,
+  proxyPrefix:"/scramjet/"
 }
 
 function getSettings(){
@@ -55,7 +56,7 @@ if(settings.panic){
 
 const search=document.getElementById("proxySearch")
 if(search){
-  search.addEventListener("keydown",async e=>{
+  search.addEventListener("keydown",e=>{
     if(e.key!=="Enter") return
     let q=search.value.trim()
     if(!q) return
@@ -69,17 +70,10 @@ if(search){
     }
 
     if(settings.proxy){
-      const testUrl="/scramjet/"+encodeURIComponent(url)
-      try{
-        const r=await fetch(testUrl,{method:"HEAD"})
-        if(r.ok){
-          location.href=testUrl
-          return
-        }
-      }catch{}
+      location.href=settings.proxyPrefix+encodeURIComponent(url)
+    }else{
+      location.href=url
     }
-
-    location.href=url
   })
 }
 
@@ -152,17 +146,20 @@ if(document.getElementById("autoBlankToggle")){
   const c=document.getElementById("cloakToggle")
   const p=document.getElementById("panicToggle")
   const pr=document.getElementById("proxyToggle")
+  const prefix=document.getElementById("proxyPrefix")
   const r=document.getElementById("resetBtn")
 
   a.checked=settings.autoBlank
   c.checked=settings.cloak
   p.checked=settings.panic
   pr.checked=settings.proxy
+  prefix.value=settings.proxyPrefix
 
   a.onchange=()=>{settings.autoBlank=a.checked;saveSettings(settings)}
   c.onchange=()=>{settings.cloak=c.checked;saveSettings(settings);location.reload()}
   p.onchange=()=>{settings.panic=p.checked;saveSettings(settings)}
   pr.onchange=()=>{settings.proxy=pr.checked;saveSettings(settings)}
+  prefix.oninput=()=>{settings.proxyPrefix=prefix.value;saveSettings(settings)}
 
   r.onclick=()=>{saveSettings(defaultSettings);location.reload()}
 }

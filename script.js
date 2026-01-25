@@ -1,171 +1,3 @@
-const SETTINGS_KEY = "orbitSettings";
-
-const defaultSettings = {
-  autoBlank: false,
-  cloak: false,
-  panic: false,
-  proxy: true
-};
-
-function getSettings() {
-  const saved = localStorage.getItem(SETTINGS_KEY);
-  return saved ? JSON.parse(saved) : defaultSettings;
-}
-
-function saveSettings(settings) {
-  localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
-}
-
-const settings = getSettings();
-
-function cloak(title, icon) {
-  document.title = title;
-  let link = document.querySelector("link[rel='icon']");
-  if (!link) {
-    link = document.createElement("link");
-    link.rel = "icon";
-    document.head.appendChild(link);
-  }
-  link.href = icon;
-}
-
-if(settings.cloak){
-  const cloakTitle="Google Classroom"
-  const cloakIcon="https://ssl.gstatic.com/classroom/favicon.png"
-
-  const applyCloak=()=>{
-    document.title=cloakTitle
-    let icon=document.querySelector("link[rel='icon']")
-    if(!icon){
-      icon=document.createElement("link")
-      icon.rel="icon"
-      document.head.appendChild(icon)
-    }
-    icon.href=cloakIcon
-  }
-
-  applyCloak()
-  setInterval(applyCloak,500)
-}
-
-if (settings.autoBlank && location.protocol !== "about:" && !location.search.includes("noblank")) {
-  const w = window.open("about:blank", "_blank");
-  const i = w.document.createElement("iframe");
-  i.src = location.href + "?noblank=1";
-  i.style.border = "none";
-  i.style.width = "100%";
-  i.style.height = "100%";
-  w.document.body.style.margin = "0";
-  w.document.body.appendChild(i);
-  location.replace("https://classroom.google.com");
-}
-
-if (settings.panic) {
-  document.addEventListener("keydown", e => {
-    if (e.key === "`") {
-      location.href = "https://classroom.google.com";
-    }
-  });
-}
-
-const menuBtn = document.getElementById("menuBtn");
-const menu = document.getElementById("menu");
-if (menuBtn && menu) {
-  menuBtn.onclick = () => menu.classList.toggle("open");
-}
-
-async function loadGames() {
-  const res = await fetch("games.json");
-  const games = await res.json();
-  return games;
-}
-
-function renderGames(games) {
-  const grid = document.getElementById("gamesGrid");
-  grid.innerHTML = "";
-  games.forEach(g => {
-    const card = document.createElement("div");
-    card.className = "card";
-    card.onclick = () => location.href = `p.html?id=${g.id}`;
-    card.innerHTML = `
-      <img class="thumb" src="${g.image}">
-      <div class="card-title">${g.name}</div>
-    `;
-    grid.appendChild(card);
-  });
-}
-
-function filterGames(all, q) {
-  q = q.toLowerCase();
-  return all.filter(g => g.name.toLowerCase().includes(q));
-}
-
-if (document.getElementById("gamesGrid")) {
-  let all = [];
-  loadGames().then(g => {
-    all = g;
-    renderGames(all);
-  });
-  const search = document.getElementById("gameSearch");
-  search.oninput = () => {
-    renderGames(filterGames(all, search.value));
-  };
-}
-
-if(document.getElementById("gameFrame")){
-  fetch("games.json").then(r=>r.json()).then(games=>{
-    const id=new URLSearchParams(location.search).get("id")
-    const game=games.find(x=>x.id===id)
-    if(!game)return
-
-    const finalUrl=settings.proxy
-      ? SCRAMJET_PREFIX+encodeURIComponent(game.url)
-      : game.url
-
-    document.getElementById("gameTitle").textContent=game.name
-    document.getElementById("gameFrame").src=finalUrl
-  })
-}
-
-const frame=document.getElementById("gameFrame")
-const fsBtn=document.getElementById("fullscreenBtn")
-
-if(fsBtn&&frame){
-  fsBtn.onclick=()=>{
-    if(frame.requestFullscreen)frame.requestFullscreen()
-    else if(frame.webkitRequestFullscreen)frame.webkitRequestFullscreen()
-  }
-}
-
-const blankBtn=document.getElementById("blankBtn")
-
-if(blankBtn&&frame){
-  blankBtn.onclick=()=>{
-    const w=window.open("about:blank","_blank")
-    const i=w.document.createElement("iframe")
-    i.src=frame.src
-    i.style.border="none"
-    i.style.width="100%"
-    i.style.height="100%"
-    w.document.body.style.margin="0"
-    w.document.body.appendChild(i)
-  }
-}
-
-const aboutBtn = document.getElementById("aboutBlankBtn");
-if (aboutBtn) {
-  aboutBtn.onclick = () => {
-    const w = window.open("about:blank", "_blank");
-    const iframe = w.document.createElement("iframe");
-    iframe.src = location.href;
-    iframe.style.border = "none";
-    iframe.style.width = "100%";
-    iframe.style.height = "100%";
-    w.document.body.style.margin = "0";
-    w.document.body.appendChild(iframe);
-  };
-}
-
 const SCRAMJET_PREFIX="/scramjet/"
 const SETTINGS_KEY="orbitSettings"
 
@@ -187,48 +19,47 @@ function saveSettings(s){
 
 const settings=getSettings()
 
+const menuBtn=document.getElementById("menuBtn")
+const menu=document.getElementById("menu")
+if(menuBtn){
+  menuBtn.onclick=()=>menu.classList.toggle("open")
+}
 
-if (document.getElementById("autoBlankToggle")) {
-  const auto = document.getElementById("autoBlankToggle");
-  const cloakToggle = document.getElementById("cloakToggle");
-  const panic = document.getElementById("panicToggle");
-  const proxy = document.getElementById("proxyToggle");
-  const reset = document.getElementById("resetBtn");
+if(settings.cloak){
+  const cloakTitle="Google Classroom"
+  const cloakIcon="https://ssl.gstatic.com/classroom/favicon.png"
+  const apply=()=>{
+    document.title=cloakTitle
+    let icon=document.querySelector("link[rel='icon']")
+    if(!icon){
+      icon=document.createElement("link")
+      icon.rel="icon"
+      document.head.appendChild(icon)
+    }
+    icon.href=cloakIcon
+  }
+  apply()
+  setInterval(apply,500)
+}
 
-  auto.checked = settings.autoBlank;
-  cloakToggle.checked = settings.cloak;
-  panic.checked = settings.panic;
-  proxy.checked = settings.proxy;
+if(settings.autoBlank && location.protocol!=="about:" && !location.search.includes("noblank")){
+  const w=window.open("about:blank","_blank")
+  const i=w.document.createElement("iframe")
+  i.src=location.href+"?noblank=1"
+  i.style.border="none"
+  i.style.width="100%"
+  i.style.height="100%"
+  w.document.body.style.margin="0"
+  w.document.body.appendChild(i)
+  location.replace("https://classroom.google.com")
+}
 
-  auto.onchange = () => {
-    settings.autoBlank = auto.checked;
-    saveSettings(settings);
-  };
-
-  cloakToggle.onchange = () => {
-    settings.cloak = cloakToggle.checked;
-    saveSettings(settings);
-  };
-
-  panic.onchange = () => {
-    settings.panic = panic.checked;
-    saveSettings(settings);
-  };
-
-  proxy.onchange = () => {
-    settings.proxy = proxy.checked;
-    saveSettings(settings);
-  };
-
-  reset.onclick = () => {
-    Object.assign(settings, defaultSettings);
-    saveSettings(settings);
-    auto.checked = settings.autoBlank;
-    cloakToggle.checked = settings.cloak;
-    panic.checked = settings.panic;
-    proxy.checked = settings.proxy;
-    location.reload();
-  };
+if(settings.panic){
+  document.addEventListener("keydown",e=>{
+    if(e.key==="`"){
+      location.href="https://classroom.google.com"
+    }
+  })
 }
 
 const search=document.getElementById("proxySearch")
@@ -237,7 +68,6 @@ if(search && settings.proxy){
     if(e.key!=="Enter")return
     let q=search.value.trim()
     if(!q)return
-
     let url
     if(q.includes(" ")||!q.includes(".")){
       url="https://duckduckgo.com/?q="+encodeURIComponent(q)
@@ -245,7 +75,115 @@ if(search && settings.proxy){
       if(!q.startsWith("http"))q="https://"+q
       url=q
     }
-
     location.href=SCRAMJET_PREFIX+encodeURIComponent(url)
   })
+}
+
+async function loadGames(){
+  const r=await fetch("games.json")
+  return await r.json()
+}
+
+function renderGames(games){
+  const grid=document.getElementById("gamesGrid")
+  if(!grid)return
+  grid.innerHTML=""
+  games.forEach(g=>{
+    const c=document.createElement("div")
+    c.className="card"
+    c.onclick=()=>location.href=`p.html?id=${g.id}`
+    c.innerHTML=`
+      <img class="thumb" src="${g.image}">
+      <div class="card-title">${g.name}</div>
+    `
+    grid.appendChild(c)
+  })
+}
+
+if(document.getElementById("gamesGrid")){
+  let all=[]
+  loadGames().then(g=>{
+    all=g
+    renderGames(all)
+  })
+  const s=document.getElementById("gameSearch")
+  s.oninput=()=>{
+    renderGames(all.filter(x=>x.name.toLowerCase().includes(s.value.toLowerCase())))
+  }
+}
+
+const frame=document.getElementById("gameFrame")
+
+if(frame){
+  loadGames().then(games=>{
+    const id=new URLSearchParams(location.search).get("id")
+    const game=games.find(x=>x.id===id)
+    if(!game)return
+    const final=settings.proxy
+      ? SCRAMJET_PREFIX+encodeURIComponent(game.url)
+      : game.url
+    document.getElementById("gameTitle").textContent=game.name
+    frame.src=final
+  })
+}
+
+const fsBtn=document.getElementById("fullscreenBtn")
+if(fsBtn && frame){
+  fsBtn.onclick=()=>{
+    if(frame.requestFullscreen)frame.requestFullscreen()
+    else if(frame.webkitRequestFullscreen)frame.webkitRequestFullscreen()
+  }
+}
+
+const blankBtn=document.getElementById("blankBtn")
+if(blankBtn && frame){
+  blankBtn.onclick=()=>{
+    const w=window.open("about:blank","_blank")
+    const i=w.document.createElement("iframe")
+    i.src=frame.src
+    i.style.border="none"
+    i.style.width="100%"
+    i.style.height="100%"
+    w.document.body.style.margin="0"
+    w.document.body.appendChild(i)
+  }
+}
+
+if(document.getElementById("autoBlankToggle")){
+  const auto=document.getElementById("autoBlankToggle")
+  const cloak=document.getElementById("cloakToggle")
+  const panic=document.getElementById("panicToggle")
+  const proxy=document.getElementById("proxyToggle")
+  const reset=document.getElementById("resetBtn")
+
+  auto.checked=settings.autoBlank
+  cloak.checked=settings.cloak
+  panic.checked=settings.panic
+  proxy.checked=settings.proxy
+
+  auto.onchange=()=>{
+    settings.autoBlank=auto.checked
+    saveSettings(settings)
+  }
+
+  cloak.onchange=()=>{
+    settings.cloak=cloak.checked
+    saveSettings(settings)
+    location.reload()
+  }
+
+  panic.onchange=()=>{
+    settings.panic=panic.checked
+    saveSettings(settings)
+  }
+
+  proxy.onchange=()=>{
+    settings.proxy=proxy.checked
+    saveSettings(settings)
+  }
+
+  reset.onclick=()=>{
+    saveSettings(defaultSettings)
+    location.reload()
+  }
 }

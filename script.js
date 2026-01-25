@@ -1,24 +1,19 @@
 const SETTINGS_KEY="orbitSettings"
-
 const defaultSettings={
   autoBlank:false,
   cloak:true,
   panic:true,
-  proxySearch:true
+  proxy:true
 }
-
 function getSettings(){
   const s=localStorage.getItem(SETTINGS_KEY)
   return s?JSON.parse(s):defaultSettings
 }
-
 function saveSettings(s){
   localStorage.setItem(SETTINGS_KEY,JSON.stringify(s))
 }
-
 const settings=getSettings()
-
-const SJ_PREFIX="/scramjet/"
+const UV_PREFIX="/uv/"
 
 const menuBtn=document.getElementById("menuBtn")
 const menu=document.getElementById("menu")
@@ -56,12 +51,11 @@ if(settings.panic){
 }
 
 const search=document.getElementById("proxySearch")
-if(search && settings.proxySearch){
+if(search && settings.proxy){
   search.addEventListener("keydown",e=>{
     if(e.key!=="Enter") return
     let q=search.value.trim()
     if(!q) return
-
     let url
     if(q.includes(" ")||!q.includes(".")){
       url="https://duckduckgo.com/?q="+encodeURIComponent(q)
@@ -69,8 +63,7 @@ if(search && settings.proxySearch){
       if(!q.startsWith("http")) q="https://"+q
       url=q
     }
-
-    location.href=SJ_PREFIX+encodeURIComponent(url)
+    location.href=UV_PREFIX+encodeURIComponent(url)
   })
 }
 
@@ -78,7 +71,6 @@ async function loadGames(){
   const r=await fetch("games.json")
   return r.json()
 }
-
 function renderGames(g){
   const grid=document.getElementById("gamesGrid")
   if(!grid) return
@@ -91,7 +83,6 @@ function renderGames(g){
     grid.appendChild(c)
   })
 }
-
 if(document.getElementById("gamesGrid")){
   let all=[]
   loadGames().then(g=>{
@@ -144,16 +135,13 @@ if(document.getElementById("autoBlankToggle")){
   const p=document.getElementById("panicToggle")
   const pr=document.getElementById("proxyToggle")
   const r=document.getElementById("resetBtn")
-
   a.checked=settings.autoBlank
   c.checked=settings.cloak
   p.checked=settings.panic
-  pr.checked=settings.proxySearch
-
+  pr.checked=settings.proxy
   a.onchange=()=>{settings.autoBlank=a.checked;saveSettings(settings)}
   c.onchange=()=>{settings.cloak=c.checked;saveSettings(settings);location.reload()}
   p.onchange=()=>{settings.panic=p.checked;saveSettings(settings)}
-  pr.onchange=()=>{settings.proxySearch=pr.checked;saveSettings(settings)}
-
+  pr.onchange=()=>{settings.proxy=pr.checked;saveSettings(settings)}
   r.onclick=()=>{saveSettings(defaultSettings);location.reload()}
 }

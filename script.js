@@ -105,6 +105,7 @@ function renderGames(g){
 if(document.getElementById("gamesGrid")){
   let all=[]
   loadGames().then(g=>{
+    g.sort((a,b)=>a.name.localeCompare(b.name)) // <-- SORT ALPHABETICALLY
     all=g
     renderGames(all)
   })

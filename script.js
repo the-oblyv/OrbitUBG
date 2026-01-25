@@ -1,17 +1,22 @@
 const SETTINGS_KEY="orbitSettings"
+
 const defaultSettings={
-  autoBlank:false,
   cloak:true,
+  cloakTitle:"Google Classroom",
+  cloakIcon:"https://ssl.gstatic.com/classroom/favicon.png",
   panic:true,
-  proxy:true
+  panicKey:"`"
 }
+
 function getSettings(){
   const s=localStorage.getItem(SETTINGS_KEY)
-  return s?JSON.parse(s):defaultSettings
+  return s?JSON.parse(s):structuredClone(defaultSettings)
 }
+
 function saveSettings(s){
   localStorage.setItem(SETTINGS_KEY,JSON.stringify(s))
 }
+
 const settings=getSettings()
 const UV_PREFIX="/uv/"
 
@@ -19,39 +24,51 @@ const menuBtn=document.getElementById("menuBtn")
 const menu=document.getElementById("menu")
 if(menuBtn) menuBtn.onclick=()=>menu.classList.toggle("open")
 
-if(settings.cloak){
-  const title="Google Classroom"
-  const icon="https://ssl.gstatic.com/classroom/favicon.png"
-  const apply=()=>{
-    document.title=title
+const originalTitle=document.title
+let originalIcon=document.querySelector("link[rel='icon']")
+originalIcon=originalIcon?originalIcon.href:null
+
+function applyCloak(){
+  document.title=settings.cloakTitle
+  let l=document.querySelector("link[rel='icon']")
+  if(!l){
+    l=document.createElement("link")
+    l.rel="icon"
+    document.head.appendChild(l)
+  }
+  l.href=settings.cloakIcon
+}
+
+function removeCloak(){
+  document.title=originalTitle
+  if(originalIcon){
     let l=document.querySelector("link[rel='icon']")
     if(!l){
       l=document.createElement("link")
       l.rel="icon"
       document.head.appendChild(l)
     }
-    l.href=icon
+    l.href=originalIcon
   }
-  apply()
-  setInterval(apply,500)
 }
 
-if(settings.autoBlank && location.protocol!=="about:" && !location.search.includes("noblank")){
-  const w=window.open("about:blank","_blank")
-  if(w){
-    w.document.write(`<iframe src="${location.href}?noblank=1" style="border:none;width:100%;height:100%"></iframe>`)
-    location.replace("https://classroom.google.com")
-  }
+if(settings.cloak){
+  applyCloak()
+  setInterval(applyCloak,500)
+}else{
+  removeCloak()
 }
 
 if(settings.panic){
   document.addEventListener("keydown",e=>{
-    if(e.key==="`") location.href="https://classroom.google.com"
+    if(e.key===settings.panicKey){
+      location.href="https://classroom.google.com"
+    }
   })
 }
 
 const search=document.getElementById("proxySearch")
-if(search && settings.proxy){
+if(search){
   search.addEventListener("keydown",e=>{
     if(e.key!=="Enter") return
     let q=search.value.trim()
@@ -71,6 +88,7 @@ async function loadGames(){
   const r=await fetch("games.json")
   return r.json()
 }
+
 function renderGames(g){
   const grid=document.getElementById("gamesGrid")
   if(!grid) return
@@ -83,6 +101,7 @@ function renderGames(g){
     grid.appendChild(c)
   })
 }
+
 if(document.getElementById("gamesGrid")){
   let all=[]
   loadGames().then(g=>{
@@ -90,7 +109,7 @@ if(document.getElementById("gamesGrid")){
     renderGames(all)
   })
   const s=document.getElementById("gameSearch")
-  s.oninput=()=>renderGames(all.filter(x=>x.name.toLowerCase().includes(s.value.toLowerCase())))
+  if(s) s.oninput=()=>renderGames(all.filter(x=>x.name.toLowerCase().includes(s.value.toLowerCase())))
 }
 
 const frame=document.getElementById("gameFrame")
@@ -98,17 +117,13 @@ if(frame){
   loadGames().then(g=>{
     const id=new URLSearchParams(location.search).get("id")
     const game=g.find(x=>x.id===id)
-    if(!game) return
-    frame.src=game.url
+    if(game) frame.src=game.url
   })
 }
 
 const fsBtn=document.getElementById("fullscreenBtn")
 if(fsBtn && frame){
-  fsBtn.onclick=()=>{
-    if(frame.requestFullscreen) frame.requestFullscreen()
-    else if(frame.webkitRequestFullscreen) frame.webkitRequestFullscreen()
-  }
+  fsBtn.onclick=()=>frame.requestFullscreen&&frame.requestFullscreen()
 }
 
 const blankBtn=document.getElementById("blankBtn")
@@ -120,28 +135,44 @@ if(blankBtn && frame){
   }
 }
 
-const aboutBtn=document.getElementById("aboutBlankBtn")
-if(aboutBtn){
-  aboutBtn.onclick=()=>{
-    const w=window.open("about:blank","_blank")
-    if(!w) return
-    w.document.write(`<iframe src="${location.href}?noblank=1" style="border:none;width:100%;height:100%"></iframe>`)
-  }
-}
+const cloakToggle=document.getElementById("cloakToggle")
+const cloakTitleInput=document.getElementById("cloakTitleInput")
+const cloakIconInput=document.getElementById("cloakIconInput")
+const panicToggle=document.getElementById("panicToggle")
+const panicKeyInput=document.getElementById("panicKeyInput")
 
-if(document.getElementById("autoBlankToggle")){
-  const a=document.getElementById("autoBlankToggle")
-  const c=document.getElementById("cloakToggle")
-  const p=document.getElementById("panicToggle")
-  const pr=document.getElementById("proxyToggle")
-  const r=document.getElementById("resetBtn")
-  a.checked=settings.autoBlank
-  c.checked=settings.cloak
-  p.checked=settings.panic
-  pr.checked=settings.proxy
-  a.onchange=()=>{settings.autoBlank=a.checked;saveSettings(settings)}
-  c.onchange=()=>{settings.cloak=c.checked;saveSettings(settings);location.reload()}
-  p.onchange=()=>{settings.panic=p.checked;saveSettings(settings)}
-  pr.onchange=()=>{settings.proxy=pr.checked;saveSettings(settings)}
-  r.onclick=()=>{saveSettings(defaultSettings);location.reload()}
+if(cloakToggle){
+  cloakToggle.checked=settings.cloak
+  cloakTitleInput.value=settings.cloakTitle
+  cloakIconInput.value=settings.cloakIcon
+  panicToggle.checked=settings.panic
+  panicKeyInput.value=settings.panicKey
+
+  cloakToggle.onchange=()=>{
+    settings.cloak=cloakToggle.checked
+    saveSettings(settings)
+    location.reload()
+  }
+
+  cloakTitleInput.oninput=()=>{
+    settings.cloakTitle=cloakTitleInput.value||"Google Classroom"
+    saveSettings(settings)
+  }
+
+  cloakIconInput.oninput=()=>{
+    settings.cloakIcon=cloakIconInput.value||"https://ssl.gstatic.com/classroom/favicon.png"
+    saveSettings(settings)
+  }
+
+  panicToggle.onchange=()=>{
+    settings.panic=panicToggle.checked
+    saveSettings(settings)
+  }
+
+  panicKeyInput.onkeydown=e=>{
+    e.preventDefault()
+    settings.panicKey=e.key
+    panicKeyInput.value=e.key
+    saveSettings(settings)
+  }
 }

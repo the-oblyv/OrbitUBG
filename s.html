@@ -32,12 +32,21 @@
 
   <div class="settings">
     <div class="setting">
-      <span>Cloak Title + Favicon</span>
+      <label>
+        <span>Cloak Title + Favicon</span>
+        <small>Set a title + icon to hide Orbit. Defaults to Google Classroom.</small>
+        <input type="text" id="cloakTitleInput" placeholder="Title">
+        <input type="text" id="cloakIconInput" placeholder="Favicon URL">
+      </label>
       <input type="checkbox" id="cloakToggle">
     </div>
 
     <div class="setting">
-      <span>Panic Key (`)</span>
+      <label>
+        <span>Panic Key (`)</span>
+        <small>Press this key to instantly escape to Google Classroom.</small>
+        <input type="text" id="panicKeyInput" placeholder="Press any key" readonly>
+      </label>
       <input type="checkbox" id="panicToggle">
     </div>
   </div>

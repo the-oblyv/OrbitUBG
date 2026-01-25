@@ -23,7 +23,9 @@
   <main class="page">
     <span id="gameTitle" style="display:none"></span>
 
-    <div style="display:flex;gap:12px;margin-bottom:14px;flex-wrap:wrap;">
+    <iframe id="gameFrame" style="width:100%;height:75vh;border-radius:18px;border:none;" allowfullscreen></iframe>
+
+    <div style="display:flex;gap:12px;margin-top:14px;flex-wrap:wrap;">
       <button class="btn secondary" id="fullscreenBtn">
         <i class="fa-solid fa-expand"></i> Fullscreen
       </button>
@@ -31,12 +33,6 @@
         <i class="fa-solid fa-arrow-up-right-from-square"></i> About:Blank
       </button>
     </div>
-
-    <iframe
-      id="gameFrame"
-      style="width:100%;height:75vh;border-radius:18px;border:none;"
-      allowfullscreen
-    ></iframe>
   </main>
 
   <script src="script.js"></script>

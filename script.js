@@ -29,12 +29,25 @@ function cloak(title, icon) {
   link.href = icon;
 }
 
-// Apply cloak if enabled
-if (settings.cloak) {
-  cloak("Google Classroom", "https://ssl.gstatic.com/classroom/favicon.png");
+if(settings.cloak){
+  const cloakTitle="Google Classroom"
+  const cloakIcon="https://ssl.gstatic.com/classroom/favicon.png"
+
+  const applyCloak=()=>{
+    document.title=cloakTitle
+    let icon=document.querySelector("link[rel='icon']")
+    if(!icon){
+      icon=document.createElement("link")
+      icon.rel="icon"
+      document.head.appendChild(icon)
+    }
+    icon.href=cloakIcon
+  }
+
+  applyCloak()
+  setInterval(applyCloak,500)
 }
 
-// Auto blank
 if (settings.autoBlank && location.protocol !== "about:" && !location.search.includes("noblank")) {
   const w = window.open("about:blank", "_blank");
   const i = w.document.createElement("iframe");
@@ -47,7 +60,6 @@ if (settings.autoBlank && location.protocol !== "about:" && !location.search.inc
   location.replace("https://classroom.google.com");
 }
 
-// Panic mode
 if (settings.panic) {
   document.addEventListener("keydown", e => {
     if (e.key === "`") {
@@ -56,14 +68,12 @@ if (settings.panic) {
   });
 }
 
-// Menu button
 const menuBtn = document.getElementById("menuBtn");
 const menu = document.getElementById("menu");
 if (menuBtn && menu) {
   menuBtn.onclick = () => menu.classList.toggle("open");
 }
 
-// Load games
 async function loadGames() {
   const res = await fetch("games.json");
   const games = await res.json();
@@ -114,7 +124,6 @@ if (document.getElementById("gameFrame")) {
   });
 }
 
-// About button
 const aboutBtn = document.getElementById("aboutBlankBtn");
 if (aboutBtn) {
   aboutBtn.onclick = () => {

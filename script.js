@@ -4,7 +4,7 @@ const defaultSettings={
   autoBlank:false,
   cloak:true,
   panic:true,
-  proxy:true
+  proxySearch:true
 }
 
 function getSettings(){
@@ -17,6 +17,8 @@ function saveSettings(s){
 }
 
 const settings=getSettings()
+
+const SJ_PREFIX="/scramjet/"
 
 const menuBtn=document.getElementById("menuBtn")
 const menu=document.getElementById("menu")
@@ -53,18 +55,9 @@ if(settings.panic){
   })
 }
 
-async function checkScramjet(url){
-  try{
-    const res=await fetch("/scramjet/"+encodeURIComponent(url), { method:"HEAD" })
-    return res.ok
-  }catch{
-    return false
-  }
-}
-
 const search=document.getElementById("proxySearch")
-if(search){
-  search.addEventListener("keydown",async e=>{
+if(search && settings.proxySearch){
+  search.addEventListener("keydown",e=>{
     if(e.key!=="Enter") return
     let q=search.value.trim()
     if(!q) return
@@ -77,16 +70,7 @@ if(search){
       url=q
     }
 
-    if(settings.proxy){
-      const ok=await checkScramjet(url)
-      if(ok){
-        location.href="/scramjet/"+encodeURIComponent(url)
-      }else{
-        location.href=url
-      }
-    }else{
-      location.href=url
-    }
+    location.href=SJ_PREFIX+encodeURIComponent(url)
   })
 }
 
@@ -164,12 +148,12 @@ if(document.getElementById("autoBlankToggle")){
   a.checked=settings.autoBlank
   c.checked=settings.cloak
   p.checked=settings.panic
-  pr.checked=settings.proxy
+  pr.checked=settings.proxySearch
 
   a.onchange=()=>{settings.autoBlank=a.checked;saveSettings(settings)}
   c.onchange=()=>{settings.cloak=c.checked;saveSettings(settings);location.reload()}
   p.onchange=()=>{settings.panic=p.checked;saveSettings(settings)}
-  pr.onchange=()=>{settings.proxy=pr.checked;saveSettings(settings)}
+  pr.onchange=()=>{settings.proxySearch=pr.checked;saveSettings(settings)}
 
   r.onclick=()=>{saveSettings(defaultSettings);location.reload()}
 }

@@ -40,5 +40,11 @@
     "name": "Pokémon Emerald",
     "image": "/games/pokemonemerald/Pokemon-Emerald---Game-Boy-Advance.png",
     "url": "/games/pokemonemerald/index.html"
+  },
+  {
+    "id": "slimerancher",
+    "name": "Slime Rancher",
+    "image": "/games/slimerancher/img.webp",
+    "url": "/games/slimerancher/index.html"
   }
 ]

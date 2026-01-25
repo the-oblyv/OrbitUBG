@@ -32,22 +32,46 @@
 
   <div class="settings">
     <div class="setting">
-      <label>
-        <span>Cloak Title + Favicon</span>
-        <small>Set a title + icon to hide Orbit. Defaults to Google Classroom.</small>
-        <input type="text" id="cloakTitleInput" placeholder="Title">
-        <input type="text" id="cloakIconInput" placeholder="Favicon URL">
+      <div>
+        <div class="setting-title">Cloak Title + Favicon</div>
+        <div class="setting-desc">Hide Orbit and use a different title & favicon.</div>
+      </div>
+      <label class="switch">
+        <input type="checkbox" id="cloakToggle">
+        <span class="slider"></span>
       </label>
-      <input type="checkbox" id="cloakToggle">
     </div>
 
     <div class="setting">
-      <label>
-        <span>Panic Key (`)</span>
-        <small>Press this key to instantly escape to Google Classroom.</small>
-        <input type="text" id="panicKeyInput" placeholder="Press any key" readonly>
+      <div>
+        <div class="setting-title">Cloak Title</div>
+        <input type="text" id="cloakTitleInput" class="setting-input" placeholder="Google Classroom">
+      </div>
+    </div>
+
+    <div class="setting">
+      <div>
+        <div class="setting-title">Cloak Favicon URL</div>
+        <input type="text" id="cloakIconInput" class="setting-input" placeholder="https://ssl.gstatic.com/classroom/favicon.png">
+      </div>
+    </div>
+
+    <div class="setting">
+      <div>
+        <div class="setting-title">Panic Key</div>
+        <div class="setting-desc">Press this key to instantly leave the site.</div>
+      </div>
+      <label class="switch">
+        <input type="checkbox" id="panicToggle">
+        <span class="slider"></span>
       </label>
-      <input type="checkbox" id="panicToggle">
+    </div>
+
+    <div class="setting">
+      <div>
+        <div class="setting-title">Panic Key Input</div>
+        <input type="text" id="panicKeyInput" class="setting-input" placeholder="Press a key">
+      </div>
     </div>
   </div>
 </main>

@@ -16,5 +16,11 @@
     "name": "1",
     "image": "/games/1/1.png",
     "url": "/games/1/index.html"
+  },
+  {
+    "id": "eaglercraftx",
+    "name": "Minecraft 1.8.8",
+    "image": "/games/eaglercraftx/MinecraftLogo.webp",
+    "url": "/games/eaglercraftx/index.html"
   }
 ]

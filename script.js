@@ -129,29 +129,28 @@ if (aboutBtn) {
   };
 }
 
-// Proxy search
-const proxyPrefix = "/scramjet/";
+const SCRAMJET_PREFIX="/scramjet/"
+const SETTINGS_KEY="orbitSettings"
 
-const search = document.getElementById("proxySearch");
-if (search) {
-  search.addEventListener("keydown", e => {
-    if (e.key !== "Enter") return;
-    let q = search.value.trim();
-    if (!q) return;
-
-    let url;
-    if (q.includes(" ") || !q.includes(".")) {
-      url = "https://duckduckgo.com/?q=" + encodeURIComponent(q);
-    } else {
-      if (!q.startsWith("http")) q = "https://" + q;
-      url = q;
-    }
-
-    location.href = proxyPrefix + encodeURIComponent(url);
-  });
+const defaultSettings={
+  autoBlank:false,
+  cloak:true,
+  panic:true,
+  proxy:true
 }
 
-// Settings panel
+function getSettings(){
+  const s=localStorage.getItem(SETTINGS_KEY)
+  return s?JSON.parse(s):defaultSettings
+}
+
+function saveSettings(s){
+  localStorage.setItem(SETTINGS_KEY,JSON.stringify(s))
+}
+
+const settings=getSettings()
+
+
 if (document.getElementById("autoBlankToggle")) {
   const auto = document.getElementById("autoBlankToggle");
   const cloakToggle = document.getElementById("cloakToggle");

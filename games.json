@@ -58,5 +58,11 @@
     "name": "Slope",
     "image": "/games/slope/slope.webp",
     "url": "/games/slope/index.html"
+  },
+  {
+    "id": "slitherio",
+    "name": "Slither.io",
+    "image": "/games/slitherio/Screenshot_20260125-194917.png",
+    "url": "/games/slitherio/index.html"
   }
 ]

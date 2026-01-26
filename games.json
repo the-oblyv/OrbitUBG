@@ -46,5 +46,11 @@
     "name": "Slime Rancher",
     "image": "/games/slimerancher/img.webp",
     "url": "/games/slimerancher/index.html"
+  },
+  {
+    "id": "supermario64",
+    "name": "Super Mario 64",
+    "image": "/games/supermario64/5276953.png",
+    "url": "/games/supermario64/index.html"
   }
 ]

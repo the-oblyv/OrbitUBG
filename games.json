@@ -52,5 +52,11 @@
     "name": "Super Mario 64",
     "image": "/games/supermario64/5276953.png",
     "url": "/games/supermario64/index.html"
+  },
+  {
+    "id": "slope",
+    "name": "Slope",
+    "image": "/games/slope/slope.webp",
+    "url": "/games/slope/index.html"
   }
 ]

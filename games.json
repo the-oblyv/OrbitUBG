@@ -60,6 +60,12 @@
     "url": "/games/slope/index.html"
   },
   {
+    "id": "geometrydashlight",
+    "name": "Slither.io",
+    "image": "/games/geometrydashlight/Geometry_Dash_Lite_Icon.webp",
+    "url": "/games/geometrydashlight/index.html"
+  },
+  {
     "id": "slitherio",
     "name": "Slither.io",
     "image": "/games/slitherio/Screenshot_20260125-194917.png",

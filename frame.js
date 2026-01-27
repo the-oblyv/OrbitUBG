@@ -4,7 +4,6 @@ const navHTML = `
   <div class="nav-links">
     <a href="/"><i class="fa-solid fa-house"></i> Home</a>
     <a href="/g"><i class="fa-solid fa-gamepad"></i> Games</a>
-    <a href="/v"><i class="fa-solid fa-video"></i> Videos</a>
     <a href="/s"><i class="fa-solid fa-gear"></i> Settings</a>
   </div>
   <i class="fa-solid fa-bars menu-btn" id="menuBtn"></i>

@@ -14,18 +14,52 @@
 <nav class="menu" id="menu"></nav>
 
 <main class="page">
+  <div class="video-top">
+    <input id="videoLink" class="searchbox" placeholder="Paste a YouTube link" />
+    <button id="loadVideo" class="btn primary">
+      <i class="fa-solid fa-play"></i> Load Video
+    </button>
+  </div>
+
   <iframe
     id="videoFrame"
+    src=""
     style="width:100%;height:80vh;border:none;border-radius:18px;"
     allowfullscreen
   ></iframe>
 </main>
 
 <script src="frame.js"></script>
-<script>
-const u="aHR0cHM6Ly9vcmJpdC1pbnYuZ3JlZ3JtY2JyaWRlLndvcmtlcnMuZGV2L2ZlZWQvcG9wdWxhcg=="
-document.getElementById("videoFrame").src=atob(u)
-</script>
 <script src="script.js"></script>
+<script>
+  function toNocookieEmbed(url){
+    try{
+      const u = new URL(url);
+      let id = "";
+
+      if(u.hostname.includes("youtu.be")){
+        id = u.pathname.slice(1);
+      } else {
+        id = u.searchParams.get("v");
+      }
+
+      if(!id) return "";
+
+      return `https://www.youtube-nocookie.com/embed/${id}?rel=0&modestbranding=1`;
+    } catch(e){
+      return "";
+    }
+  }
+
+  const videoLink = document.getElementById("videoLink");
+  const videoFrame = document.getElementById("videoFrame");
+  const loadVideo = document.getElementById("loadVideo");
+
+  loadVideo.onclick = () => {
+    const embed = toNocookieEmbed(videoLink.value.trim());
+    if(!embed) return;
+    videoFrame.src = embed;
+  }
+</script>
 </body>
 </html>

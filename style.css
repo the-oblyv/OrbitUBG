@@ -345,9 +345,12 @@ body {
   }
 }
 
-
-a.card{
-  text-decoration:none;
+a.game-card{
   color:inherit;
+  text-decoration:none;
 }
 
+a.game-card .game-title{
+  color:inherit;
+  text-decoration:none;
+}

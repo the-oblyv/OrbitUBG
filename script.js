@@ -92,38 +92,43 @@ document.addEventListener("DOMContentLoaded",()=>{
     })
   }
 
-  const grid=document.getElementById("gamesGrid")
-if(grid){
+  const grid = document.getElementById("gamesGrid")
+if (grid) {
   fetch("/games.json")
-    .then(r=>r.json())
-    .then(g=>{
-      g.sort((a,b)=>a.name.localeCompare(b.name))
-      const render=list=>{
-        grid.innerHTML=""
+    .then(r => r.json())
+    .then(g => {
+      g.sort((a,b) => a.name.localeCompare(b.name))
 
-        const req=document.createElement("a")
-        req.className="card"
-        req.href="https://forms.gle/WdSBv4jkFo3nwvFz8"
-        req.target="_blank"
-        req.rel="noopener"
-        req.innerHTML=`<img class="thumb" src="/res/googleform.webp"><div class="card-title">!! Request a Game</div>`
-        grid.appendChild(req)
+      const render = list => {
+        grid.innerHTML = ""
 
-        list.forEach(x=>{
-          const c=document.createElement("div")
-          c.className="card"
-          c.onclick=()=>location.href=`/p.html?id=${x.id}`
-          c.innerHTML=`<img class="thumb" src="${x.image}"><div class="card-title">${x.name}</div>`
+        const requestCard = document.createElement("div")
+        requestCard.className = "card"
+        requestCard.onclick = () => window.open("https://forms.gle/WdSBv4jkFo3nwvFz8", "_blank")
+        requestCard.innerHTML = `
+          <img class="thumb" src="/res/googleform.webp">
+          <div class="card-title">!! Request a Game</div>
+        `
+        grid.appendChild(requestCard)
+
+        list.forEach(x => {
+          const c = document.createElement("div")
+          c.className = "card"
+          c.onclick = () => location.href = `/p.html?id=${x.id}`
+          c.innerHTML = `
+            <img class="thumb" src="${x.image}">
+            <div class="card-title">${x.name}</div>
+          `
           grid.appendChild(c)
         })
       }
+
       render(g)
-      const s=document.getElementById("gameSearch")
-      if(s){
-        s.oninput=()=>render(
-          g.filter(x=>x.name.toLowerCase().includes(s.value.toLowerCase()))
-        )
-      }
+
+      const s = document.getElementById("gameSearch")
+      if(s) s.oninput = () => render(
+        g.filter(x => x.name.toLowerCase().includes(s.value.toLowerCase()))
+      )
     })
 }
   

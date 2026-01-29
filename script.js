@@ -114,7 +114,7 @@ if (grid) {
         list.forEach(x => {
           const c = document.createElement("div")
           c.className = "card"
-          c.onclick = () => location.href = `/p.html?id=${x.id}`
+          c.onclick = () => location.href = `/p?id=${x.id}`
           c.innerHTML = `
             <img class="thumb" src="${x.image}">
             <div class="card-title">${x.name}</div>

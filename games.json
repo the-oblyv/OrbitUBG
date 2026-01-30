@@ -66,6 +66,12 @@
     "url": "/games/geometrydashlight/index.html"
   },
   {
+    "id": "hollowknight",
+    "name": "Hollow Knight",
+    "image": "/games/hollowknight/468.png",
+    "url": "/games/hollowknight/index.html"
+  },
+  {
     "id": "slitherio",
     "name": "Slither.io",
     "image": "/games/slitherio/Screenshot_20260125-194917.png",

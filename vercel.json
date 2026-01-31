@@ -3,6 +3,8 @@
     { "source": "/g", "destination": "/g.html" },
     { "source": "/s", "destination": "/s.html" },
     { "source": "/p", "destination": "/p.html" },
-    { "source": "/404", "destination": "/404.html" }
+  ]
+    "routes": [
+    { "src": "/(.*)", "status": 404, "dest": "/404.html" }
   ]
 }

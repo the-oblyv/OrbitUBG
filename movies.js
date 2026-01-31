@@ -8,7 +8,7 @@ grid.innerHTML=""
 list.forEach(m=>{
 const c=document.createElement("div")
 c.className="card"
-c.onclick=()=>location.href="/p?name="+encodeURIComponent(m.name)
+c.onclick=()=>location.href="/p?id="+encodeURIComponent(m.name)
 c.innerHTML=`<img class="thumb" src="${m.cover}"><div class="card-title">${m.name}</div>`
 grid.appendChild(c)
 })

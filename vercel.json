@@ -1,0 +1,7 @@
+{
+  "rewrites": [
+    { "source": "/g", "destination": "/g.html" },
+    { "source": "/s", "destination": "/s.html" },
+    { "source": "/p", "destination": "/p.html" },
+  ]
+}

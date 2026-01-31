@@ -4,7 +4,4 @@
     { "source": "/s", "destination": "/s.html" },
     { "source": "/p", "destination": "/p.html" },
   ]
-    "routes": [
-    { "src": "/(.*)", "status": 404, "dest": "/404.html" }
-  ]
 }

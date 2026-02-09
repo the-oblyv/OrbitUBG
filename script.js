@@ -18,7 +18,7 @@ function saveSettings(s) {
 }
 
 const settings = getSettings();
-const UV_PREFIX = "/uv/";
+const SJ_PREFIX = "/sj/";
 
 const defaultTitle = document.title;
 let defaultIcon = document.querySelector("link[rel='icon']");
@@ -81,15 +81,6 @@ document.addEventListener("DOMContentLoaded", () => {
       let q = search.value.trim();
       if (!q) return;
 
-      let url;
-      if (q.includes(" ") || !q.includes(".")) {
-        url = "https://html.duckduckgo.com/html/?q=" + encodeURIComponent(q);
-      } else {
-        if (!q.startsWith("http")) q = "https://" + q;
-        const encoded = encodeURIComponent(q);
-        url = `/uv/${encoded}`;
-      }
-      location.href = url;
     });
   }
 

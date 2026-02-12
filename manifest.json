@@ -4,8 +4,8 @@
   "start_url": "/",
   "display": "standalone",
   "description": "Your gateway to unblocked games.",
-  "background_color": "#0A1D37",
-  "theme_color": "#0A1D37",
+  "background_color": "#0f1420",
+  "theme_color": "#6c7cff",
   "icons": [
     {
       "src": "storage/images/logo-png-removebg-preview.png",

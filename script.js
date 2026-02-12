@@ -126,27 +126,89 @@ document.addEventListener("DOMContentLoaded", () => {
       });
   }
 
+  const appsGrid = document.getElementById("appsGrid");
+  if (appsGrid) {
+    fetch("/apps.json")
+      .then(r => r.json())
+      .then(apps => {
+        apps.sort((a, b) => a.name.localeCompare(b.name));
+
+        const renderApps = list => {
+          appsGrid.innerHTML = "";
+
+          const requestCard = document.createElement("div");
+          requestCard.className = "card";
+          requestCard.onclick = () => window.open("https://forms.gle/WdSBv4jkFo3nwvFz8", "_blank");
+          requestCard.innerHTML = `
+            <img class="thumb" src="/res/googleform.webp">
+            <div class="card-title">!! Request an App</div>
+          `;
+          appsGrid.appendChild(requestCard);
+
+          list.forEach(app => {
+            const c = document.createElement("div");
+            c.className = "card";
+            c.onclick = () => location.href = `/p?id=${app.id}`;
+            c.innerHTML = `
+              <img class="thumb" src="${app.image}">
+              <div class="card-title">${app.name}</div>
+            `;
+            appsGrid.appendChild(c);
+          });
+        };
+
+        renderApps(apps);
+
+        const appSearchInput = document.getElementById("appSearch");
+        if (appSearchInput) {
+          appSearchInput.oninput = () =>
+            renderApps(apps.filter(app =>
+              app.name.toLowerCase().includes(appSearchInput.value.toLowerCase())
+            ));
+        }
+      });
+  }
+
   const gameFrame = document.getElementById("gameFrame");
-  if (gameFrame) {
+  const appFrame = document.getElementById("appFrame");
+
+  const id = new URLSearchParams(location.search).get("id");
+
+  if (id && gameFrame && appFrame) {
     fetch("/games.json")
       .then(r => r.json())
       .then(games => {
-        const id = new URLSearchParams(location.search).get("id");
         const game = games.find(x => x.id === id);
-        if (game) gameFrame.src = game.url;
+        if (game) {
+          gameFrame.src = game.url;
+          gameFrame.style.display = "block";
+          appFrame.style.display = "none";
+          return;
+        }
+
+        fetch("/apps.json")
+          .then(r => r.json())
+          .then(apps => {
+            const app = apps.find(x => x.id === id);
+            if (app) {
+              appFrame.src = app.url;
+              appFrame.style.display = "block";
+              gameFrame.style.display = "none";
+            }
+          });
       });
   }
 
   const fsBtn = document.getElementById("fullscreenBtn");
-  if (fsBtn && gameFrame) fsBtn.onclick = () => gameFrame.requestFullscreen?.();
+  if (fsBtn && gameFrame) fsBtn.onclick = () => (gameFrame.style.display !== "none" ? gameFrame.requestFullscreen?.() : appFrame.requestFullscreen?.());
 
   const blankBtn = document.getElementById("blankBtn");
-  if (blankBtn && gameFrame) {
+  if (blankBtn) {
     blankBtn.onclick = () => {
       const w = window.open("about:blank", "_blank");
       if (!w) return;
       const i = w.document.createElement("iframe");
-      i.src = gameFrame.src;
+      i.src = gameFrame.style.display !== "none" ? gameFrame.src : appFrame.src;
       i.style.border = "none";
       i.style.width = "100%";
       i.style.height = "100%";
@@ -212,59 +274,5 @@ document.addEventListener("DOMContentLoaded", () => {
       w.document.body.style.margin = "0";
       w.document.body.appendChild(i);
     };
-  }
-
-  const appsGrid = document.getElementById("appsGrid");
-  if (appsGrid) {
-    fetch("/apps.json")
-      .then(r => r.json())
-      .then(apps => {
-        apps.sort((a, b) => a.name.localeCompare(b.name));
-
-        const renderApps = list => {
-          appsGrid.innerHTML = "";
-
-          const requestCard = document.createElement("div");
-          requestCard.className = "card";
-          requestCard.onclick = () => window.open("https://forms.gle/WdSBv4jkFo3nwvFz8", "_blank");
-          requestCard.innerHTML = `
-            <img class="thumb" src="/res/googleform.webp">
-            <div class="card-title">!! Request an App</div>
-          `;
-          appsGrid.appendChild(requestCard);
-
-          list.forEach(app => {
-            const c = document.createElement("div");
-            c.className = "card";
-            c.onclick = () => location.href = `/p?id=${app.id}`;
-            c.innerHTML = `
-              <img class="thumb" src="${app.image}">
-              <div class="card-title">${app.name}</div>
-            `;
-            appsGrid.appendChild(c);
-          });
-        };
-
-        renderApps(apps);
-
-        const appSearchInput = document.getElementById("appSearch");
-        if (appSearchInput) {
-          appSearchInput.oninput = () =>
-            renderApps(apps.filter(app =>
-              app.name.toLowerCase().includes(appSearchInput.value.toLowerCase())
-            ));
-        }
-      });
-  }
-
-  const appFrame = document.getElementById("appFrame");
-  if (appFrame) {
-    fetch("/apps.json")
-      .then(r => r.json())
-      .then(apps => {
-        const id = new URLSearchParams(location.search).get("id");
-        const app = apps.find(x => x.id === id);
-        if (app) appFrame.src = app.url;
-      });
   }
 });

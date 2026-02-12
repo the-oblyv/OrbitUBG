@@ -354,3 +354,25 @@ a.game-card .game-title{
   color:inherit;
   text-decoration:none;
 }
+
+
+.search-apps {
+  width:100%;
+  padding:16px;
+  border-radius:14px;
+  border:none;
+  outline:none;
+  background:var(--panel2);
+  color:var(--text);
+  margin-bottom:24px;
+}
+
+a.app-card{
+  color:inherit;
+  text-decoration:none;
+}
+
+a.app-card .app-title{
+  color:inherit;
+  text-decoration:none;
+}

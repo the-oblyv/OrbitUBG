@@ -1,6 +1,6 @@
 
 self.__uv$config = {
-	prefix: "/static/petezah/",
+	prefix: "/static/orbit/",
 	bare: "/api/youtube-bypass/bare/",
 	encodeUrl: Ultraviolet.codec.xor.encode,
 	decodeUrl: Ultraviolet.codec.xor.decode,

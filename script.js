@@ -83,15 +83,15 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  const grid = document.getElementById("gamesGrid");
-  if (grid) {
+  const gamesGrid = document.getElementById("gamesGrid");
+  if (gamesGrid) {
     fetch("/games.json")
       .then(r => r.json())
-      .then(g => {
-        g.sort((a, b) => a.name.localeCompare(b.name));
+      .then(games => {
+        games.sort((a, b) => a.name.localeCompare(b.name));
 
-        const render = list => {
-          grid.innerHTML = "";
+        const renderGames = list => {
+          gamesGrid.innerHTML = "";
 
           const requestCard = document.createElement("div");
           requestCard.className = "card";
@@ -100,49 +100,53 @@ document.addEventListener("DOMContentLoaded", () => {
             <img class="thumb" src="/res/googleform.webp">
             <div class="card-title">!! Request a Game</div>
           `;
-          grid.appendChild(requestCard);
+          gamesGrid.appendChild(requestCard);
 
-          list.forEach(x => {
+          list.forEach(game => {
             const c = document.createElement("div");
             c.className = "card";
-            c.onclick = () => location.href = \`/p?id=\${x.id}\`;
+            c.onclick = () => location.href = `/p?id=${game.id}`;
             c.innerHTML = `
-              <img class="thumb" src="\${x.image}">
-              <div class="card-title">\${x.name}</div>
+              <img class="thumb" src="${game.image}">
+              <div class="card-title">${game.name}</div>
             `;
-            grid.appendChild(c);
+            gamesGrid.appendChild(c);
           });
         };
 
-        render(g);
+        renderGames(games);
 
-        const s = document.getElementById("gameSearch");
-        if (s) s.oninput = () =>
-          render(g.filter(x => x.name.toLowerCase().includes(s.value.toLowerCase())));
+        const gameSearchInput = document.getElementById("gameSearch");
+        if (gameSearchInput) {
+          gameSearchInput.oninput = () =>
+            renderGames(games.filter(game =>
+              game.name.toLowerCase().includes(gameSearchInput.value.toLowerCase())
+            ));
+        }
       });
   }
 
-  const frame = document.getElementById("gameFrame");
-  if (frame) {
+  const gameFrame = document.getElementById("gameFrame");
+  if (gameFrame) {
     fetch("/games.json")
       .then(r => r.json())
-      .then(g => {
+      .then(games => {
         const id = new URLSearchParams(location.search).get("id");
-        const game = g.find(x => x.id === id);
-        if (game) frame.src = game.url;
+        const game = games.find(x => x.id === id);
+        if (game) gameFrame.src = game.url;
       });
   }
 
   const fsBtn = document.getElementById("fullscreenBtn");
-  if (fsBtn && frame) fsBtn.onclick = () => frame.requestFullscreen?.();
+  if (fsBtn && gameFrame) fsBtn.onclick = () => gameFrame.requestFullscreen?.();
 
   const blankBtn = document.getElementById("blankBtn");
-  if (blankBtn && frame) {
+  if (blankBtn && gameFrame) {
     blankBtn.onclick = () => {
       const w = window.open("about:blank", "_blank");
       if (!w) return;
       const i = w.document.createElement("iframe");
-      i.src = frame.src;
+      i.src = gameFrame.src;
       i.style.border = "none";
       i.style.width = "100%";
       i.style.height = "100%";
@@ -214,8 +218,8 @@ document.addEventListener("DOMContentLoaded", () => {
   if (appsGrid) {
     fetch("/apps.json")
       .then(r => r.json())
-      .then(a => {
-        a.sort((a, b) => a.name.localeCompare(b.name));
+      .then(apps => {
+        apps.sort((a, b) => a.name.localeCompare(b.name));
 
         const renderApps = list => {
           appsGrid.innerHTML = "";
@@ -229,23 +233,27 @@ document.addEventListener("DOMContentLoaded", () => {
           `;
           appsGrid.appendChild(requestCard);
 
-          list.forEach(x => {
+          list.forEach(app => {
             const c = document.createElement("div");
             c.className = "card";
-            c.onclick = () => location.href = \`/a?id=\${x.id}\`;
+            c.onclick = () => location.href = `/a?id=${app.id}`;
             c.innerHTML = `
-              <img class="thumb" src="\${x.image}">
-              <div class="card-title">\${x.name}</div>
+              <img class="thumb" src="${app.image}">
+              <div class="card-title">${app.name}</div>
             `;
             appsGrid.appendChild(c);
           });
         };
 
-        renderApps(a);
+        renderApps(apps);
 
-        const s = document.getElementById("appSearch");
-        if (s) s.oninput = () =>
-          renderApps(a.filter(x => x.name.toLowerCase().includes(s.value.toLowerCase())));
+        const appSearchInput = document.getElementById("appSearch");
+        if (appSearchInput) {
+          appSearchInput.oninput = () =>
+            renderApps(apps.filter(app =>
+              app.name.toLowerCase().includes(appSearchInput.value.toLowerCase())
+            ));
+        }
       });
   }
 
@@ -253,11 +261,10 @@ document.addEventListener("DOMContentLoaded", () => {
   if (appFrame) {
     fetch("/apps.json")
       .then(r => r.json())
-      .then(a => {
+      .then(apps => {
         const id = new URLSearchParams(location.search).get("id");
-        const app = a.find(x => x.id === id);
+        const app = apps.find(x => x.id === id);
         if (app) appFrame.src = app.url;
       });
   }
 });
-              

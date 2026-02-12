@@ -1,7 +1,9 @@
 {
   "rewrites": [
     { "source": "/g", "destination": "/g.html" },
+    { "source": "/a", "destination": "/a.html" },
     { "source": "/s", "destination": "/s.html" },
     { "source": "/p", "destination": "/p.html" },
+    { "source": "/404", "destination": "/404.html" }
   ]
 }

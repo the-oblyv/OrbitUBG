@@ -80,7 +80,6 @@ document.addEventListener("DOMContentLoaded", () => {
       if (e.key !== "Enter") return;
       let q = search.value.trim();
       if (!q) return;
-
     });
   }
 
@@ -106,10 +105,10 @@ document.addEventListener("DOMContentLoaded", () => {
           list.forEach(x => {
             const c = document.createElement("div");
             c.className = "card";
-            c.onclick = () => location.href = `/p?id=${x.id}`;
+            c.onclick = () => location.href = \`/p?id=\${x.id}\`;
             c.innerHTML = `
-              <img class="thumb" src="${x.image}">
-              <div class="card-title">${x.name}</div>
+              <img class="thumb" src="\${x.image}">
+              <div class="card-title">\${x.name}</div>
             `;
             grid.appendChild(c);
           });
@@ -210,4 +209,55 @@ document.addEventListener("DOMContentLoaded", () => {
       w.document.body.appendChild(i);
     };
   }
+
+  const appsGrid = document.getElementById("appsGrid");
+  if (appsGrid) {
+    fetch("/apps.json")
+      .then(r => r.json())
+      .then(a => {
+        a.sort((a, b) => a.name.localeCompare(b.name));
+
+        const renderApps = list => {
+          appsGrid.innerHTML = "";
+
+          const requestCard = document.createElement("div");
+          requestCard.className = "card";
+          requestCard.onclick = () => window.open("https://forms.gle/WdSBv4jkFo3nwvFz8", "_blank");
+          requestCard.innerHTML = `
+            <img class="thumb" src="/res/googleform.webp">
+            <div class="card-title">!! Request an App</div>
+          `;
+          appsGrid.appendChild(requestCard);
+
+          list.forEach(x => {
+            const c = document.createElement("div");
+            c.className = "card";
+            c.onclick = () => location.href = \`/a?id=\${x.id}\`;
+            c.innerHTML = `
+              <img class="thumb" src="\${x.image}">
+              <div class="card-title">\${x.name}</div>
+            `;
+            appsGrid.appendChild(c);
+          });
+        };
+
+        renderApps(a);
+
+        const s = document.getElementById("appSearch");
+        if (s) s.oninput = () =>
+          renderApps(a.filter(x => x.name.toLowerCase().includes(s.value.toLowerCase())));
+      });
+  }
+
+  const appFrame = document.getElementById("appFrame");
+  if (appFrame) {
+    fetch("/apps.json")
+      .then(r => r.json())
+      .then(a => {
+        const id = new URLSearchParams(location.search).get("id");
+        const app = a.find(x => x.id === id);
+        if (app) appFrame.src = app.url;
+      });
+  }
 });
+              

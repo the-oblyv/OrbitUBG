@@ -1,0 +1,8 @@
+[
+  {
+    "id": "music",
+    "name": "Music",
+    "image": "/apps/music/Music.png",
+    "url": "/apps/music/index.html"
+  }
+]

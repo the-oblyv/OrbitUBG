@@ -236,7 +236,7 @@ document.addEventListener("DOMContentLoaded", () => {
           list.forEach(app => {
             const c = document.createElement("div");
             c.className = "card";
-            c.onclick = () => location.href = `/a?id=${app.id}`;
+            c.onclick = () => location.href = `/p?id=${app.id}`;
             c.innerHTML = `
               <img class="thumb" src="${app.image}">
               <div class="card-title">${app.name}</div>

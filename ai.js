@@ -1,103 +1,164 @@
 const endpoint = "https://3.dmvdriverseducation.org/worker/ai/chat";
+
 const input = document.getElementById("aiInput");
 const chat = document.getElementById("aiChat");
 const sendBtn = document.getElementById("sendBtn");
 const attachBtn = document.getElementById("attachBtn");
-const imageBtn = document.getElementById("imageBtn");
 const fileInput = document.getElementById("aiFile");
-let contents = [];
 
-function addMessage(role, text) {
+let contents = [];
+let pendingAttachments = [];
+
+function createMessage(role) {
     const div = document.createElement("div");
     div.className = `aiMsg ${role}`;
-    if (role === "user") text = "**You:** " + text;
-    div.innerHTML = marked.parse(text);
     chat.appendChild(div);
-    Prism.highlightAllUnder(div);
-    div.scrollIntoView({ behavior: "smooth" });
+    chat.scrollTop = chat.scrollHeight;
     return div;
 }
 
-async function sendMessage(text) {
-    contents.push({ role: "user", parts: [{ text }] });
-    addMessage("user", text);
-    const loadingMsg = addMessage("model", "_Loading..._");
-    const body = { contents, generationConfig: { temperature: 0.7 } };
-    let responseText = "(No Response)";
+function renderMarkdown(text) {
+    return marked.parse(text || "");
+}
+
+function enhanceCodeBlocks(container) {
+    Prism.highlightAllUnder(container);
+    container.querySelectorAll("pre").forEach(pre => {
+        if (pre.querySelector(".aicopy-btn")) return;
+        const btn = document.createElement("button");
+        btn.textContent = "Copy";
+        btn.className = "aicopy-btn";
+        const code = pre.querySelector("code");
+        btn.onclick = () => {
+            navigator.clipboard.writeText(code.innerText).then(() => {
+                btn.textContent = "Copied!";
+                setTimeout(() => btn.textContent = "Copy", 1200);
+            });
+        };
+        pre.appendChild(btn);
+    });
+}
+
+function addUserTextMessage(text) {
+    const msg = createMessage("user");
+    msg.innerHTML = renderMarkdown(text);
+    enhanceCodeBlocks(msg);
+}
+
+function addAttachmentPreview(file, dataUrl) {
+    const msg = createMessage("user");
+
+    if (file.type.startsWith("image/")) {
+        msg.innerHTML = `
+            <div><strong>Attached:</strong> ${file.name}</div>
+            <img src="${dataUrl}" style="max-width:250px;border-radius:12px;margin-top:8px;">
+        `;
+    } else if (file.type.startsWith("audio/")) {
+        msg.innerHTML = `
+            <div><strong>Attached:</strong> ${file.name}</div>
+            <audio controls src="${dataUrl}" style="margin-top:8px;"></audio>
+        `;
+    } else if (file.type.startsWith("video/")) {
+        msg.innerHTML = `
+            <div><strong>Attached:</strong> ${file.name}</div>
+            <video controls src="${dataUrl}" style="max-width:300px;border-radius:12px;margin-top:8px;"></video>
+        `;
+    } else {
+        msg.innerHTML = `<div><strong>Attached:</strong> ${file.name}</div>`;
+    }
+}
+
+async function sendMessage() {
+    const text = input.value.trim();
+
+    if (!text && pendingAttachments.length === 0) return;
+
+    if (text) addUserTextMessage(text);
+
+    const parts = [];
+
+    if (text) parts.push({ text });
+
+    pendingAttachments.forEach(file => {
+        parts.push({
+            inlineData: {
+                mimeType: file.mimeType,
+                data: file.base64
+            }
+        });
+    });
+
+    contents.push({ role: "user", parts });
+
+    input.value = "";
+    pendingAttachments = [];
+
+    const loadingMsg = createMessage("model");
+    loadingMsg.innerHTML = renderMarkdown("_Loading..._");
+
     try {
         const res = await fetch(endpoint, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(body)
+            body: JSON.stringify({
+                contents,
+                generationConfig: { temperature: 0.7 }
+            })
         });
+
         const json = await res.json();
-        responseText =
-            json?.candidates?.[0]?.content?.parts?.[0]?.text || json?.text || JSON.stringify(json, null, 2);
-    } catch (e) {
-        responseText = "Request Failed: " + e.message;
+
+        const responseText =
+            json?.candidates?.[0]?.content?.parts?.[0]?.text ||
+            json?.text ||
+            "(No response)";
+
+        contents.push({
+            role: "model",
+            parts: [{ text: responseText }]
+        });
+
+        loadingMsg.innerHTML = renderMarkdown(responseText);
+        enhanceCodeBlocks(loadingMsg);
+
+    } catch (err) {
+        loadingMsg.innerHTML = "Request Failed: " + err.message;
     }
-    contents.push({ role: "model", parts: [{ text: responseText }] });
-    loadingMsg.innerHTML = marked.parse(responseText);
-    Prism.highlightAllUnder(loadingMsg);
-    loadingMsg.scrollIntoView({ behavior: "smooth" });
+
+    chat.scrollTop = chat.scrollHeight;
 }
 
-sendBtn.onclick = () => {
-    const text = input.value.trim();
-    if (!text) return;
-    input.value = "";
-    if (text.startsWith("gen-image:")) generateImage(text.slice(10).trim());
-    else sendMessage(text);
-};
+attachBtn.addEventListener("click", () => fileInput.click());
+
+fileInput.addEventListener("change", () => {
+    const files = Array.from(fileInput.files);
+
+    files.forEach(file => {
+        const reader = new FileReader();
+
+        reader.onload = () => {
+            const base64 = reader.result.split(",")[1];
+
+            pendingAttachments.push({
+                name: file.name,
+                mimeType: file.type || "application/octet-stream",
+                base64
+            });
+
+            addAttachmentPreview(file, reader.result);
+        };
+
+        reader.readAsDataURL(file);
+    });
+
+    fileInput.value = "";
+});
+
+sendBtn.addEventListener("click", sendMessage);
 
 input.addEventListener("keydown", e => {
     if (e.key === "Enter" && !e.shiftKey) {
         e.preventDefault();
-        sendBtn.click();
+        sendMessage();
     }
 });
-
-imageBtn.onclick = () => {
-    const text = "gen-image:";
-    input.value = text;
-    input.focus();
-};
-
-attachBtn.onclick = () => {
-    fileInput.click();
-};
-
-fileInput.addEventListener("change", async e => {
-    for (const file of e.target.files) {
-        const reader = new FileReader();
-        reader.onload = () => {
-            const base64 = reader.result.split(",")[1];
-            const fileMsg = `Attached file: ${file.name} (${file.type})`;
-            addMessage("user", fileMsg);
-            contents.push({ role: "user", parts: [{ file: { name: file.name, type: file.type, base64 } }] });
-        };
-        reader.readAsDataURL(file);
-    }
-    fileInput.value = "";
-});
-
-async function generateImage(prompt) {
-    const msg = addMessage("user", "**You (image request):** " + prompt);
-    const loading = addMessage("model", "_Generating image..._");
-
-    try {
-        const form = new FormData();
-        form.append("prompt", prompt);
-        const res = await fetch("https://api.pollinations.ai/generate", { method: "POST", body: form });
-        const blob = await res.blob();
-        const url = URL.createObjectURL(blob);
-        const img = document.createElement("img");
-        img.src = url;
-        img.style.maxWidth = "100%";
-        img.style.borderRadius = "14px";
-        chat.appendChild(img);
-        loading.innerHTML = `Here is your image of ${prompt}.`;
-    } catch (err) {
-        loading.innerHTML = "Image generation failed: " + err.message;
-    }
-}

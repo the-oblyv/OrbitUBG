@@ -13,12 +13,21 @@
   <header class="topbar" id="navMount"></header>
   <nav class="menu" id="menu"></nav>
 
-  <main class="page">
-    <iframe 
-      src="embed.html"
-      style="width:100%;height:80vh;border:none;border-radius:18px;background:#000;">
-    </iframe>
+  <main class="page" style="padding:110px 0 0;">
+    <iframe id="proxyFrame" style="width:100%;height:90vh;border:none;"></iframe>
   </main>
+
+  <script>
+    const frame = document.getElementById("proxyFrame");
+
+    const hash = location.hash;
+
+    if (!hash || hash === "#") {
+      frame.src = "/embed.html#https://google.com/";
+    } else {
+      frame.src = "/embed.html" + hash;
+    }
+  </script>
 
   <script src="frame.js"></script>
   <script src="script.js"></script>

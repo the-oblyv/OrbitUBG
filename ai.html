@@ -5,19 +5,19 @@
 <title>AI | Orbit</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <link rel="stylesheet" href="style.css">
 <link rel="icon" href="/res/orbit.png">
 
 <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet"/>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
-
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
 <style>
 .aiContainer{
   max-width:900px;
   margin:auto;
-  padding:40px 20px 120px;
+  padding:140px 20px 160px;
 }
 
 #aiChat{
@@ -32,6 +32,7 @@
   max-width:85%;
   line-height:1.5;
   font-size:15px;
+  word-wrap:break-word;
 }
 
 .aiMsg.user{
@@ -51,15 +52,22 @@
   bottom:0;
   left:0;
   width:100%;
-  padding:20px;
-  background:linear-gradient(to top,#0f1220 60%,transparent);
+  padding:18px 20px;
+  background:linear-gradient(to top,#0f1220 70%,transparent);
+  display:flex;
+  justify-content:center;
+}
+
+.aiInputWrapper{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  width:100%;
+  max-width:900px;
 }
 
 #aiInput{
-  width:100%;
-  max-width:900px;
-  margin:auto;
-  display:block;
+  flex:1;
   padding:14px 18px;
   border-radius:18px;
   border:none;
@@ -67,6 +75,28 @@
   background:#1f2338;
   color:white;
   font-size:15px;
+}
+
+.aiBtn{
+  background:#5e5cff;
+  border:none;
+  color:white;
+  width:44px;
+  height:44px;
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+  font-size:16px;
+}
+
+.aiAttach{
+  background:#1f2338;
+}
+
+#aiFile{
+  display:none;
 }
 
 pre{
@@ -99,12 +129,50 @@ pre{
 </main>
 
 <div class="aiInputBar">
-  <input id="aiInput" placeholder="Ask Orbit AI anything and press Enter..." autocomplete="off">
+  <div class="aiInputWrapper">
+    <button class="aiBtn aiAttach" id="attachBtn">
+      <i class="fa-solid fa-paperclip"></i>
+    </button>
+    <input type="file" id="aiFile">
+    <input id="aiInput" placeholder="Ask Orbit AI anything..." autocomplete="off">
+    <button class="aiBtn" id="sendBtn">
+      <i class="fa-solid fa-paper-plane"></i>
+    </button>
+  </div>
 </div>
 
 <script src="frame.js"></script>
 <script src="ai.js"></script>
 <script src="script.js"></script>
+
+<script>
+const sendBtn=document.getElementById("sendBtn")
+const input=document.getElementById("aiInput")
+const fileInput=document.getElementById("aiFile")
+const attachBtn=document.getElementById("attachBtn")
+
+sendBtn.onclick=()=>{
+  if(input.value.trim()){
+    const text=input.value.trim()
+    input.value=""
+    sendMessage(text)
+  }
+}
+
+attachBtn.onclick=()=>fileInput.click()
+
+fileInput.addEventListener("change",()=>{
+  const file=fileInput.files[0]
+  if(!file) return
+  const reader=new FileReader()
+  reader.onload=()=>{
+    const content=reader.result
+    const text=`Attached File: ${file.name}\n\n\`\`\`\n${content.slice(0,12000)}\n\`\`\``
+    sendMessage(text)
+  }
+  reader.readAsText(file)
+})
+</script>
 
 </body>
 </html>

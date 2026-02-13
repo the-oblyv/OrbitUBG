@@ -1,227 +1,115 @@
-const endpoint = "https://3.dmvdriverseducation.org/worker/ai/chat";
+const chatEndpoint = "https://3.dmvdriverseducation.org/worker/ai/chat";
+const imageEndpoint = "https://3.dmvdriverseducation.org/worker/ai/image";
 
 const input = document.getElementById("aiInput");
 const chat = document.getElementById("aiChat");
-const sendBtn = document.getElementById("sendBtn");
-const attachBtn = document.getElementById("attachBtn");
-const imageBtn = document.getElementById("imageBtn");
-const fileInput = document.getElementById("aiFile");
+const fileInput = document.getElementById("fileInput");
 
 let contents = [];
-let pendingAttachments = [];
 
-function createMessage(role) {
+function addMessage(role, text) {
     const div = document.createElement("div");
     div.className = `aiMsg ${role}`;
+    if (role === "user") text = "**You:** " + text;
+    div.innerHTML = marked.parse(text);
     chat.appendChild(div);
-    chat.scrollTop = chat.scrollHeight;
+    enhanceCodeBlocks(div);
+    window.scrollTo(0, document.body.scrollHeight);
     return div;
 }
 
-function renderMarkdown(text) {
-    return marked.parse(text || "");
+async function sendMessage(text, files=[]) {
+    if (!text && files.length === 0) return;
+    if (text) {
+        contents.push({ role: "user", parts: [{ text }] });
+        addMessage("user", text);
+    }
+
+    if (text && text.startsWith("gen-image:")) {
+        const prompt = text.slice(10).trim();
+        const loadingMsg = addMessage("model", "_Generating image..._");
+        try {
+            const formData = new FormData();
+            formData.append("prompt", prompt);
+            for (const file of files) formData.append("file", file);
+            const res = await fetch(imageEndpoint, { method:"POST", body: formData });
+            const json = await res.json();
+            const img = document.createElement("img");
+            img.src = json.base64;
+            img.style.maxWidth = "100%";
+            img.style.borderRadius = "8px";
+            loadingMsg.innerHTML = "";
+            loadingMsg.appendChild(img);
+
+            const desc = json.description || prompt;
+            addMessage("model", `Here is your image of ${desc}.`);
+
+        } catch (e) {
+            loadingMsg.innerHTML = "Image generation failed: " + e.message;
+        }
+        return;
+    }
+
+    const loadingMsg = addMessage("model", "_Loading..._");
+    try {
+        const body = { contents, generationConfig: { temperature:0.7 }, files: [] };
+        for (const file of files) {
+            body.files.push({ name:file.name, type:file.type });
+        }
+        const res = await fetch(chatEndpoint, {
+            method:"POST",
+            headers:{ "Content-Type":"application/json" },
+            body: JSON.stringify(body)
+        });
+        const json = await res.json();
+        const responseText = json?.candidates?.[0]?.content?.parts?.[0]?.text || json?.text || "(No response)";
+        contents.push({ role:"model", parts:[{ text: responseText }] });
+        loadingMsg.innerHTML = marked.parse(responseText);
+        enhanceCodeBlocks(loadingMsg);
+        window.scrollTo(0, document.body.scrollHeight);
+    } catch (e) {
+        loadingMsg.innerHTML = "Request failed: " + e.message;
+    }
 }
 
 function enhanceCodeBlocks(container) {
     Prism.highlightAllUnder(container);
-    container.querySelectorAll("pre").forEach(pre => {
+    container.querySelectorAll("pre").forEach(pre=>{
         if (pre.querySelector(".aicopy-btn")) return;
-        const btn = document.createElement("button");
-        btn.textContent = "Copy";
-        btn.className = "aicopy-btn";
+        const button = document.createElement("button");
+        button.textContent = "Copy";
+        button.className = "aicopy-btn";
         const code = pre.querySelector("code");
-        btn.onclick = () => {
-            navigator.clipboard.writeText(code.innerText).then(() => {
-                btn.textContent = "Copied!";
-                setTimeout(() => btn.textContent = "Copy", 1200);
+        button.onclick = ()=> {
+            navigator.clipboard.writeText(code.innerText).then(()=>{
+                button.textContent = "Copied!";
+                setTimeout(()=>button.textContent="Copy",1200);
             });
         };
-        pre.appendChild(btn);
+        pre.appendChild(button);
     });
 }
-
-function addUserText(text) {
-    const msg = createMessage("user");
-    msg.innerHTML = renderMarkdown(text);
-    enhanceCodeBlocks(msg);
-}
-
-function addAttachmentPreview(file, dataUrl) {
-    const msg = createMessage("user");
-
-    if (file.type.startsWith("image/")) {
-        msg.innerHTML = `
-            <div><strong>Attached:</strong> ${file.name}</div>
-            <img src="${dataUrl}" style="max-width:260px;border-radius:14px;margin-top:8px;">
-        `;
-    } else if (file.type.startsWith("audio/")) {
-        msg.innerHTML = `
-            <div><strong>Attached:</strong> ${file.name}</div>
-            <audio controls src="${dataUrl}" style="margin-top:8px;"></audio>
-        `;
-    } else if (file.type.startsWith("video/")) {
-        msg.innerHTML = `
-            <div><strong>Attached:</strong> ${file.name}</div>
-            <video controls src="${dataUrl}" style="max-width:300px;border-radius:14px;margin-top:8px;"></video>
-        `;
-    } else {
-        msg.innerHTML = `<div><strong>Attached:</strong> ${file.name}</div>`;
-    }
-}
-
-async function generateImage(prompt) {
-    const userMsg = createMessage("user");
-    userMsg.innerHTML = renderMarkdown("gen-image: " + prompt);
-
-    const imageContainer = createMessage("model");
-    imageContainer.innerHTML = renderMarkdown("_Generating image..._");
-
-    try {
-        if (!puter.auth.isSignedIn()) {
-            await puter.auth.signInAnonymously();
-        }
-
-        const imageElement = await puter.ai.txt2img(prompt);
-
-        imageContainer.innerHTML = "";
-        imageElement.style.maxWidth = "300px";
-        imageElement.style.borderRadius = "14px";
-        imageContainer.appendChild(imageElement);
-
-        const descriptionPrompt =
-            `Describe the generated image in 1–2 concise sentences. ` +
-            `Start exactly with "Here is your image of ${prompt}." ` +
-            `Do not ask questions. Do not add extra commentary.`;
-
-        const res = await fetch(endpoint, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                contents: [
-                    { role: "user", parts: [{ text: descriptionPrompt }] }
-                ]
-            })
-        });
-
-        const json = await res.json();
-        const responseText =
-            json?.candidates?.[0]?.content?.parts?.[0]?.text ||
-            `Here is your image of ${prompt}.`;
-
-        const descMsg = createMessage("model");
-        descMsg.innerHTML = renderMarkdown(responseText);
-
-    } catch (err) {
-        imageContainer.innerHTML = "Image generation failed.";
-    }
-
-    chat.scrollTop = chat.scrollHeight;
-}
-
-async function sendMessage() {
-    const text = input.value.trim();
-
-    if (!text && pendingAttachments.length === 0) return;
-
-    if (text.startsWith("gen-image:")) {
-        const prompt = text.replace("gen-image:", "").trim();
-        input.value = "";
-        pendingAttachments = [];
-        generateImage(prompt);
-        return;
-    }
-
-    if (text) addUserText(text);
-
-    const parts = [];
-    if (text) parts.push({ text });
-
-    pendingAttachments.forEach(file => {
-        parts.push({
-            inlineData: {
-                mimeType: file.mimeType,
-                data: file.base64
-            }
-        });
-    });
-
-    contents.push({ role: "user", parts });
-
-    input.value = "";
-    pendingAttachments = [];
-
-    const loadingMsg = createMessage("model");
-    loadingMsg.innerHTML = renderMarkdown("_Loading..._");
-
-    try {
-        const res = await fetch(endpoint, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                contents,
-                generationConfig: { temperature: 0.7 }
-            })
-        });
-
-        const json = await res.json();
-        const responseText =
-            json?.candidates?.[0]?.content?.parts?.[0]?.text ||
-            json?.text ||
-            "(No response)";
-
-        contents.push({
-            role: "model",
-            parts: [{ text: responseText }]
-        });
-
-        loadingMsg.innerHTML = renderMarkdown(responseText);
-        enhanceCodeBlocks(loadingMsg);
-
-    } catch (err) {
-        loadingMsg.innerHTML = "Request Failed: " + err.message;
-    }
-
-    chat.scrollTop = chat.scrollHeight;
-}
-
-attachBtn.addEventListener("click", () => fileInput.click());
-
-fileInput.addEventListener("change", () => {
-    const files = Array.from(fileInput.files);
-
-    files.forEach(file => {
-        const reader = new FileReader();
-
-        reader.onload = () => {
-            const base64 = reader.result.split(",")[1];
-
-            pendingAttachments.push({
-                name: file.name,
-                mimeType: file.type || "application/octet-stream",
-                base64
-            });
-
-            addAttachmentPreview(file, reader.result);
-        };
-
-        reader.readAsDataURL(file);
-    });
-
-    fileInput.value = "";
-});
-
-sendBtn.addEventListener("click", sendMessage);
 
 input.addEventListener("keydown", e => {
-    if (e.key === "Enter" && !e.shiftKey) {
-        e.preventDefault();
-        sendMessage();
+    if (e.key === "Enter" && input.value.trim()) {
+        const text = input.value.trim();
+        input.value = "";
+        sendMessage(text);
     }
 });
 
-if (imageBtn) {
-    imageBtn.addEventListener("click", () => {
-        input.value = "gen-image: ";
-        input.focus();
-    });
-}
+document.getElementById("sendBtn").onclick = ()=>{
+    const text = input.value.trim();
+    input.value = "";
+    sendMessage(text);
+};
+
+document.getElementById("attachBtn").onclick = ()=>{
+    fileInput.click();
+};
+
+fileInput.addEventListener("change", ()=>{
+    const files = Array.from(fileInput.files);
+    if (!files.length) return;
+    sendMessage("", files);
+});

@@ -40,7 +40,7 @@ function enhanceCodeBlocks(container) {
     });
 }
 
-function addUserTextMessage(text) {
+function addUserText(text) {
     const msg = createMessage("user");
     msg.innerHTML = renderMarkdown(text);
     enhanceCodeBlocks(msg);
@@ -52,7 +52,7 @@ function addAttachmentPreview(file, dataUrl) {
     if (file.type.startsWith("image/")) {
         msg.innerHTML = `
             <div><strong>Attached:</strong> ${file.name}</div>
-            <img src="${dataUrl}" style="max-width:250px;border-radius:12px;margin-top:8px;">
+            <img src="${dataUrl}" style="max-width:260px;border-radius:14px;margin-top:8px;">
         `;
     } else if (file.type.startsWith("audio/")) {
         msg.innerHTML = `
@@ -62,7 +62,7 @@ function addAttachmentPreview(file, dataUrl) {
     } else if (file.type.startsWith("video/")) {
         msg.innerHTML = `
             <div><strong>Attached:</strong> ${file.name}</div>
-            <video controls src="${dataUrl}" style="max-width:300px;border-radius:12px;margin-top:8px;"></video>
+            <video controls src="${dataUrl}" style="max-width:300px;border-radius:14px;margin-top:8px;"></video>
         `;
     } else {
         msg.innerHTML = `<div><strong>Attached:</strong> ${file.name}</div>`;
@@ -70,53 +70,49 @@ function addAttachmentPreview(file, dataUrl) {
 }
 
 async function generateImage(prompt) {
-    const msg = createMessage("user");
-    msg.innerHTML = renderMarkdown("gen-image: " + prompt);
+    const userMsg = createMessage("user");
+    userMsg.innerHTML = renderMarkdown("gen-image: " + prompt);
 
-    const loading = createMessage("model");
-    loading.innerHTML = renderMarkdown("_Generating image..._");
+    const imageContainer = createMessage("model");
+    imageContainer.innerHTML = renderMarkdown("_Generating image..._");
 
     try {
         const imageElement = await puter.ai.txt2img(prompt);
 
-        loading.innerHTML = "";
+        imageContainer.innerHTML = "";
         imageElement.style.maxWidth = "300px";
         imageElement.style.borderRadius = "14px";
-        loading.appendChild(imageElement);
+        imageElement.style.display = "block";
+        imageElement.style.marginTop = "6px";
 
-        const describePrompt = `Briefly describe this generated image: ${prompt}`;
+        imageContainer.appendChild(imageElement);
 
-        contents.push({
-            role: "user",
-            parts: [{ text: describePrompt }]
-        });
+        const descriptionPrompt =
+            `Describe the generated image in 1–2 concise sentences. ` +
+            `Start exactly with "Here is your image of ${prompt}." ` +
+            `Do not ask questions. Do not add extra commentary.`;
 
         const res = await fetch(endpoint, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
-                contents,
-                generationConfig: { temperature: 0.7 }
+                contents: [
+                    { role: "user", parts: [{ text: descriptionPrompt }] }
+                ],
+                generationConfig: { temperature: 0.4 }
             })
         });
 
         const json = await res.json();
         const responseText =
             json?.candidates?.[0]?.content?.parts?.[0]?.text ||
-            json?.text ||
-            "Image generated.";
-
-        contents.push({
-            role: "model",
-            parts: [{ text: responseText }]
-        });
+            `Here is your image of ${prompt}.`;
 
         const descMsg = createMessage("model");
         descMsg.innerHTML = renderMarkdown(responseText);
-        enhanceCodeBlocks(descMsg);
 
     } catch (err) {
-        loading.innerHTML = "Image generation failed.";
+        imageContainer.innerHTML = "Image generation failed.";
     }
 
     chat.scrollTop = chat.scrollHeight;
@@ -135,7 +131,7 @@ async function sendMessage() {
         return;
     }
 
-    if (text) addUserTextMessage(text);
+    if (text) addUserText(text);
 
     const parts = [];
     if (text) parts.push({ text });

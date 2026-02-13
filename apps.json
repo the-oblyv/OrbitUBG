@@ -4,5 +4,11 @@
     "name": "Music",
     "image": "/apps/music/Music.png",
     "url": "/apps/music/index.html"
+  },
+  {
+    "id": "soundboard",
+    "name": "Soundboard",
+    "image": "/apps/soundboard/179.png",
+    "url": "/apps/soundboard/index.html"
   }
 ]

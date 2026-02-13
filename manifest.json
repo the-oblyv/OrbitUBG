@@ -4,17 +4,12 @@
   "description": "Orbit Unblocked",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#8cbe37",
+  "background_color": "#0f1420",
+  "theme_color": "#6c7cff",
   "orientation": "portrait",
   "icons": [
     {
-      "src": "/res/192icon.png",
-      "sizes": "192x192",
-      "type": "image/png"
-    },
-    {
-      "src": "/res/512icon.png",
+      "src": "/res/orbit.png",
       "sizes": "512x512",
       "type": "image/png"
     }

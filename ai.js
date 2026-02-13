@@ -64,3 +64,36 @@ input.addEventListener("keydown", e => {
         sendMessage(text);
     }
 });
+
+const sendBtn = document.getElementById("sendBtn");
+const attachBtn = document.getElementById("attachBtn");
+const fileInput = document.getElementById("aiFile");
+
+if (sendBtn) {
+    sendBtn.onclick = () => {
+        if (input.value.trim()) {
+            const text = input.value.trim();
+            input.value = "";
+            sendMessage(text);
+        }
+    };
+}
+
+if (attachBtn && fileInput) {
+    attachBtn.onclick = () => fileInput.click();
+
+    fileInput.addEventListener("change", () => {
+        const file = fileInput.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = () => {
+            const content = reader.result;
+            const text =
+                `Attached File: ${file.name}\n\n\`\`\`\n${content.slice(0,12000)}\n\`\`\``;
+            sendMessage(text);
+        };
+        reader.readAsText(file);
+    });
+}
+

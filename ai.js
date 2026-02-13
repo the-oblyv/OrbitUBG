@@ -77,14 +77,15 @@ async function generateImage(prompt) {
     imageContainer.innerHTML = renderMarkdown("_Generating image..._");
 
     try {
+        if (!puter.auth.isSignedIn()) {
+            await puter.auth.signInAnonymously();
+        }
+
         const imageElement = await puter.ai.txt2img(prompt);
 
         imageContainer.innerHTML = "";
         imageElement.style.maxWidth = "300px";
         imageElement.style.borderRadius = "14px";
-        imageElement.style.display = "block";
-        imageElement.style.marginTop = "6px";
-
         imageContainer.appendChild(imageElement);
 
         const descriptionPrompt =
@@ -98,8 +99,7 @@ async function generateImage(prompt) {
             body: JSON.stringify({
                 contents: [
                     { role: "user", parts: [{ text: descriptionPrompt }] }
-                ],
-                generationConfig: { temperature: 0.4 }
+                ]
             })
         });
 

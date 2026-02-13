@@ -72,6 +72,12 @@
     "url": "/games/hollowknight/index.html"
   },
   {
+    "id": "3dbowling",
+    "name": "3D Bowling",
+    "image": "/games/3dbowling/Screenshot_20260213-185504.png",
+    "url": "/games/3dbowling/index.html"
+  },
+  {
     "id": "slitherio",
     "name": "Slither.io",
     "image": "/games/slitherio/Screenshot_20260125-194917.png",

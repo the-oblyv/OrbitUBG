@@ -4,6 +4,7 @@ const input = document.getElementById("aiInput");
 const chat = document.getElementById("aiChat");
 const sendBtn = document.getElementById("sendBtn");
 const attachBtn = document.getElementById("attachBtn");
+const imageBtn = document.getElementById("imageBtn");
 const fileInput = document.getElementById("aiFile");
 
 let contents = [];
@@ -68,15 +69,75 @@ function addAttachmentPreview(file, dataUrl) {
     }
 }
 
+async function generateImage(prompt) {
+    const msg = createMessage("user");
+    msg.innerHTML = renderMarkdown("gen-image: " + prompt);
+
+    const loading = createMessage("model");
+    loading.innerHTML = renderMarkdown("_Generating image..._");
+
+    try {
+        const imageElement = await puter.ai.txt2img(prompt);
+
+        loading.innerHTML = "";
+        imageElement.style.maxWidth = "300px";
+        imageElement.style.borderRadius = "14px";
+        loading.appendChild(imageElement);
+
+        const describePrompt = `Briefly describe this generated image: ${prompt}`;
+
+        contents.push({
+            role: "user",
+            parts: [{ text: describePrompt }]
+        });
+
+        const res = await fetch(endpoint, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                contents,
+                generationConfig: { temperature: 0.7 }
+            })
+        });
+
+        const json = await res.json();
+        const responseText =
+            json?.candidates?.[0]?.content?.parts?.[0]?.text ||
+            json?.text ||
+            "Image generated.";
+
+        contents.push({
+            role: "model",
+            parts: [{ text: responseText }]
+        });
+
+        const descMsg = createMessage("model");
+        descMsg.innerHTML = renderMarkdown(responseText);
+        enhanceCodeBlocks(descMsg);
+
+    } catch (err) {
+        loading.innerHTML = "Image generation failed.";
+    }
+
+    chat.scrollTop = chat.scrollHeight;
+}
+
 async function sendMessage() {
     const text = input.value.trim();
 
     if (!text && pendingAttachments.length === 0) return;
 
+    if (text.startsWith("gen-image:")) {
+        const prompt = text.replace("gen-image:", "").trim();
+        input.value = "";
+        pendingAttachments = [];
+        generateImage(prompt);
+        return;
+    }
+
     if (text) addUserTextMessage(text);
 
     const parts = [];
-
     if (text) parts.push({ text });
 
     pendingAttachments.forEach(file => {
@@ -107,7 +168,6 @@ async function sendMessage() {
         });
 
         const json = await res.json();
-
         const responseText =
             json?.candidates?.[0]?.content?.parts?.[0]?.text ||
             json?.text ||
@@ -162,3 +222,10 @@ input.addEventListener("keydown", e => {
         sendMessage();
     }
 });
+
+if (imageBtn) {
+    imageBtn.addEventListener("click", () => {
+        input.value = "gen-image: ";
+        input.focus();
+    });
+}

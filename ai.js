@@ -1,28 +1,50 @@
 const endpoint = "https://3.dmvdriverseducation.org/worker/ai/chat";
 const input = document.getElementById("aiInput");
 const chat = document.getElementById("aiChat");
+const sendBtn = document.getElementById("sendBtn");
+const attachBtn = document.getElementById("attachBtn");
+const fileInput = document.getElementById("aiFile");
+
 let contents = [];
+let pendingAttachments = [];
+
 function addMessage(role, text) {
     const div = document.createElement("div");
     div.className = `aiMsg ${role}`;
-    if (role === "user") {
-        text = "**You:** " + text;
-    }
+    if (role === "user") text = "**You:** " + text;
     div.innerHTML = marked.parse(text);
     chat.appendChild(div);
     enhanceCodeBlocks(div);
     window.scrollTo(0, document.body.scrollHeight);
     return div;
 }
+
 async function sendMessage(text) {
-    contents.push({ role: "user", parts: [{ text }] });
-    addMessage("user", text);
+    const parts = [];
+    if (text) parts.push({ text });
+
+    pendingAttachments.forEach(file => {
+        parts.push({
+            inlineData: {
+                mimeType: file.mimeType,
+                data: file.data
+            }
+        });
+    });
+
+    contents.push({ role: "user", parts });
+
+    addMessage("user", text || "Sent attachment(s)");
+
     const loadingMsg = addMessage("model", "_Loading..._");
+
     const body = {
-        contents: contents,
+        contents,
         generationConfig: { temperature: 0.7 }
     };
+
     let responseText = "(No Response)";
+
     try {
         const res = await fetch(endpoint, {
             method: "POST",
@@ -31,15 +53,22 @@ async function sendMessage(text) {
         });
         const json = await res.json();
         responseText =
-            json?.candidates?.[0]?.content?.parts?.[0]?.text || json?.text || JSON.stringify(json, null, 2);
+            json?.candidates?.[0]?.content?.parts?.[0]?.text ||
+            json?.text ||
+            JSON.stringify(json, null, 2);
     } catch (e) {
         responseText = "Request Failed: " + e.message;
     }
+
     contents.push({ role: "model", parts: [{ text: responseText }] });
+
     loadingMsg.innerHTML = marked.parse(responseText);
     enhanceCodeBlocks(loadingMsg);
+
+    pendingAttachments = [];
     window.scrollTo(0, document.body.scrollHeight);
 }
+
 function enhanceCodeBlocks(container) {
     Prism.highlightAllUnder(container);
     container.querySelectorAll("pre").forEach(pre => {
@@ -57,43 +86,42 @@ function enhanceCodeBlocks(container) {
         pre.appendChild(button);
     });
 }
-input.addEventListener("keydown", e => {
-    if (e.key === "Enter" && input.value.trim()) {
-        const text = input.value.trim();
-        input.value = "";
-        sendMessage(text);
-    }
-});
-
-const sendBtn = document.getElementById("sendBtn");
-const attachBtn = document.getElementById("attachBtn");
-const fileInput = document.getElementById("aiFile");
-
-if (sendBtn) {
-    sendBtn.onclick = () => {
-        if (input.value.trim()) {
-            const text = input.value.trim();
-            input.value = "";
-            sendMessage(text);
-        }
-    };
-}
 
 if (attachBtn && fileInput) {
     attachBtn.onclick = () => fileInput.click();
 
     fileInput.addEventListener("change", () => {
-        const file = fileInput.files[0];
-        if (!file) return;
-
-        const reader = new FileReader();
-        reader.onload = () => {
-            const content = reader.result;
-            const text =
-                `Attached File: ${file.name}\n\n\`\`\`\n${content.slice(0,12000)}\n\`\`\``;
-            sendMessage(text);
-        };
-        reader.readAsText(file);
+        const files = Array.from(fileInput.files);
+        files.forEach(file => {
+            const reader = new FileReader();
+            reader.onload = () => {
+                const base64 = reader.result.split(",")[1];
+                pendingAttachments.push({
+                    name: file.name,
+                    mimeType: file.type || "application/octet-stream",
+                    data: base64
+                });
+                addMessage("user", `Attached: ${file.name}`);
+            };
+            reader.readAsDataURL(file);
+        });
+        fileInput.value = "";
     });
 }
 
+if (sendBtn) {
+    sendBtn.onclick = () => {
+        if (!input.value.trim() && pendingAttachments.length === 0) return;
+        const text = input.value.trim();
+        input.value = "";
+        sendMessage(text);
+    };
+}
+
+input.addEventListener("keydown", e => {
+    if (e.key === "Enter" && (input.value.trim() || pendingAttachments.length > 0)) {
+        const text = input.value.trim();
+        input.value = "";
+        sendMessage(text);
+    }
+});

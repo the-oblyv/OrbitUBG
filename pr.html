@@ -8,11 +8,22 @@
 <link rel="icon" href="/res/orbit.png">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <style>
-body, html { margin:0; padding:0; height:100%; overflow:hidden; background:#0f1220; }
-iframe { width:100%; height:100%; border:none; }
-#urlBar { position:fixed; top:0; left:0; width:100%; padding:10px; background:#1f2338; display:flex; gap:10px; z-index:10; }
-#urlBar input { flex:1; padding:8px 12px; border-radius:12px; border:none; outline:none; background:#0f1220; color:white; }
-#urlBar button { padding:8px 14px; border:none; border-radius:12px; background:#5e5cff; color:white; cursor:pointer; }
+body, html {
+  margin:0; padding:0; height:100%; background:#0f1220; font-family:sans-serif;
+}
+#urlBar {
+  position:fixed; top:0; left:0; width:100%; padding:10px;
+  background:#1f2338; display:flex; gap:10px; z-index:10;
+}
+#urlBar input {
+  flex:1; padding:8px 12px; border-radius:12px; border:none; outline:none;
+  background:#0f1220; color:white;
+}
+#urlBar button {
+  padding:8px 14px; border:none; border-radius:12px;
+  background:#5e5cff; color:white; cursor:pointer;
+}
+#info { color:#aaa; font-size:12px; margin-top:50px; text-align:center; }
 </style>
 </head>
 <body>
@@ -22,7 +33,7 @@ iframe { width:100%; height:100%; border:none; }
   <button id="goBtn">Go</button>
 </div>
 
-<iframe id="proxyFrame"></iframe>
+<div id="info">Enter a URL and click Go. Sites load through the Orbit Proxy.</div>
 
 <script src="frame.js"></script>
 <script src="pr.js"></script>

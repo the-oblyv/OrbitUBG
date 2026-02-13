@@ -4,7 +4,6 @@
     { "source": "/a", "destination": "/a.html" },
     { "source": "/s", "destination": "/s.html" },
     { "source": "/p", "destination": "/p.html" },
-    { "source": "/sj", "destination": "/sj.html" },
     { "source": "/404", "destination": "/404.html" }
   ]
 }

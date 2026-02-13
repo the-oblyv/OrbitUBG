@@ -1,10 +1,27 @@
-const proxyBase = "https://3.dmvdriverseducation.org/vpr/go/"; 
+const baseProxy = "https://3.dmvdriverseducation.org/vpr/go/";
 const iframe = document.getElementById("proxyFrame");
+const input = document.getElementById("proxyInput");
+const goBtn = document.getElementById("goBtn");
 
-function getTargetUrl() {
-    const query = window.location.href.split("?")[1];
-    if (query) return encodeURIComponent(query);
-    return encodeURIComponent("https://start.duckduckgo.com/");
+function encodeUrl(url) {
+    return encodeURIComponent(url);
 }
 
-iframe.src = proxyBase + getTargetUrl();
+let url = location.search.slice(1);
+
+if (!url) {
+    url = "https://start.duckduckgo.com/";
+}
+
+iframe.src = baseProxy + encodeUrl(url);
+input.value = url;
+
+goBtn.addEventListener("click", () => {
+    let target = input.value.trim();
+    if (!target.startsWith("http")) target = "https://" + target;
+    iframe.src = baseProxy + encodeUrl(target);
+});
+
+input.addEventListener("keydown", e => {
+    if (e.key === "Enter") goBtn.click();
+});

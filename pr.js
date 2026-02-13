@@ -4,24 +4,23 @@ const input = document.getElementById("proxyInput");
 const goBtn = document.getElementById("goBtn");
 
 function encodeUrl(url) {
-    try {
-        if (!/^https?:\/\//i.test(url)) {
-            url = "https://" + url;
-        }
-        return encodeURIComponent(url);
-    } catch (e) {
-        return encodeURIComponent("https://start.duckduckgo.com/");
+    if (!/^https?:\/\//i.test(url)) {
+        url = "https://" + url;
     }
+    return encodeURIComponent(url);
 }
 
-let queryUrl = decodeURIComponent(location.search.slice(1));
-if (!queryUrl) queryUrl = "https://start.duckduckgo.com/";
+let rawQuery = location.href.split('?')[1] || "";
+rawQuery = decodeURIComponent(rawQuery);
 
-iframe.src = baseProxy + encodeUrl(queryUrl);
-input.value = queryUrl;
+let initialUrl = rawQuery || "https://start.duckduckgo.com/";
+
+iframe.src = baseProxy + encodeUrl(initialUrl);
+input.value = initialUrl;
 
 goBtn.addEventListener("click", () => {
     let target = input.value.trim();
+    if (!target) return;
     iframe.src = baseProxy + encodeUrl(target);
 });
 

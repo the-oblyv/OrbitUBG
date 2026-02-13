@@ -8,33 +8,31 @@ const fileInput = document.getElementById("aiFile");
 let contents = [];
 let pendingAttachments = [];
 
-function addMessage(role, text) {
+function addMessage(role, html, isHtml = false) {
     const div = document.createElement("div");
     div.className = `aiMsg ${role}`;
-    if (role === "user") text = "**You:** " + text;
-    div.innerHTML = marked.parse(text);
+    div.innerHTML = isHtml ? html : marked.parse(html);
     chat.appendChild(div);
     enhanceCodeBlocks(div);
-    window.scrollTo(0, document.body.scrollHeight);
+    chat.scrollTop = chat.scrollHeight;
     return div;
 }
 
 async function sendMessage(text) {
     const parts = [];
+
     if (text) parts.push({ text });
 
     pendingAttachments.forEach(file => {
         parts.push({
             inlineData: {
                 mimeType: file.mimeType,
-                data: file.data
+                data: file.base64
             }
         });
     });
 
     contents.push({ role: "user", parts });
-
-    addMessage("user", text || "Sent attachment(s)");
 
     const loadingMsg = addMessage("model", "_Loading..._");
 
@@ -66,7 +64,7 @@ async function sendMessage(text) {
     enhanceCodeBlocks(loadingMsg);
 
     pendingAttachments = [];
-    window.scrollTo(0, document.body.scrollHeight);
+    chat.scrollTop = chat.scrollHeight;
 }
 
 function enhanceCodeBlocks(container) {
@@ -92,19 +90,45 @@ if (attachBtn && fileInput) {
 
     fileInput.addEventListener("change", () => {
         const files = Array.from(fileInput.files);
+
         files.forEach(file => {
             const reader = new FileReader();
+
             reader.onload = () => {
                 const base64 = reader.result.split(",")[1];
+
                 pendingAttachments.push({
                     name: file.name,
                     mimeType: file.type || "application/octet-stream",
-                    data: base64
+                    base64
                 });
-                addMessage("user", `Attached: ${file.name}`);
+
+                if (file.type.startsWith("image/")) {
+                    addMessage(
+                        "user",
+                        `<div><strong>Attached:</strong> ${file.name}<br><img src="${reader.result}" style="max-width:250px;border-radius:12px;margin-top:8px;"></div>`,
+                        true
+                    );
+                } else if (file.type.startsWith("audio/")) {
+                    addMessage(
+                        "user",
+                        `<div><strong>Attached:</strong> ${file.name}<br><audio controls src="${reader.result}" style="margin-top:8px;"></audio></div>`,
+                        true
+                    );
+                } else if (file.type.startsWith("video/")) {
+                    addMessage(
+                        "user",
+                        `<div><strong>Attached:</strong> ${file.name}<br><video controls src="${reader.result}" style="max-width:300px;border-radius:12px;margin-top:8px;"></video></div>`,
+                        true
+                    );
+                } else {
+                    addMessage("user", `Attached: ${file.name}`);
+                }
             };
+
             reader.readAsDataURL(file);
         });
+
         fileInput.value = "";
     });
 }
@@ -119,7 +143,9 @@ if (sendBtn) {
 }
 
 input.addEventListener("keydown", e => {
-    if (e.key === "Enter" && (input.value.trim() || pendingAttachments.length > 0)) {
+    if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault();
+        if (!input.value.trim() && pendingAttachments.length === 0) return;
         const text = input.value.trim();
         input.value = "";
         sendMessage(text);

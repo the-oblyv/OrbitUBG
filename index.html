@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Educational - Comprehensive online learning platform featuring interactive curriculum, personalized study paths, collaborative education tools, formative assessments, and adaptive learning technology for academic success" />
+    <meta name="keywords" content="online learning, education platform, curriculum, interactive lessons, study resources, academic excellence, personalized learning, student engagement, knowledge retention, educational technology, e-learning, distance learning, virtual classroom, study tools, homework help, test preparation, exam prep, tutoring, skill development, cognitive learning, learning management system, LMS, educational software, student portal, academic support, online courses, digital education, self-paced learning, blended learning, instructional design, learning analytics, progress tracking, student assessment, formative assessment, summative assessment, educational resources, study guides, practice exercises, educational videos, learning modules, subject mastery, competency-based education, standards-aligned curriculum, common core, STEM education, literacy development, numeracy skills, critical thinking, problem solving, collaborative learning, peer learning, study groups, academic achievement, grade improvement, learning outcomes, educational objectives, lesson plans, teaching materials, student success, educational goals, learning strategies, study techniques, time management, note-taking, flashcards, memorization, retention strategies, active learning, experiential learning, project-based learning, inquiry-based learning, differentiated instruction, scaffolding, remedial education, enrichment programs, gifted education, special education, inclusive learning, universal design for learning, UDL, accessibility, mobile learning, tablet education, education apps, learning software, educational games, gamification, badges, achievements, motivation, student rewards, learning incentives, progress reports, parent portal, teacher dashboard, educator resources, professional development, continuing education, lifelong learning, adult education, K-12 education, higher education, college prep, university preparation, SAT prep, ACT prep, AP courses, honors classes, advanced placement, dual enrollment, academic advising, career readiness, college and career readiness, 21st century skills, digital literacy, information literacy, media literacy, computational thinking, coding education, programming courses, mathematics education, algebra, geometry, calculus, statistics, science education, physics, chemistry, biology, English language arts, literature, writing skills, grammar, vocabulary, reading comprehension, social studies, history education, geography, civics, arts education, music education, visual arts" />
+    <link rel="shortcut icon" type="image/jpg" href="favicon.ico" />
+    <title>
+      Educational - Empowering Academic Excellence Through Interactive Learning
+    </title>
+    <!-- Feather Icons -->
+    <script src="https://unpkg.com/feather-icons">
+    </script>
+    <style>
+      * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, &#39;Segoe UI&#39;, &#39;Roboto&#39;, &#39;Oxygen&#39;, &#39;Ubuntu&#39;, sans-serif;
+            line-height: 1.6;
+            color: #e8e8e8;
+            background: linear-gradient(135deg, #0f0f1e 0%, #1a1a2e 100%);
+            min-height: 100vh;
+        }
+
+        header {
+            background: rgba(22, 22, 38, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(99, 102, 241, 0.2);
+            padding: 1rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        nav {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 2rem;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #e8e8e8;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+        }
+
+        .logo-icon {
+            color: #6366f1;
+        }
+
+        .logo span {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2.5rem;
+            list-style: none;
+            align-items: center;
+        }
+
+        .nav-links a {
+            color: #e8e8e8;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .nav-links a:hover {
+            color: #6366f1;
+        }
+
+        .hero {
+            background: linear-gradient(135deg, #1e1e3f 0%, #2a2a4a 100%);
+            padding: 5rem 2rem;
+            text-align: center;
+            border-bottom: 1px solid rgba(99, 102, 241, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: &#39;&#39;;
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at 50% 50%, rgba(99, 102, 241, 0.1) 0%, transparent 50%);
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 1;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .hero h1 {
+            font-size: 3rem;
+            margin-bottom: 1.2rem;
+            color: #e8e8e8;
+            font-weight: 700;
+            line-height: 1.2;
+        }
+
+        .hero .tagline {
+            font-size: 1.3rem;
+            margin-bottom: 0.8rem;
+            color: #a5a5c8;
+            font-weight: 500;
+        }
+
+        .hero .subtitle {
+            font-size: 1.1rem;
+            margin-bottom: 2.5rem;
+            color: #8585a8;
+        }
+
+        .cta-button {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            color: white;
+            padding: 1rem 2.5rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.6rem;
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+        }
+
+        .cta-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 4rem 2rem;
+        }
+
+        .section-title {
+            font-size: 2.2rem;
+            margin-bottom: 1rem;
+            color: #e8e8e8;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+
+        .section-subtitle {
+            color: #a5a5c8;
+            margin-bottom: 3rem;
+            font-size: 1.1rem;
+        }
+
+        .subjects-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .subject-card {
+            background: linear-gradient(135deg, rgba(30, 30, 63, 0.6) 0%, rgba(42, 42, 74, 0.6) 100%);
+            padding: 2.5rem;
+            border-radius: 12px;
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            transition: all 0.3s;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .subject-card::before {
+            content: &#39;&#39;;
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, transparent 100%);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .subject-card:hover {
+            border-color: #6366f1;
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(99, 102, 241, 0.2);
+        }
+
+        .subject-card:hover::before {
+            opacity: 1;
+        }
+
+        .subject-icon {
+            width: 60px;
+            height: 60px;
+            margin-bottom: 1.2rem;
+            color: #6366f1;
+            background: rgba(99, 102, 241, 0.1);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .subject-card h3 {
+            font-size: 1.4rem;
+            margin-bottom: 0.8rem;
+            color: #e8e8e8;
+            font-weight: 600;
+            position: relative;
+        }
+
+        .subject-card p {
+            color: #a5a5c8;
+            font-size: 1rem;
+            line-height: 1.6;
+            position: relative;
+        }
+
+        .features {
+            background: linear-gradient(135deg, #1e1e3f 0%, #2a2a4a 100%);
+            padding: 4rem 2rem;
+            border-top: 1px solid rgba(99, 102, 241, 0.2);
+            border-bottom: 1px solid rgba(99, 102, 241, 0.2);
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 2.5rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .feature-item {
+            padding: 2rem;
+            text-align: left;
+            background: rgba(30, 30, 63, 0.4);
+            border-radius: 12px;
+            border: 1px solid rgba(99, 102, 241, 0.15);
+            transition: all 0.3s;
+        }
+
+        .feature-item:hover {
+            transform: translateY(-3px);
+            border-color: rgba(99, 102, 241, 0.4);
+        }
+
+        .feature-icon {
+            width: 50px;
+            height: 50px;
+            margin-bottom: 1.2rem;
+            color: #8b5cf6;
+            background: rgba(139, 92, 246, 0.1);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .feature-item h3 {
+            font-size: 1.2rem;
+            margin-bottom: 0.8rem;
+            color: #e8e8e8;
+            font-weight: 600;
+        }
+
+        .feature-item p {
+            color: #a5a5c8;
+            font-size: 1rem;
+            line-height: 1.6;
+        }
+
+        .stats {
+            background: linear-gradient(135deg, #0f0f1e 0%, #1a1a2e 100%);
+            padding: 4rem 2rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 2rem;
+            max-width: 1200px;
+            margin: 2rem auto 0;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 2rem;
+            background: linear-gradient(135deg, rgba(30, 30, 63, 0.6) 0%, rgba(42, 42, 74, 0.6) 100%);
+            border-radius: 12px;
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            transition: all 0.3s;
+        }
+
+        .stat-item:hover {
+            transform: translateY(-5px);
+            border-color: #6366f1;
+            box-shadow: 0 10px 25px rgba(99, 102, 241, 0.2);
+        }
+
+        .stat-item .stat-icon {
+            width: 50px;
+            height: 50px;
+            margin: 0 auto 1rem;
+            color: #6366f1;
+            background: rgba(99, 102, 241, 0.1);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .stat-item h3 {
+            font-size: 2.8rem;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 700;
+        }
+
+        .stat-item p {
+            color: #a5a5c8;
+            font-size: 1rem;
+            font-weight: 500;
+        }
+
+        footer {
+            background: rgba(22, 22, 38, 0.95);
+            color: #a5a5c8;
+            text-align: center;
+            padding: 2.5rem;
+            border-top: 1px solid rgba(99, 102, 241, 0.2);
+        }
+
+        .quiz-section {
+            background: linear-gradient(135deg, rgba(30, 30, 63, 0.6) 0%, rgba(42, 42, 74, 0.6) 100%);
+            padding: 2.5rem;
+            border-radius: 12px;
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            margin-top: 2rem;
+            display: none;
+        }
+
+        .quiz-section.active {
+            display: block;
+        }
+
+        .quiz-section h3 {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            margin-bottom: 1.5rem;
+            font-size: 1.5rem;
+        }
+
+        .quiz-question {
+            margin-bottom: 2rem;
+        }
+
+        .quiz-question p {
+            margin-bottom: 1.2rem;
+            font-size: 1.2rem;
+            font-weight: 500;
+        }
+
+        .quiz-options {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .quiz-option {
+            padding: 1.2rem;
+            background: rgba(30, 30, 63, 0.6);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+
+        .quiz-option:hover {
+            border-color: #6366f1;
+            background: rgba(99, 102, 241, 0.1);
+            transform: translateX(5px);
+        }
+
+        .quiz-option.correct {
+            border-color: #10b981;
+            background: rgba(16, 185, 129, 0.1);
+        }
+
+        .quiz-option.incorrect {
+            border-color: #ef4444;
+            background: rgba(239, 68, 68, 0.1);
+        }
+
+        @media (max-width: 768px) {
+            .nav-links {
+                gap: 1.5rem;
+            }
+            
+            .hero h1 {
+                font-size: 2rem;
+            }
+            
+            .subjects-grid,
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .lessons-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .lesson-card {
+            background: linear-gradient(135deg, rgba(30, 30, 63, 0.6) 0%, rgba(42, 42, 74, 0.6) 100%);
+            border-radius: 12px;
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            overflow: hidden;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .lesson-card:hover {
+            transform: translateY(-5px);
+            border-color: #6366f1;
+            box-shadow: 0 10px 25px rgba(99, 102, 241, 0.2);
+        }
+
+        .lesson-header {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            padding: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .lesson-icon {
+            width: 50px;
+            height: 50px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+
+        .lesson-title {
+            flex: 1;
+        }
+
+        .lesson-title h3 {
+            font-size: 1.3rem;
+            color: white;
+            margin-bottom: 0.3rem;
+        }
+
+        .lesson-title span {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .lesson-body {
+            padding: 1.5rem;
+        }
+
+        .lesson-description {
+            color: #a5a5c8;
+            margin-bottom: 1.2rem;
+            line-height: 1.6;
+        }
+
+        .lesson-meta {
+            display: flex;
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #8585a8;
+            font-size: 0.9rem;
+        }
+
+        .meta-item i {
+            color: #6366f1;
+        }
+
+        .lesson-topics {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-bottom: 1.2rem;
+        }
+
+        .topic-tag {
+            background: rgba(99, 102, 241, 0.15);
+            color: #8b5cf6;
+            padding: 0.4rem 0.8rem;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            border: 1px solid rgba(99, 102, 241, 0.3);
+        }
+
+        .lesson-button {
+            width: 100%;
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            color: white;
+            padding: 0.9rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.6rem;
+        }
+
+        .lesson-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
+        }
+
+        .progress-section {
+            background: linear-gradient(135deg, rgba(30, 30, 63, 0.6) 0%, rgba(42, 42, 74, 0.6) 100%);
+            border-radius: 12px;
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            padding: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .progress-title {
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            color: #e8e8e8;
+        }
+
+        .progress-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .stat-box {
+            background: rgba(30, 30, 63, 0.6);
+            padding: 1.5rem;
+            border-radius: 10px;
+            border: 1px solid rgba(99, 102, 241, 0.15);
+            text-align: center;
+        }
+
+        .stat-box h4 {
+            font-size: 2rem;
+            color: #6366f1;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-box p {
+            color: #a5a5c8;
+        }
+    </style>
+  </head>
+  <body>
+    <header>
+      <nav>
+        <div class="logo" onclick="window.location.href=&#39;index.html&#39;" style="cursor: pointer;">
+          <i data-feather="award" class="logo-icon"></i>
+          <span>          Educat
+</span>
+          ional
+        </div>
+        <ul class="nav-links">
+          <li>
+            <a href="#home">            <i data-feather="home"></i>
+            Home
+</a>
+          </li>
+          <li>
+            <a href="#subjects">            <i data-feather="book-open"></i>
+            Curriculum
+</a>
+          </li>
+          <li>
+            <a href="#classroom">            <i data-feather="layers"></i>
+            Lessons
+</a>
+          </li>
+          <li>
+            <a href="subjects.html">            <i data-feather="book"></i>
+            Subjects
+</a>
+          </li>
+          <li>
+            <a href="resources.html">            <i data-feather="folder"></i>
+            Resources
+</a>
+          </li>
+          <li>
+        

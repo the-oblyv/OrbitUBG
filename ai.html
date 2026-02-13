@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>AI | Orbit</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<link rel="stylesheet" href="style.css">
+<link rel="icon" href="/res/orbit.png">
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+<style>
+.aiContainer{
+  max-width:900px;
+  margin:auto;
+  padding:40px 20px 120px;
+}
+
+#aiChat{
+  display:flex;
+  flex-direction:column;
+  gap:16px;
+}
+
+.aiMsg{
+  padding:14px 18px;
+  border-radius:16px;
+  max-width:85%;
+  line-height:1.5;
+  font-size:15px;
+}
+
+.aiMsg.user{
+  align-self:flex-end;
+  background:linear-gradient(135deg,#5e5cff,#7a6bff);
+  color:white;
+}
+
+.aiMsg.model{
+  align-self:flex-start;
+  background:#1f2338;
+  color:#ddd;
+}
+
+.aiInputBar{
+  position:fixed;
+  bottom:0;
+  left:0;
+  width:100%;
+  padding:20px;
+  background:linear-gradient(to top,#0f1220 60%,transparent);
+}
+
+#aiInput{
+  width:100%;
+  max-width:900px;
+  margin:auto;
+  display:block;
+  padding:14px 18px;
+  border-radius:18px;
+  border:none;
+  outline:none;
+  background:#1f2338;
+  color:white;
+  font-size:15px;
+}
+
+pre{
+  position:relative;
+  border-radius:14px;
+  overflow:auto;
+}
+
+.aicopy-btn{
+  position:absolute;
+  top:8px;
+  right:8px;
+  background:#5e5cff;
+  border:none;
+  color:white;
+  font-size:12px;
+  padding:4px 8px;
+  border-radius:6px;
+  cursor:pointer;
+}
+</style>
+</head>
+<body>
+
+<header class="topbar" id="navMount"></header>
+<nav class="menu" id="menu"></nav>
+
+<main class="aiContainer">
+  <div id="aiChat"></div>
+</main>
+
+<div class="aiInputBar">
+  <input id="aiInput" placeholder="Ask Orbit AI anything and press Enter..." autocomplete="off">
+</div>
+
+<script src="frame.js"></script>
+<script src="ai.js"></script>
+<script src="script.js"></script>
+
+</body>
+</html>

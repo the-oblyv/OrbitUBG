@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Music | Orbit</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      margin: 0;
+      background: #0f0f14;
+      color: #e5e5e5;
+      font-family: system-ui, sans-serif;
+    }
+    iframe {
+      border: none;
+      width: 100vw;
+      height: 100vh;
+    }
+  </style>
+</head>
+<body>
+  <iframe id="musicFrame"></iframe>
+
+  <script>
+    const base64 = "aHR0cHM6Ly9jcS5qc3gucG0vYjJiM2U4ZDc2Y2YxNGNkNThiNDFjOWE5ZTRkM2E4ODYvX3Joc0RMMk9NOi8vUk5Tbi5zMFoudkIvUzJOMHcvckFTfkkvZEpLeHov";
+    const decodedURL = atob(base64);
+    document.getElementById("musicFrame").src = decodedURL;
+  </script>
+</body>
+</html>

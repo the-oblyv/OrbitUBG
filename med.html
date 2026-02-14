@@ -3,92 +3,66 @@
 <head>
   <meta charset="UTF-8">
   <title>Media | Orbit</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <link rel="stylesheet" href="/style.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
   <style>
     .media-page {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-direction: column;
-  min-height: 100vh;
-  gap: 6vh;
-  padding: 4vh 4vw;
-}
-
-.media-btn {
-  display: flex;
-  align-items: center;
-  gap: 4vw;
-  padding: 4vh 8vw;
-  font-size: clamp(2rem, 6vw, 3.5rem);
-  font-weight: 700;
-  border: none;
-  border-radius: 2rem;
-  cursor: pointer;
-  background: var(--fourth-bg);
-  color: white;
-  transition: 0.25s ease;
-  width: 90%;
-  max-width: 800px;
-  justify-content: center;
-}
-
-.media-btn:hover {
-  transform: scale(1.08);
-  background: var(--third-bg);
-}
-
-.media-btn i {
-  font-size: clamp(2rem, 6vw, 3.5rem);
-}
-
-.orbit-logo {
-  width: clamp(180px, 40vw, 260px);
-  height: auto;
-  margin-right: 3vw;
-}
-
-.media-page h1 {
-  font-size: clamp(3rem, 8vw, 5rem);
-  display: flex;
-  align-items: center;
-  gap: 3vw;
-  text-align: center;
-}
-
-    @media (max-width: 768px) {
-
-  .media-page {
-    gap: 3rem;
-    padding: 2rem;
-  }
-
-  .media-page h1 {
-    font-size: 3.5rem;
-  }
-
-  .orbit-logo {
-    width: 220px;
-    height: auto;
-  }
-
-  .media-btn {
-    font-size: 2.5rem;
-    padding: 2rem 3rem;
-    width: 90%;
-    max-width: 600px;
-    justify-content: center;
-  }
-
-  .media-btn i {
-    font-size: 2.5rem;
-  }
-
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      min-height: 100vh;
+      gap: 6vh;
+      padding: 4vh 4vw;
+      text-align: center;
     }
-    
+
+    .media-page h1 {
+      font-size: clamp(2.5rem, 8vw, 5rem);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+    }
+
+    .orbit-logo {
+      width: clamp(140px, 40vw, 220px);
+      height: auto;
+    }
+
+    .media-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 90%;
+      max-width: 700px;
+      gap: 1.5rem;
+      padding: 3vh 4vw;
+      font-size: clamp(1.8rem, 5vw, 3rem);
+      font-weight: 700;
+      border: none;
+      border-radius: 1.75rem;
+      cursor: pointer;
+      background: var(--fourth-bg);
+      color: white;
+      transition: 0.25s ease;
+    }
+
+    .media-btn:hover {
+      transform: scale(1.05);
+      background: var(--third-bg);
+    }
+
+    .media-btn i {
+      font-size: clamp(1.8rem, 5vw, 3rem);
+    }
   </style>
 </head>
+
 <body>
   <header class="topbar" id="navMount"></header>
   <nav class="menu" id="menu"></nav>
@@ -108,7 +82,7 @@
     </button>
   </div>
 
-<script src="frame.js"></script>
-<script src="script.js"></script>
+  <script src="frame.js"></script>
+  <script src="script.js"></script>
 </body>
 </html>

@@ -24,6 +24,14 @@
       z-index: 1000;
     }
 
+    header.topbar > *,
+    nav.menu > * {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 100%;
+    }
+
     #musicFrame {
       width: 100%;
       height: calc(100vh - 100px);
@@ -34,8 +42,14 @@
   </style>
 </head>
 <body>
-  <header class="topbar" id="navMount"></header>
-  <nav class="menu" id="menu"></nav>
+  <header class="topbar" id="navMount">
+    <div>Orbit Music</div>
+  </header>
+
+  <nav class="menu" id="menu">
+    <div>Menu Item 1 | Menu Item 2</div>
+  </nav>
+
   <iframe id="musicFrame"></iframe>
 
   <script>

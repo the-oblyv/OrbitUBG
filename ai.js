@@ -6,7 +6,17 @@ const sendBtn = document.getElementById("sendBtn");
 const attachBtn = document.getElementById("attachBtn");
 const fileInput = document.getElementById("aiFile");
 
-let contents = [];
+let contents = [
+    {
+        role: "system",
+        parts: [
+            {
+                text: "You are Orbit AI, an AI assistant created by gmacbride for https://orbit.foo.ng/. Always identify yourself as Orbit AI and provide helpful responses to users."
+            }
+        ]
+    }
+];
+
 let pendingAttachments = [];
 
 function createMessage(role) {
@@ -94,7 +104,7 @@ async function sendMessage() {
     pendingAttachments = [];
 
     const loadingMsg = createMessage("model");
-    loadingMsg.innerHTML = renderMarkdown("_Loading..._");
+    loadingMsg.innerHTML = renderMarkdown("_Orbit AI is thinking..._");
 
     try {
         const res = await fetch(endpoint, {

@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Media | Orbit</title>
+  <link rel="stylesheet" href="/styles/defaults.css">
+  <style>
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      min-height: 100vh;
+      gap: 1rem;
+    }
+    .media-btn {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      padding: 1rem 2rem;
+      font-size: 1.2rem;
+      font-weight: 500;
+      border: none;
+      border-radius: 0.75rem;
+      cursor: pointer;
+      background: var(--fourth-bg);
+      color: white;
+      transition: 0.25s ease;
+    }
+    .media-btn:hover {
+      transform: scale(1.03);
+      background: var(--third-bg);
+    }
+    .media-btn i {
+      font-size: 1.2rem;
+    }
+    
+    img {
+        width: 30px;
+        height: 16px;
+        margin-right: 5px;
+        object-fit: cover;
+        transform: translateY(01px);
+    }
+    
+    h1 {
+        font-size: 20px;
+    }
+  </style>
+</head>
+<body>
+    
+    <h1><img src="/_a/logo.new.png">VAPOR Media</h1>
+
+  <button class="media-btn" onclick="location.href='/page/mov.html'">
+    <i class="fa-regular fa-clapperboard"></i> Movies
+  </button>
+
+  <button class="media-btn" onclick="location.href='/page/music.html'">
+    <i class="fa-regular fa-music"></i> Music
+  </button>
+
+</body>
+</html>

@@ -33,6 +33,7 @@
   line-height:1.5;
   font-size:15px;
   word-wrap:break-word;
+  position:relative;
 }
 
 .aiMsg.user{
@@ -113,9 +114,29 @@ pre{
   border:none;
   color:white;
   font-size:12px;
-  padding:4px 8px;
+  padding:6px 10px;
   border-radius:6px;
   cursor:pointer;
+  display:flex;
+  align-items:center;
+  gap:6px;
+}
+
+.aicopy-btn:hover{
+  opacity:0.9;
+}
+
+.aiMessageCopy{
+  background:none;
+  border:none;
+  color:#888;
+  cursor:pointer;
+  font-size:14px;
+  padding:4px;
+}
+
+.aiMessageCopy:hover{
+  color:#fff;
 }
 </style>
 </head>
@@ -133,8 +154,11 @@ pre{
     <button class="aiBtn aiAttach" id="attachBtn">
       <i class="fa-solid fa-paperclip"></i>
     </button>
+
     <input type="file" id="aiFile" multiple>
+
     <input id="aiInput" placeholder="Ask Orbit AI anything..." autocomplete="off">
+
     <button class="aiBtn" id="sendBtn">
       <i class="fa-solid fa-paper-plane"></i>
     </button>
@@ -144,5 +168,6 @@ pre{
 <script src="frame.js"></script>
 <script src="ai.js"></script>
 <script src="script.js"></script>
+
 </body>
 </html>

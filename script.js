@@ -93,14 +93,6 @@ document.addEventListener("DOMContentLoaded", () => {
         const renderGames = list => {
           gamesGrid.innerHTML = "";
 
-          const requestCard = document.createElement("div");
-          requestCard.className = "card";
-          requestCard.onclick = () => window.open("https://forms.gle/WdSBv4jkFo3nwvFz8", "_blank");
-          requestCard.innerHTML = `
-            <img class="thumb" src="/res/googleform.webp">
-            <div class="card-title">!! Request a Game</div>
-          `;
-          gamesGrid.appendChild(requestCard);
           const dmcaCard = document.createElement("div");
           dmcaCard.className = "card";
           dmcaCard.onclick = () => window.open("https://forms.gle/WdSBv4jkFo3nwvFz8", "_blank");
@@ -109,7 +101,16 @@ document.addEventListener("DOMContentLoaded", () => {
             <div class="card-title">!! DMCA</div>
           `;
           gamesGrid.appendChild(dmcaCard);
-
+          
+          const requestCard = document.createElement("div");
+          requestCard.className = "card";
+          requestCard.onclick = () => window.open("https://forms.gle/WdSBv4jkFo3nwvFz8", "_blank");
+          requestCard.innerHTML = `
+            <img class="thumb" src="/res/googleform.webp">
+            <div class="card-title">!! Request a Game</div>
+          `;
+          gamesGrid.appendChild(requestCard);
+          
           list.forEach(game => {
             const c = document.createElement("div");
             c.className = "card";

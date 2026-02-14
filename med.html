@@ -6,7 +6,7 @@
   <link rel="stylesheet" href="/style.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <style>
-    body {
+    .media-page {
       display: flex;
       justify-content: center;
       align-items: center;
@@ -47,7 +47,7 @@
       transform: translateY(7px);
     }
 
-    h1 {
+    .media-page h1 {
       font-size: 5rem;
       display: flex;
       align-items: center;
@@ -59,19 +59,21 @@
   <header class="topbar" id="navMount"></header>
   <nav class="menu" id="menu"></nav>
 
-  <h1>
-    <img class="orbit-logo" src="/res/orbit-no-bg.png">
-    Orbit Media
-  </h1>
+  <div class="media-page">
+    <h1>
+      <img class="orbit-logo" src="/res/orbit-no-bg.png">
+      Orbit Media
+    </h1>
 
-  <button class="media-btn" onclick="location.href='/mov.html'">
-    <i class="fa-solid fa-clapperboard"></i> Movies
-  </button>
+    <button class="media-btn" onclick="location.href='/mov.html'">
+      <i class="fa-solid fa-clapperboard"></i> Movies
+    </button>
 
-  <button class="media-btn" onclick="location.href='/music.html'">
-    <i class="fa-solid fa-music"></i> Music
-  </button>
-  
+    <button class="media-btn" onclick="location.href='/music.html'">
+      <i class="fa-solid fa-music"></i> Music
+    </button>
+  </div>
+
 <script src="frame.js"></script>
 <script src="script.js"></script>
 </body>

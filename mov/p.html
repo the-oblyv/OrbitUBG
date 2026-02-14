@@ -35,7 +35,15 @@
   <iframe id="player-iframe" src=""></iframe>
 
   <script>
-    window.open = () => null;
+if (window.top !== window.self) {
+  window.open = () => null;
+
+  document.addEventListener("click", e => {
+    if (e.target.tagName === "A") {
+      e.preventDefault();
+    }
+  });
+}
     const playerUrls = {
       default:
         "https://vidora.su/movie/TMDB_ID?colour=a4b8db&autoplay=true&autonextepisode=true&backbutton=https%3A%2F%2Fvaporon.top&pausescreen=true&logo=https%3A%2F%2Fvaporon.top%2F_a%2Flogo.new.png",

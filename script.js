@@ -206,7 +206,7 @@ if (id && gameFrame && appFrame) {
             return Promise.reject("found");
           }
 
-          const movUrl = `/mov/mov-p.html#${id}`;
+          const movUrl = `/mov/p.html#${id}`;
 
           appFrame.src = movUrl;
           appFrame.style.display = "block";

@@ -6,18 +6,9 @@ const sendBtn = document.getElementById("sendBtn");
 const attachBtn = document.getElementById("attachBtn");
 const fileInput = document.getElementById("aiFile");
 
-let contents = [
-    {
-        role: "system",
-        parts: [
-            {
-                text: "You are Orbit AI, an AI assistant created by gmacbride for https://orbit.foo.ng/. Always identify yourself as Orbit AI and provide helpful responses to users."
-            }
-        ]
-    }
-];
-
+let contents = [];
 let pendingAttachments = [];
+let identityInjected = false;
 
 function createMessage(role) {
     const div = document.createElement("div");
@@ -80,12 +71,18 @@ function addAttachmentPreview(file, dataUrl) {
 
 async function sendMessage() {
     const text = input.value.trim();
-
     if (!text && pendingAttachments.length === 0) return;
 
     if (text) addUserTextMessage(text);
 
     const parts = [];
+
+    if (!identityInjected) {
+        parts.push({
+            text: "You are Orbit AI, an AI assistant created by gmacbride for https://orbit.foo.ng/. Always identify yourself as Orbit AI in responses.\n\nUser message:"
+        });
+        identityInjected = true;
+    }
 
     if (text) parts.push({ text });
 

@@ -70,6 +70,7 @@ if (settings.panic) {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
+  let isMov = false;
   const menuBtn = document.getElementById("menuBtn");
   const menu = document.getElementById("menu");
   if (menuBtn) menuBtn.onclick = () => menu.classList.toggle("open");
@@ -189,32 +190,50 @@ if (id && gameFrame && appFrame) {
     .then(games => {
       const game = games.find(x => x.id === id);
       if (game) {
-        gameFrame.src = game.url;
-        gameFrame.style.display = "block";
-        appFrame.style.display = "none";
-        return Promise.reject("found");
-      }
+  isMov = false;
+
+  gameFrame.removeAttribute("sandbox");
+  appFrame.removeAttribute("sandbox");
+
+  gameFrame.src = game.url;
+  gameFrame.style.display = "block";
+  appFrame.style.display = "none";
+  return Promise.reject("found");
+}
 
       return fetch("/apps.json")
         .then(r => r.json())
         .then(apps => {
           const app = apps.find(x => x.id === id);
           if (app) {
-            appFrame.src = app.url;
-            appFrame.style.display = "block";
-            gameFrame.style.display = "none";
-            return Promise.reject("found");
-          }
+  isMov = false;
 
+  appFrame.removeAttribute("sandbox");
+  gameFrame.removeAttribute("sandbox");
+
+  appFrame.src = app.url;
+  appFrame.style.display = "block";
+  gameFrame.style.display = "none";
+  return Promise.reject("found");
+}
+          
           const movUrl = `/mov/p.html#${id}`;
 
-          appFrame.src = movUrl;
-          appFrame.style.display = "block";
-          gameFrame.style.display = "none";
+isMov = true;
 
-          appFrame.onerror = () => {
-            location.href = "/404";
-          };
+appFrame.src = movUrl;
+appFrame.style.display = "block";
+gameFrame.style.display = "none";
+
+appFrame.setAttribute(
+  "sandbox",
+  "allow-scripts allow-same-origin allow-presentation"
+);
+
+appFrame.onerror = () => {
+  location.href = "/404";
+};
+
         });
     })
     .catch(err => {
@@ -228,19 +247,27 @@ if (id && gameFrame && appFrame) {
   if (fsBtn && gameFrame) fsBtn.onclick = () => (gameFrame.style.display !== "none" ? gameFrame.requestFullscreen?.() : appFrame.requestFullscreen?.());
 
   const blankBtn = document.getElementById("blankBtn");
-  if (blankBtn) {
-    blankBtn.onclick = () => {
-      const w = window.open("about:blank", "_blank");
-      if (!w) return;
-      const i = w.document.createElement("iframe");
-      i.src = gameFrame.style.display !== "none" ? gameFrame.src : appFrame.src;
-      i.style.border = "none";
-      i.style.width = "100%";
-      i.style.height = "100%";
-      w.document.body.style.margin = "0";
-      w.document.body.appendChild(i);
-    };
-  }
+if (blankBtn) {
+  blankBtn.onclick = () => {
+
+    if (isMov) {
+      alert("Opening movie embeds in about:blank is disabled for security reasons.");
+      return;
+    }
+
+    const w = window.open("about:blank", "_blank");
+    if (!w) return;
+
+    const i = w.document.createElement("iframe");
+    i.src = gameFrame.style.display !== "none" ? gameFrame.src : appFrame.src;
+    i.style.border = "none";
+    i.style.width = "100%";
+    i.style.height = "100%";
+
+    w.document.body.style.margin = "0";
+    w.document.body.appendChild(i);
+  };
+}
 
   const cloakToggle = document.getElementById("cloakToggle");
   const cloakTitleInput = document.getElementById("cloakTitleInput");

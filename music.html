@@ -3,34 +3,48 @@
 <head>
   <meta charset="UTF-8">
   <title>Music | Orbit</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <link rel="stylesheet" href="style.css">
   <link rel="icon" href="/res/orbit.png">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <style>
     body {
       margin: 0;
       background: #0f0f14;
       color: #e5e5e5;
       font-family: system-ui, sans-serif;
-    }
-    iframe {
-      border: none;
-      width: 100vw;
+      display: flex;
+      flex-direction: column;
       height: 100vh;
+    }
+
+    #musicFrame {
+      flex: 1;
+      width: 100%;
+      border: none;
     }
   </style>
 </head>
+
 <body>
   <header class="topbar" id="navMount"></header>
   <nav class="menu" id="menu"></nav>
-  <iframe id="musicFrame"></iframe>
+
+  <iframe id="musicFrame" referrerpolicy="no-referrer"></iframe>
 
   <script>
     const base64 = "aHR0cHM6Ly9jcS5qc3gucG0vYjJiM2U4ZDc2Y2YxNGNkNThiNDFjOWE5ZTRkM2E4ODYvX3Joc0RMMk9NOi8vUk5Tbi5zMFoudkIvUzJOMHcvckFTfkkvZEpLeHov";
-    const decodedURL = atob(base64);
-    document.getElementById("musicFrame").src = decodedURL;
+    
+    try {
+      const decodedURL = atob(base64);
+      document.getElementById("musicFrame").src = decodedURL;
+    } catch (e) {
+      console.error("Invalid base64 URL");
+    }
   </script>
+
   <script src="frame.js"></script>
   <script src="script.js"></script>
 </body>

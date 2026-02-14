@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Orbit | Proxy</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="/res/orbit.png">
+<link rel="stylesheet" href="/style.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+  body, html {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    background: var(--main-bg);
+  }
+
+  #proxyContainer {
+    padding-top: 80px;
+    width: 100%;
+    height: calc(100vh - 80px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  #proxyFrame {
+    width: 100%;
+    height: 100%;
+    border: none;
+  }
+</style>
+</head>
+
+<body>
+<header class="topbar" id="navMount"></header>
+<nav class="menu" id="menu"></nav>
+
+<div id="proxyContainer">
+  <iframe id="proxyFrame" allowfullscreen></iframe>
+</div>
+
+<script src="frame.js"></script>
+<script src="script.js"></script>
+<script>
+  const base64Url = "aHR0cHM6Ly9vcmJ0ZWR1LmdtYWNicmlkZS53b3JrZXJzLmRldi8=";
+  const decodedUrl = atob(base64Url);
+  document.getElementById("proxyFrame").src = decodedUrl;
+</script>
+</body>
+</html>

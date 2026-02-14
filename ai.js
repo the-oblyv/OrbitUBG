@@ -10,11 +10,18 @@ let contents = [];
 let pendingAttachments = [];
 let identityInjected = false;
 
-function createMessage(role) {
+function createWrapper(role) {
+  const wrapper = document.createElement("div");
+  wrapper.className = `aiWrapper ${role}`;
+  chat.appendChild(wrapper);
+  chat.scrollTop = chat.scrollHeight;
+  return wrapper;
+}
+
+function createMessage(role, wrapper) {
   const div = document.createElement("div");
   div.className = `aiMsg ${role}`;
-  chat.appendChild(div);
-  chat.scrollTop = chat.scrollHeight;
+  wrapper.appendChild(div);
   return div;
 }
 
@@ -45,39 +52,33 @@ function addCodeCopyButtons(container) {
   });
 }
 
-function addMessageCopyButton(messageDiv, rawText) {
-  const wrapper = document.createElement("div");
-  wrapper.style.marginTop = "6px";
-  wrapper.style.display = "flex";
-  wrapper.style.justifyContent = "flex-end";
-
+function addMessageCopyButton(wrapper, rawText) {
   const btn = document.createElement("button");
   btn.className = "aiMessageCopy";
-  btn.innerHTML = `<i class="fa-regular fa-copy"></i>`;
+  btn.innerHTML = `<i class="fa-regular fa-copy"></i> Copy`;
 
   btn.onclick = () => {
     navigator.clipboard.writeText(rawText).then(() => {
-      btn.innerHTML = `<i class="fa-solid fa-check"></i>`;
+      btn.innerHTML = `<i class="fa-solid fa-check"></i> Copied`;
       setTimeout(() => {
-        btn.innerHTML = `<i class="fa-regular fa-copy"></i>`;
+        btn.innerHTML = `<i class="fa-regular fa-copy"></i> Copy`;
       }, 1200);
     });
   };
 
   wrapper.appendChild(btn);
-  messageDiv.appendChild(wrapper);
 }
 
-function enhance(container, rawText, isModel = false) {
+function enhance(container) {
   Prism.highlightAllUnder(container);
   addCodeCopyButtons(container);
-  if (isModel) addMessageCopyButton(container, rawText);
 }
 
 function addUserTextMessage(text) {
-  const msg = createMessage("user");
+  const wrapper = createWrapper("user");
+  const msg = createMessage("user", wrapper);
   msg.innerHTML = renderMarkdown(text);
-  enhance(msg, text, false);
+  enhance(msg);
 }
 
 async function sendMessage() {
@@ -111,7 +112,8 @@ async function sendMessage() {
   input.value = "";
   pendingAttachments = [];
 
-  const loadingMsg = createMessage("model");
+  const wrapper = createWrapper("model");
+  const loadingMsg = createMessage("model", wrapper);
   loadingMsg.innerHTML = renderMarkdown("_Thinking..._");
 
   try {
@@ -137,13 +139,29 @@ async function sendMessage() {
     });
 
     loadingMsg.innerHTML = renderMarkdown(responseText);
-    enhance(loadingMsg, responseText, true);
+    enhance(loadingMsg);
+    addMessageCopyButton(wrapper, responseText);
 
   } catch (err) {
     loadingMsg.innerHTML = "Request Failed: " + err.message;
   }
 
   chat.scrollTop = chat.scrollHeight;
+}
+
+function sendInitialMessage() {
+  const welcomeText = "Hello! I'm Orbit AI. How can I help you today?";
+
+  const wrapper = createWrapper("model");
+  const msg = createMessage("model", wrapper);
+  msg.innerHTML = renderMarkdown(welcomeText);
+  enhance(msg);
+  addMessageCopyButton(wrapper, welcomeText);
+
+  contents.push({
+    role: "model",
+    parts: [{ text: welcomeText }]
+  });
 }
 
 attachBtn.addEventListener("click", () => fileInput.click());
@@ -153,16 +171,13 @@ fileInput.addEventListener("change", () => {
 
   files.forEach(file => {
     const reader = new FileReader();
-
     reader.onload = () => {
       const base64 = reader.result.split(",")[1];
-
       pendingAttachments.push({
         mimeType: file.type || "application/octet-stream",
         base64
       });
     };
-
     reader.readAsDataURL(file);
   });
 
@@ -177,18 +192,5 @@ input.addEventListener("keydown", e => {
     sendMessage();
   }
 });
-
-function sendInitialMessage() {
-  const welcomeText = "Hello! I'm Orbit AI. How can I help you today?";
-
-  const msg = createMessage("model");
-  msg.innerHTML = renderMarkdown(welcomeText);
-  enhance(msg, welcomeText, true);
-
-  contents.push({
-    role: "model",
-    parts: [{ text: welcomeText }]
-  });
-}
 
 sendInitialMessage();

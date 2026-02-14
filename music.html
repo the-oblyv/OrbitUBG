@@ -7,6 +7,7 @@
   <link rel="stylesheet" href="style.css">
   <link rel="icon" href="/res/orbit.png">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <style>
     body {
       margin: 0;
@@ -22,23 +23,31 @@
       left: 0;
       right: 0;
       z-index: 1000;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: #0f0f14;
     }
 
     header.topbar { height: 60px; }
-    nav.menu { height: 40px; }
+    nav.menu { height: 40px; margin-top: 60px; }
 
     #musicFrame {
       width: 100%;
       height: calc(100vh - 100px);
       border: none;
-      margin-top: 100px;
       display: block;
     }
   </style>
 </head>
 <body>
-  <header class="topbar" id="navMount"></header>
-  <nav class="menu" id="menu"></nav>
+  <header class="topbar" id="navMount">
+    <h1 style="margin:0;">Orbit Music</h1>
+  </header>
+
+  <nav class="menu" id="menu">
+    <span>Menu Item 1 | Menu Item 2</span>
+  </nav>
 
   <iframe id="musicFrame"></iframe>
 

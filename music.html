@@ -15,41 +15,16 @@
       font-family: system-ui, sans-serif;
     }
 
-    header.topbar,
-    nav.menu {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      z-index: 1000;
-    }
-
-    header.topbar > *,
-    nav.menu > * {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      width: 100%;
-    }
-
     #musicFrame {
       width: 100%;
-      height: calc(100vh - 100px);
+      height: 100vh;
       border: none;
-      margin-top: 100px;
-      display: block;
     }
   </style>
 </head>
 <body>
-  <header class="topbar" id="navMount">
-    <div>Orbit Music</div>
-  </header>
-
-  <nav class="menu" id="menu">
-    <div>Menu Item 1 | Menu Item 2</div>
-  </nav>
-
+  <header class="topbar" id="navMount"></header>
+  <nav class="menu" id="menu"></nav>
   <iframe id="musicFrame"></iframe>
 
   <script>

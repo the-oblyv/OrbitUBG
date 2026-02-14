@@ -22,20 +22,22 @@ function renderMarkdown(text) {
   return marked.parse(text || "");
 }
 
-function addCopyButtons(container) {
+function addCodeCopyButtons(container) {
   container.querySelectorAll("pre").forEach(pre => {
     if (pre.querySelector(".aicopy-btn")) return;
 
     const btn = document.createElement("button");
     btn.className = "aicopy-btn";
-    btn.textContent = "Copy";
+    btn.innerHTML = `<i class="fa-solid fa-copy"></i> Copy code`;
 
     const code = pre.querySelector("code");
 
     btn.onclick = () => {
       navigator.clipboard.writeText(code.innerText).then(() => {
-        btn.textContent = "Copied!";
-        setTimeout(() => btn.textContent = "Copy", 1200);
+        btn.innerHTML = `<i class="fa-solid fa-check"></i> Copied`;
+        setTimeout(() => {
+          btn.innerHTML = `<i class="fa-solid fa-copy"></i> Copy code`;
+        }, 1200);
       });
     };
 
@@ -43,38 +45,39 @@ function addCopyButtons(container) {
   });
 }
 
-function enhance(container) {
+function addMessageCopyButton(messageDiv, rawText) {
+  const wrapper = document.createElement("div");
+  wrapper.style.marginTop = "6px";
+  wrapper.style.display = "flex";
+  wrapper.style.justifyContent = "flex-end";
+
+  const btn = document.createElement("button");
+  btn.className = "aiMessageCopy";
+  btn.innerHTML = `<i class="fa-regular fa-copy"></i>`;
+
+  btn.onclick = () => {
+    navigator.clipboard.writeText(rawText).then(() => {
+      btn.innerHTML = `<i class="fa-solid fa-check"></i>`;
+      setTimeout(() => {
+        btn.innerHTML = `<i class="fa-regular fa-copy"></i>`;
+      }, 1200);
+    });
+  };
+
+  wrapper.appendChild(btn);
+  messageDiv.appendChild(wrapper);
+}
+
+function enhance(container, rawText, isModel = false) {
   Prism.highlightAllUnder(container);
-  addCopyButtons(container);
+  addCodeCopyButtons(container);
+  if (isModel) addMessageCopyButton(container, rawText);
 }
 
 function addUserTextMessage(text) {
   const msg = createMessage("user");
   msg.innerHTML = renderMarkdown(text);
-  enhance(msg);
-}
-
-function addAttachmentPreview(file, dataUrl) {
-  const msg = createMessage("user");
-
-  if (file.type.startsWith("image/")) {
-    msg.innerHTML = `
-      <div><strong>Attached:</strong> ${file.name}</div>
-      <img src="${dataUrl}" style="max-width:250px;border-radius:12px;margin-top:8px;">
-    `;
-  } else if (file.type.startsWith("audio/")) {
-    msg.innerHTML = `
-      <div><strong>Attached:</strong> ${file.name}</div>
-      <audio controls src="${dataUrl}" style="margin-top:8px;"></audio>
-    `;
-  } else if (file.type.startsWith("video/")) {
-    msg.innerHTML = `
-      <div><strong>Attached:</strong> ${file.name}</div>
-      <video controls src="${dataUrl}" style="max-width:300px;border-radius:12px;margin-top:8px;"></video>
-    `;
-  } else {
-    msg.innerHTML = `<div><strong>Attached:</strong> ${file.name}</div>`;
-  }
+  enhance(msg, text, false);
 }
 
 async function sendMessage() {
@@ -134,7 +137,7 @@ async function sendMessage() {
     });
 
     loadingMsg.innerHTML = renderMarkdown(responseText);
-    enhance(loadingMsg);
+    enhance(loadingMsg, responseText, true);
 
   } catch (err) {
     loadingMsg.innerHTML = "Request Failed: " + err.message;
@@ -155,12 +158,9 @@ fileInput.addEventListener("change", () => {
       const base64 = reader.result.split(",")[1];
 
       pendingAttachments.push({
-        name: file.name,
         mimeType: file.type || "application/octet-stream",
         base64
       });
-
-      addAttachmentPreview(file, reader.result);
     };
 
     reader.readAsDataURL(file);
@@ -177,3 +177,18 @@ input.addEventListener("keydown", e => {
     sendMessage();
   }
 });
+
+function sendInitialMessage() {
+  const welcomeText = "Hello! I'm Orbit AI. How can I help you today?";
+
+  const msg = createMessage("model");
+  msg.innerHTML = renderMarkdown(welcomeText);
+  enhance(msg, welcomeText, true);
+
+  contents.push({
+    role: "model",
+    parts: [{ text: welcomeText }]
+  });
+}
+
+sendInitialMessage();

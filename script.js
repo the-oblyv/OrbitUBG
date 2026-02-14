@@ -101,6 +101,14 @@ document.addEventListener("DOMContentLoaded", () => {
             <div class="card-title">!! Request a Game</div>
           `;
           gamesGrid.appendChild(requestCard);
+          const dmcaCard = document.createElement("div");
+          dmcaCard.className = "card";
+          dmcaCard.onclick = () => window.open("https://forms.gle/WdSBv4jkFo3nwvFz8", "_blank");
+          dmcaCard.innerHTML = `
+            <img class="thumb" src="/res/DMCA.png">
+            <div class="card-title">!! DMCA</div>
+          `;
+          gamesGrid.appendChild(dmcaCard);
 
           list.forEach(game => {
             const c = document.createElement("div");

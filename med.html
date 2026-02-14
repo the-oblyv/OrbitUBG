@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <title>Media | Orbit</title>
-  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/styles/defaults.css">
   <style>
     body {
       display: flex;
@@ -11,52 +11,58 @@
       align-items: center;
       flex-direction: column;
       min-height: 100vh;
-      gap: 1rem;
+      gap: 2.5rem;
     }
+
     .media-btn {
       display: flex;
       align-items: center;
-      gap: 0.8rem;
-      padding: 1rem 2rem;
-      font-size: 1.2rem;
-      font-weight: 500;
+      gap: 1.5rem;
+      padding: 1.8rem 3.5rem;
+      font-size: 2rem;
+      font-weight: 600;
       border: none;
-      border-radius: 0.75rem;
+      border-radius: 1.25rem;
       cursor: pointer;
       background: var(--fourth-bg);
       color: white;
       transition: 0.25s ease;
     }
+
     .media-btn:hover {
-      transform: scale(1.03);
+      transform: scale(1.05);
       background: var(--third-bg);
     }
+
     .media-btn i {
-      font-size: 1.2rem;
+      font-size: 2rem;
     }
-    
+
     img {
-        width: 30px;
-        height: 16px;
-        margin-right: 5px;
-        object-fit: cover;
-        transform: translateY(01px);
+      width: 60px;
+      height: 32px;
+      margin-right: 12px;
+      object-fit: cover;
+      transform: translateY(2px);
     }
-    
+
     h1 {
-        font-size: 20px;
+      font-size: 3rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
     }
   </style>
 </head>
 <body>
-    
-    <h1><img src="/res/orbit.png">Orbit Media</h1>
 
-  <button class="media-btn" onclick="location.href='/mov'">
+  <h1><img src="/res/orbit.png">Orbit Media</h1>
+
+  <button class="media-btn" onclick="location.href='/mov.html'">
     <i class="fa-regular fa-clapperboard"></i> Movies
   </button>
 
-  <button class="media-btn" onclick="location.href='/music'">
+  <button class="media-btn" onclick="location.href='/music.html'">
     <i class="fa-regular fa-music"></i> Music
   </button>
 

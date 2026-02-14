@@ -14,23 +14,23 @@
       justify-content: center;
       align-items: center;
       flex-direction: column;
-      min-height: 100vh;
-      gap: 6vh;
-      padding: 4vh 4vw;
+      min-height: calc(100vh - 80px);
+      gap: 3rem;
+      padding: 2rem 1.5rem;
       text-align: center;
     }
 
     .media-page h1 {
-      font-size: clamp(2.5rem, 8vw, 5rem);
+      font-size: clamp(2rem, 6vw, 3.5rem);
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 1.5rem;
-      flex-wrap: wrap;
+      gap: 1rem;
+      margin: 0;
     }
 
     .orbit-logo {
-      width: clamp(140px, 40vw, 220px);
+      width: clamp(120px, 25vw, 170px);
       height: auto;
     }
 
@@ -38,14 +38,14 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      width: 90%;
-      max-width: 700px;
-      gap: 1.5rem;
-      padding: 3vh 4vw;
-      font-size: clamp(1.8rem, 5vw, 3rem);
-      font-weight: 700;
+      width: 100%;
+      max-width: 550px;
+      gap: 1rem;
+      padding: 1.5rem 2rem;
+      font-size: clamp(1.4rem, 4.5vw, 2.2rem);
+      font-weight: 600;
       border: none;
-      border-radius: 1.75rem;
+      border-radius: 1.25rem;
       cursor: pointer;
       background: var(--fourth-bg);
       color: white;
@@ -53,12 +53,18 @@
     }
 
     .media-btn:hover {
-      transform: scale(1.05);
+      transform: scale(1.04);
       background: var(--third-bg);
     }
 
     .media-btn i {
-      font-size: clamp(1.8rem, 5vw, 3rem);
+      font-size: clamp(1.4rem, 4.5vw, 2.2rem);
+    }
+
+    @media (max-width: 600px) {
+      .media-page {
+        gap: 2.5rem;
+      }
     }
   </style>
 </head>

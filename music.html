@@ -26,6 +26,7 @@
       flex: 1;
       width: 100%;
       border: none;
+      display: block;
     }
   </style>
 </head>
@@ -33,7 +34,13 @@
   <header class="topbar" id="navMount"></header>
   <nav class="menu" id="menu"></nav>
 
-  <iframe id="musicFrame" src="music-embed.html"></iframe>
+  <iframe id="musicFrame"></iframe>
+
+  <script>
+    const base64 = "aHR0cHM6Ly9jcS5qc3gucG0vMjJlZjIzYTg1OGI5NGJlOGE0NTJiMTE0MTU2YTRhZTQvX3Joc1VvTUlyOi8vV2pUeS4zRmwuflIvVE1qRksvNHpUbWYvNi1wQ3Ev";
+    const decodedURL = atob(base64);
+    document.getElementById("musicFrame").src = decodedURL;
+  </script>
 
   <script src="frame.js"></script>
   <script src="script.js"></script>

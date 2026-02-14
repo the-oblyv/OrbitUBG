@@ -9,6 +9,7 @@
     { "source": "/mov", "destination": "/mov.html" },
     { "source": "/med", "destination": "/med.html" },
     { "source": "/music", "destination": "/music.html" },
+    { "source": "/prx", "destination": "/prx.html" },
     { "source": "/mov/", "destination": "/mov.html" },
     { "source": "/mov/p", "destination": "/mov/p.html" },
     { "source": "/404", "destination": "/404.html" }

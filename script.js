@@ -183,30 +183,50 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const id = new URLSearchParams(location.search).get("id");
 
-  if (id && gameFrame && appFrame) {
-    fetch("/games.json")
-      .then(r => r.json())
-      .then(games => {
-        const game = games.find(x => x.id === id);
-        if (game) {
-          gameFrame.src = game.url;
-          gameFrame.style.display = "block";
-          appFrame.style.display = "none";
-          return;
-        }
+if (id && gameFrame && appFrame) {
+  fetch("/games.json")
+    .then(r => r.json())
+    .then(games => {
+      const game = games.find(x => x.id === id);
+      if (game) {
+        gameFrame.src = game.url;
+        gameFrame.style.display = "block";
+        appFrame.style.display = "none";
+        return Promise.reject("found");
+      }
 
-        fetch("/apps.json")
-          .then(r => r.json())
-          .then(apps => {
-            const app = apps.find(x => x.id === id);
-            if (app) {
-              appFrame.src = app.url;
-              appFrame.style.display = "block";
-              gameFrame.style.display = "none";
-            }
-          });
-      });
-  }
+      return fetch("/apps.json")
+        .then(r => r.json())
+        .then(apps => {
+          const app = apps.find(x => x.id === id);
+          if (app) {
+            appFrame.src = app.url;
+            appFrame.style.display = "block";
+            gameFrame.style.display = "none";
+            return Promise.reject("found");
+          }
+
+          const testUrl = `/mov/mov-p.html#${id}`;
+
+          return fetch(testUrl, { method: "HEAD" })
+            .then(res => {
+              if (res.ok) {
+                location.href = testUrl;
+              } else {
+                location.href = "/404";
+              }
+            })
+            .catch(() => {
+              location.href = "/404";
+            });
+        });
+    })
+    .catch(err => {
+      if (err !== "found") {
+        location.href = "/404";
+      }
+    });
+}
 
   const fsBtn = document.getElementById("fullscreenBtn");
   if (fsBtn && gameFrame) fsBtn.onclick = () => (gameFrame.style.display !== "none" ? gameFrame.requestFullscreen?.() : appFrame.requestFullscreen?.());

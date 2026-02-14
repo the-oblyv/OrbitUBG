@@ -206,7 +206,7 @@ if (id && gameFrame && appFrame) {
             return Promise.reject("found");
           }
 
-          const testUrl = `/mov/mov-p.html#${id}`;
+          const testUrl = `/mov/p.html#${id}`;
 
           return fetch(testUrl, { method: "HEAD" })
             .then(res => {

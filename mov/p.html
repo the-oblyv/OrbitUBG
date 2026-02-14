@@ -1,77 +1,62 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-  <link rel="stylesheet" href="./style.css">
-  <link rel="stylesheet" href="mov.css">
-  <link rel="icon" href="/res/orbit.png">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="./style.css">
+    <link rel="stylesheet" href="mov.css">
+    <link rel="icon" href="/res/orbit.png">
+    <style>
+      body,
+      html {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        font-family: "Inter";
+      }
 
-  <style>
-    body, html {
-      margin: 0;
-      padding: 0;
-      width: 100%;
-      height: 100%;
-      overflow: hidden;
-      font-family: "Inter";
-    }
+      iframe {
+        width: 100%;
+        height: 100%;
+        border: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <iframe id="player-iframe" src="" sandbox="allow-scripts allow-same-origin allow-presentation" referrerpolicy="no-referrer"></iframe>
+    <script>
+      if (window.top !== window.self) {
+        window.open = () => null;
+        document.addEventListener("click", e => {
+          if (e.target.tagName === "A") {
+            e.preventDefault();
+          }
+        });
+      }
+      const playerUrl = "https://watch.vidora.su/watch/movie/TMDB_ID";
 
-    iframe {
-      width: 100%;
-      height: 100%;
-      border: 0;
-    }
-  </style>
-</head>
+      function getHash() {
+        return window.location.hash.substring(1) || null;
+      }
 
-<body>
-
-  <iframe
-    id="player-iframe"
-    src=""
-    sandbox="allow-scripts allow-same-origin allow-presentation"
-    referrerpolicy="no-referrer"
-  ></iframe>
-
-  <script>
-    if (window.top !== window.self) {
-      window.open = () => null;
-
-      document.addEventListener("click", e => {
-        if (e.target.tagName === "A") {
-          e.preventDefault();
-        }
+      function updatePlayer(tmdbId) {
+        if (!tmdbId) return;
+        const finalUrl = playerUrl.replace("TMDB_ID", tmdbId);
+        document.getElementById("player-iframe").src = finalUrl;
+      }
+      window.addEventListener("hashchange", () => {
+        const id = getHash();
+        updatePlayer(id);
       });
-    }
-
-    const playerUrl =
-      "https://watch.vidora.su/watch/movie/TMDB_ID";
-
-    function getHash() {
-      return window.location.hash.substring(1) || null;
-    }
-
-    function updatePlayer(tmdbId) {
-      if (!tmdbId) return;
-
-      const finalUrl = playerUrl.replace("TMDB_ID", tmdbId);
-      document.getElementById("player-iframe").src = finalUrl;
-    }
-
-    window.addEventListener("hashchange", () => {
-      const id = getHash();
-      updatePlayer(id);
-    });
-
-    document.addEventListener("DOMContentLoaded", () => {
-      const id = getHash();
-      updatePlayer(id);
-    });
-  </script>
-
-  <script src="frame.js"></script>
-  <script src="script.js"></script>
-</body>
+      document.addEventListener("DOMContentLoaded", () => {
+        const id = getHash();
+        updatePlayer(id);
+      });
+    </script>
+    <script src="frame.js"></script>
+    <script src="script.js"></script>
+  </body>
 </html>

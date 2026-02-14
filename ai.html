@@ -26,10 +26,23 @@
   gap:16px;
 }
 
+.aiWrapper{
+  display:flex;
+  flex-direction:column;
+  max-width:85%;
+}
+
+.aiWrapper.user{
+  align-self:flex-end;
+}
+
+.aiWrapper.model{
+  align-self:flex-start;
+}
+
 .aiMsg{
   padding:14px 18px;
   border-radius:16px;
-  max-width:85%;
   line-height:1.5;
   font-size:15px;
   word-wrap:break-word;
@@ -37,15 +50,30 @@
 }
 
 .aiMsg.user{
-  align-self:flex-end;
   background:linear-gradient(135deg,#5e5cff,#7a6bff);
   color:white;
 }
 
 .aiMsg.model{
-  align-self:flex-start;
   background:#1f2338;
   color:#ddd;
+}
+
+.aiMessageCopy{
+  background:none;
+  border:none;
+  color:#888;
+  cursor:pointer;
+  font-size:13px;
+  margin-top:6px;
+  padding:0;
+  display:flex;
+  align-items:center;
+  gap:6px;
+}
+
+.aiMessageCopy:hover{
+  color:#fff;
 }
 
 .aiInputBar{
@@ -124,19 +152,6 @@ pre{
 
 .aicopy-btn:hover{
   opacity:0.9;
-}
-
-.aiMessageCopy{
-  background:none;
-  border:none;
-  color:#888;
-  cursor:pointer;
-  font-size:14px;
-  padding:4px;
-}
-
-.aiMessageCopy:hover{
-  color:#fff;
 }
 </style>
 </head>

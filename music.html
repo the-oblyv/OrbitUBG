@@ -8,44 +8,28 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
-  html, body {
+  body, html {
     margin: 0;
     padding: 0;
     height: 100%;
-    overflow: hidden;
   }
 
   #musicFrame {
     width: 100%;
+    height: calc(100vh - 68px);
     border: none;
-    position: absolute;
-    left: 0;
+    display: block;
+    margin-top: 68px;
   }
 </style>
 </head>
 <body>
   <header class="topbar" id="navMount"></header>
   <nav class="menu" id="menu"></nav>
+
   <iframe id="musicFrame" src="music-embed.html"></iframe>
 
   <script src="frame.js"></script>
   <script src="script.js"></script>
-  <script>
-    function resizeIframe() {
-      const topbar = document.getElementById('navMount');
-      const menu = document.getElementById('menu');
-      const iframe = document.getElementById('musicFrame');
-
-      const topbarRect = topbar.getBoundingClientRect();
-      const menuRect = menu.getBoundingClientRect();
-
-      const offsetTop = topbarRect.bottom + menuRect.height;
-      iframe.style.top = offsetTop + 'px';
-      iframe.style.height = (window.innerHeight - offsetTop) + 'px';
-    }
-
-    window.addEventListener('load', resizeIframe);
-    window.addEventListener('resize', resizeIframe);
-  </script>
 </body>
 </html>

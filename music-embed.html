@@ -1,46 +1,25 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Music | Orbit Embed</title>
-  <link rel="stylesheet" href="style.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-  <link rel="icon" href="/res/orbit.png">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <style>
-    body, html {
-      margin: 0;
-      padding: 0;
-      height: 100%;
-      display: flex;
-      flex-direction: column;
-      background: #0f0f14;
-      font-family: system-ui, sans-serif;
-    }
-
-    header.topbar,
-    nav.menu {
-      width: 100%;
-      z-index: 1000;
-    }
-
-    #musicFrame {
-      flex: 1;
-      width: 100%;
-      border: none;
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Music Embed | Orbit</title>
+<style>
+  html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+  }
+  iframe {
+    border: none;
+    width: 100%;
+    height: 100%;
+  }
+</style>
 </head>
 <body>
-  <iframe id="musicFrame" sandbox="allow-scripts allow-same-origin" referrerpolicy="no-referrer"></iframe>
-
-  <script>
-    const base64 = "aHR0cHM6Ly9jcS5qc3gucG0vMjJlZjIzYTg1OGI5NGJlOGE0NTJiMTE0MTU2YTRhZTQvX3Joc1VvTUlyOi8vV2pUeS4zRmwuflIvVE1qRksvNHpUbWYvNi1wQ3Ev";
-    const decodedURL = atob(base64);
-    document.getElementById("musicFrame").src = decodedURL;
-  </script>
-
-  <script src="frame.js"></script>
-  <script src="script.js"></script>
+<iframe src="data:text/html;base64,aHR0cHM6Ly9jcS5qc3gucG0vMjJlZjIzYTg1OGI5NGJlOGE0NTJiMTE0MTU2YTRhZTQvX3Joc1VvTUlyOi8vV2pUeS4zRmwuflIvVE1qRksvNHpUbWYvNi1wQ3Ev" allowfullscreen></iframe>
 </body>
 </html>

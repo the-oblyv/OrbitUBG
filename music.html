@@ -3,26 +3,46 @@
 <head>
   <meta charset="UTF-8">
   <title>Music | Orbit</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <link rel="stylesheet" href="style.css">
   <link rel="icon" href="/res/orbit.png">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
-    body {
+    body, html {
       margin: 0;
-      background: #0f0f14;
-      font-family: system-ui, sans-serif;
-    }
-
-    header.topbar,
-    nav.menu {
-      width: 100%;
-      z-index: 1000;
+      padding: 0;
+      height: 100%;
     }
 
     #musicFrame {
       width: 100%;
-      height: calc(100vh - 100px);
+      height: 100vh;
+      border: none;
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <iframe id="musicFrame" src="music-embed.html"></iframe>
+</body>
+</ht<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Music | Orbit</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="icon" href="/res/orbit.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body, html {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+    }
+
+    #musicFrame {
+      width: 100%;
+      height: 100vh;
       border: none;
       display: block;
     }
@@ -31,15 +51,7 @@
 <body>
   <header class="topbar" id="navMount"></header>
   <nav class="menu" id="menu"></nav>
-
-  <iframe id="musicFrame" sandbox="allow-scripts allow-same-origin" referrerpolicy="no-referrer"></iframe>
-
-  <script>
-    const base64 = "aHR0cHM6Ly9jcS5qc3gucG0vMjJlZjIzYTg1OGI5NGJlOGE0NTJiMTE0MTU2YTRhZTQvX3Joc1VvTUlyOi8vV2pUeS4zRmwuflIvVE1qRksvNHpUbWYvNi1wQ3Ev";
-    const decodedURL = atob(base64);
-    document.getElementById("musicFrame").src = decodedURL;
-  </script>
-
+  <iframe id="musicFrame" src="music-embed.html"></iframe>
   <script src="frame.js"></script>
   <script src="script.js"></script>
 </body>

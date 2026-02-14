@@ -1,4 +1,4 @@
-const endpoint = "https://3.dmvdriverseducation.org/worker/ai/chat";
+const endpoint = "https://9.dmvdriverseducation.org/worker/ai/chat";
 
 const input = document.getElementById("aiInput");
 const chat = document.getElementById("aiChat");

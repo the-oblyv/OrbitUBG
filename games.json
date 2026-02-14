@@ -72,6 +72,12 @@
     "url": "/games/hollowknight/index.html"
   },
   {
+    "id": "bankrobbery",
+    "name": "Bank Robbery",
+    "image": "/games/bankrobbery/697.png",
+    "url": "/games/bankrobbery/index.html"
+  },
+  {
     "id": "slitherio",
     "name": "Slither.io",
     "image": "/games/slitherio/Screenshot_20260125-194917.png",

@@ -60,6 +60,16 @@
     .media-btn i {
       font-size: clamp(1.4rem, 4.5vw, 2.2rem);
     }
+
+    .media-btn.disabled {
+      cursor: not-allowed;
+      opacity: 0.6;
+    }
+
+    .media-btn.disabled:hover {
+      transform: none;
+      background: var(--fourth-bg);
+    }
   </style>
 </head>
 
@@ -77,8 +87,8 @@
       <i class="fa-solid fa-clapperboard"></i> Movies
     </button>
 
-    <button class="media-btn" onclick="location.href='/music.html'">
-      <i class="fa-solid fa-music"></i> Music
+    <button class="media-btn disabled">
+      <i class="fa-solid fa-music"></i> Music (Coming Soon!)
     </button>
   </div>
 

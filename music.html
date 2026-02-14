@@ -8,18 +8,25 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
-  body, html {
+  html, body {
     margin: 0;
     padding: 0;
     height: 100%;
   }
 
+  .iframe-container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    padding-top: 68px;
+    box-sizing: border-box;
+  }
+
   #musicFrame {
     width: 100%;
-    height: calc(100vh - 68px);
+    height: 100%;
     border: none;
     display: block;
-    margin-top: 68px;
   }
 </style>
 </head>
@@ -27,7 +34,9 @@
   <header class="topbar" id="navMount"></header>
   <nav class="menu" id="menu"></nav>
 
-  <iframe id="musicFrame" src="music-embed.html"></iframe>
+  <div class="iframe-container">
+    <iframe id="musicFrame" src="music-embed.html"></iframe>
+  </div>
 
   <script src="frame.js"></script>
   <script src="script.js"></script>

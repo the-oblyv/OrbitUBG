@@ -206,19 +206,15 @@ if (id && gameFrame && appFrame) {
             return Promise.reject("found");
           }
 
-          const testUrl = `/mov/p.html#${id}`;
+          const movUrl = `/mov/mov-p.html#${id}`;
 
-          return fetch(testUrl, { method: "HEAD" })
-            .then(res => {
-              if (res.ok) {
-                location.href = testUrl;
-              } else {
-                location.href = "/404";
-              }
-            })
-            .catch(() => {
-              location.href = "/404";
-            });
+          appFrame.src = movUrl;
+          appFrame.style.display = "block";
+          gameFrame.style.display = "none";
+
+          appFrame.onerror = () => {
+            location.href = "/404";
+          };
         });
     })
     .catch(err => {

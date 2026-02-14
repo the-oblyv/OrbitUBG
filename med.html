@@ -7,52 +7,55 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <style>
     .media-page {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      flex-direction: column;
-      min-height: 100vh;
-      gap: 4rem;
-    }
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  min-height: 100vh;
+  gap: 6vh;
+  padding: 4vh 4vw;
+}
 
-    .media-btn {
-      display: flex;
-      align-items: center;
-      gap: 2rem;
-      padding: 2.5rem 5rem;
-      font-size: 3rem;
-      font-weight: 700;
-      border: none;
-      border-radius: 1.75rem;
-      cursor: pointer;
-      background: var(--fourth-bg);
-      color: white;
-      transition: 0.25s ease;
-    }
+.media-btn {
+  display: flex;
+  align-items: center;
+  gap: 4vw;
+  padding: 4vh 8vw;
+  font-size: clamp(2rem, 6vw, 3.5rem);
+  font-weight: 700;
+  border: none;
+  border-radius: 2rem;
+  cursor: pointer;
+  background: var(--fourth-bg);
+  color: white;
+  transition: 0.25s ease;
+  width: 90%;
+  max-width: 800px;
+  justify-content: center;
+}
 
-    .media-btn:hover {
-      transform: scale(1.08);
-      background: var(--third-bg);
-    }
+.media-btn:hover {
+  transform: scale(1.08);
+  background: var(--third-bg);
+}
 
-    .media-btn i {
-      font-size: 3rem;
-    }
+.media-btn i {
+  font-size: clamp(2rem, 6vw, 3.5rem);
+}
 
-    .orbit-logo {
-      width: 192px;
-      height: 108px;
-      margin-right: 32px;
-      object-fit: cover;
-      transform: translateY(7px);
-    }
+.orbit-logo {
+  width: clamp(180px, 40vw, 260px);
+  height: auto;
+  margin-right: 3vw;
+}
 
-    .media-page h1 {
-      font-size: 5rem;
-      display: flex;
-      align-items: center;
-      gap: 1.5rem;
-    }
+.media-page h1 {
+  font-size: clamp(3rem, 8vw, 5rem);
+  display: flex;
+  align-items: center;
+  gap: 3vw;
+  text-align: center;
+}
   </style>
 </head>
 <body>

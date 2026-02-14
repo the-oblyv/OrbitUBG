@@ -3,11 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <title>Music | Orbit</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <link rel="stylesheet" href="style.css">
   <link rel="icon" href="/res/orbit.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <style>
     body {
@@ -27,22 +26,16 @@
     }
   </style>
 </head>
-
 <body>
   <header class="topbar" id="navMount"></header>
   <nav class="menu" id="menu"></nav>
 
-  <iframe id="musicFrame" referrerpolicy="no-referrer"></iframe>
+  <iframe id="musicFrame"></iframe>
 
   <script>
     const base64 = "aHR0cHM6Ly9jcS5qc3gucG0vYjJiM2U4ZDc2Y2YxNGNkNThiNDFjOWE5ZTRkM2E4ODYvX3Joc0RMMk9NOi8vUk5Tbi5zMFoudkIvUzJOMHcvckFTfkkvZEpLeHov";
-    
-    try {
-      const decodedURL = atob(base64);
-      document.getElementById("musicFrame").src = decodedURL;
-    } catch (e) {
-      console.error("Invalid base64 URL");
-    }
+    const decodedURL = atob(base64);
+    document.getElementById("musicFrame").src = decodedURL;
   </script>
 
   <script src="frame.js"></script>

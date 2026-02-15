@@ -52,6 +52,19 @@ function enhanceCodeBlocks(container) {
     });
 }
 
+function addDefaultMessage() {
+    const text = "Hello! I'm Orbit AI.\n\nYou can:\n- Ask questions\n- Attach images, audio, or files\n- Regenerate responses\n\nHow can I help you today?";
+
+    contents.push({
+        role: "model",
+        parts: [{ text }]
+    });
+
+    const { bubble } = createMessage("model");
+    bubble.innerHTML = renderMarkdown(text);
+    enhanceCodeBlocks(bubble);
+}
+
 function addUserMessage(text, attachments = []) {
     const { bubble } = createMessage("user");
 
@@ -251,3 +264,5 @@ input.addEventListener("keydown", e => {
         sendMessage();
     }
 });
+
+addDefaultMessage();

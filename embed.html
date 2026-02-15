@@ -68,7 +68,7 @@
       };
 
       function getParams() {
-        const hash = location.hash.substring(1);
+        const hash = decodeURIComponent(location.hash.substring(1));
         const noRedirect = location.search.includes('no-redirect');
         let url = hash || 'https://start.duckduckgo.com/';
         if (!url.startsWith('http://') && !url.startsWith('https://')) url = 'https://' + url;

@@ -119,11 +119,23 @@ let historyStack = [];
 let historyIndex = -1;
 
 function loadUrl(url) {
+  url = url.trim();
   if(!url) url = 'newtab.html';
-  if(!url.startsWith('http') && !url.startsWith('embed.html') && !url.startsWith('newtab.html')) url = 'https://' + url;
-  iframe.src = 'embed.html#' + encodeURIComponent(url);
-  urlInput.value = url === 'newtab.html' ? '' : url;
-  if(historyIndex===-1||historyStack[historyIndex]!==url){
+  
+  let target = url;
+
+  if(url !== 'newtab.html') {
+    const isUrl = url.startsWith('http') || url.includes('.') || url.startsWith('embed.html');
+    if(!isUrl){
+      target = 'https://start.duckduckgo.com/?q=' + encodeURIComponent(url);
+    }
+    if(!target.startsWith('http') && !target.startsWith('embed.html')) target = 'https://' + target;
+  }
+
+  iframe.src = 'embed.html#' + encodeURIComponent(target);
+  urlInput.value = (url === 'newtab.html') ? '' : url;
+
+  if(historyIndex===-1 || historyStack[historyIndex]!==url){
     historyStack = historyStack.slice(0, historyIndex+1);
     historyStack.push(url);
     historyIndex++;

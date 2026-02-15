@@ -29,7 +29,7 @@ html,body{
 
 #browserUI{
   position:fixed;
-  top:80px;
+  top:110px;
   left:0;
   width:100%;
   background:var(--panel);
@@ -67,10 +67,10 @@ html,body{
 
 #proxyContainer{
   position:fixed;
-  top:140px;
+  top:170px;
   left:0;
   width:100%;
-  height:calc(100vh - 140px);
+  height:calc(100vh - 170px);
 }
 
 #proxyFrame{
@@ -136,13 +136,9 @@ function looksLikeCipher(str){
 function formatInput(value){
   value=value.trim()
   if(!value)return null
-
-  if(looksLikeCipher(value)){
-    value=vigenereDecrypt(value,key)
-  }
-
-  if(value.startsWith("http"))return value
-  if(value.includes("."))return "https://"+value
+  if(looksLikeCipher(value)) value=vigenereDecrypt(value,key)
+  if(value.startsWith("http")) return value
+  if(value.includes(".")) return "https://"+value
   return "https://start.duckduckgo.com/?q="+encodeURIComponent(value)
 }
 
@@ -153,11 +149,9 @@ function load(value,addHistory=true){
     input.value=""
     return
   }
-
   iframe.src="embed.html#"+encodeURIComponent(formatted)
   input.value=value
   location.hash=encodeURIComponent(value)
-
   if(addHistory){
     historyStack=historyStack.slice(0,historyIndex+1)
     historyStack.push(value)

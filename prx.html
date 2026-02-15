@@ -9,41 +9,99 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
 <style>
-  :root {
-    --main-bg: #0f1420;
-  }
+:root {
+  --main-bg: #0f1420;
+  --panel: #1b2133;
+  --panel2: #232a40;
+  --text: #e6e9f2;
+  --accent: #6c7cff;
+  --radius: 14px;
+}
 
-  body, html {
-    margin: 0;
-    padding: 0;
-    height: 100%;
-    background: var(--main-bg);
-    font-family: system-ui, sans-serif;
-    color: #ddd;
-  }
+body, html {
+  margin:0;
+  padding:0;
+  height:100%;
+  font-family: system-ui, sans-serif;
+  background: var(--main-bg);
+  color: var(--text);
+}
 
-  #proxyContainer {
-    padding-top: 120px;
-    width: 100%;
-    height: calc(100vh - 120px);
-    display: flex;
-    justify-content: center;
-    align-items: stretch;
-    box-sizing: border-box;
-  }
+#proxyContainer {
+  padding-top: 170px;
+  width: 100%;
+  height: calc(100vh - 170px);
+  display: flex;
+  justify-content: center;
+  align-items: stretch;
+  box-sizing: border-box;
+}
 
-  #proxyFrame {
-    width: 100%;
-    height: 100%;
-    border: none;
-    flex: 1;
-  }
+#proxyFrame {
+  width: 100%;
+  height: 100%;
+  border: none;
+  flex: 1;
+}
+
+#addressBar {
+  position: fixed;
+  top: 120px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: calc(100% - 32px);
+  max-width: 1200px;
+  background: var(--panel);
+  border-radius: var(--radius);
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  z-index: 15;
+  box-shadow: 0 10px 20px rgba(0,0,0,.4);
+}
+
+#addressBar input {
+  flex: 1;
+  background: var(--panel2);
+  color: var(--text);
+  border: none;
+  outline: none;
+  border-radius: var(--radius);
+  padding: 8px 12px;
+  font-size: 0.95rem;
+}
+
+.addr-btn {
+  background: var(--panel2);
+  border: none;
+  color: var(--text);
+  font-size: 1rem;
+  padding: 6px 10px;
+  border-radius: var(--radius);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: 0.2s;
+}
+
+.addr-btn:hover {
+  background: var(--accent);
+  color: white;
+}
 </style>
 </head>
-
 <body>
 <header class="topbar" id="navMount"></header>
 <nav class="menu" id="menu"></nav>
+
+<div id="addressBar">
+  <button class="addr-btn" id="backBtn"><i class="fa-solid fa-arrow-left"></i></button>
+  <button class="addr-btn" id="forwardBtn"><i class="fa-solid fa-arrow-right"></i></button>
+  <button class="addr-btn" id="refreshBtn"><i class="fa-solid fa-rotate-right"></i></button>
+  <input id="urlInput" placeholder="Enter URL..." autocomplete="off">
+</div>
 
 <div id="proxyContainer">
   <iframe id="proxyFrame" allowfullscreen></iframe>
@@ -52,9 +110,62 @@
 <script src="frame.js"></script>
 <script src="script.js"></script>
 <script>
-  const base64Url = "aHR0cHM6Ly9vcmJ0ZWR1LmdtYWNicmlkZS53b3JrZXJzLmRldi8=";
-  const decodedUrl = atob(base64Url);
-  document.getElementById("proxyFrame").src = decodedUrl;
+const iframe = document.getElementById('proxyFrame');
+const urlInput = document.getElementById('urlInput');
+const backBtn = document.getElementById('backBtn');
+const forwardBtn = document.getElementById('forwardBtn');
+const refreshBtn = document.getElementById('refreshBtn');
+
+let historyStack = [];
+let historyIndex = -1;
+
+function loadUrl(url) {
+  if (!url.startsWith('http')) url = 'https://' + url;
+  iframe.src = 'embed.html#' + encodeURIComponent(url);
+  urlInput.value = url;
+  if (historyIndex === -1 || historyStack[historyIndex] !== url) {
+    historyStack = historyStack.slice(0, historyIndex + 1);
+    historyStack.push(url);
+    historyIndex++;
+  }
+}
+
+function updateInput() {
+  urlInput.value = historyStack[historyIndex] || '';
+}
+
+backBtn.onclick = () => {
+  if (historyIndex > 0) {
+    historyIndex--;
+    updateInput();
+    iframe.src = 'embed.html#' + encodeURIComponent(historyStack[historyIndex]);
+  }
+}
+
+forwardBtn.onclick = () => {
+  if (historyIndex < historyStack.length -1) {
+    historyIndex++;
+    updateInput();
+    iframe.src = 'embed.html#' + encodeURIComponent(historyStack[historyIndex]);
+  }
+}
+
+refreshBtn.onclick = () => {
+  if(historyIndex >=0){
+    iframe.src = 'embed.html#' + encodeURIComponent(historyStack[historyIndex]);
+  }
+}
+
+urlInput.addEventListener('keydown', e => {
+  if(e.key === 'Enter') loadUrl(urlInput.value);
+});
+
+const initialFragment = location.hash.slice(1);
+if(initialFragment){
+  loadUrl(decodeURIComponent(initialFragment));
+} else {
+  loadUrl('embed.html');
+}
 </script>
 </body>
 </html>

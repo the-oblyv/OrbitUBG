@@ -5,13 +5,11 @@ const chat = document.getElementById("aiChat");
 const sendBtn = document.getElementById("sendBtn");
 const attachBtn = document.getElementById("attachBtn");
 const fileInput = document.getElementById("aiFile");
-const startersContainer = document.getElementById("aiStarters");
 
 let contents = [];
 let pendingAttachments = [];
 let identityInjected = false;
 let lastUserParts = null;
-let readingFiles = false;
 
 const starters = [
   { starterName: "Explain quantum computing simply", starterText: "Explain quantum computing simply" },
@@ -46,9 +44,7 @@ function addCodeCopyButtons(container) {
     const btn = document.createElement("button");
     btn.className = "aicopy-btn";
     btn.innerHTML = `<i class="fa-solid fa-copy"></i> Copy code`;
-
     const code = pre.querySelector("code");
-
     btn.onclick = () => {
       navigator.clipboard.writeText(code.innerText).then(() => {
         btn.innerHTML = `<i class="fa-solid fa-check"></i> Copied`;
@@ -57,7 +53,6 @@ function addCodeCopyButtons(container) {
         }, 1200);
       });
     };
-
     pre.appendChild(btn);
   });
 }
@@ -69,12 +64,13 @@ function enhance(container) {
 
 function addActions(wrapper, text) {
   const actions = document.createElement("div");
-  actions.className = "aiActions";
+  actions.style.display = "flex";
+  actions.style.gap = "6px";
+  actions.style.marginTop = "6px";
 
   const copyBtn = document.createElement("button");
   copyBtn.className = "aiMessageCopy";
   copyBtn.innerHTML = `<i class="fa-regular fa-copy"></i> Copy`;
-
   copyBtn.onclick = () => {
     navigator.clipboard.writeText(text).then(() => {
       copyBtn.innerHTML = `<i class="fa-solid fa-check"></i> Copied`;
@@ -87,12 +83,11 @@ function addActions(wrapper, text) {
   const regenBtn = document.createElement("button");
   regenBtn.className = "aiRegenerateBtn";
   regenBtn.innerHTML = `<i class="fa-solid fa-rotate"></i> Regenerate`;
-
-  regenBtn.onclick = async () => {
+  regenBtn.onclick = () => {
     if (!lastUserParts) return;
     wrapper.remove();
     contents.pop();
-    await sendMessage(true);
+    sendMessage(true);
   };
 
   actions.appendChild(copyBtn);
@@ -100,69 +95,56 @@ function addActions(wrapper, text) {
   wrapper.appendChild(actions);
 }
 
-function addUserMessage(parts) {
+function addUserTextMessage(text) {
   const wrapper = createWrapper("user");
   const msg = createMessage("user", wrapper);
-
-  const textPart = parts.find(p => p.text);
-  if (textPart) {
-    msg.innerHTML = renderMarkdown(textPart.text);
-    enhance(msg);
-  }
+  msg.innerHTML = renderMarkdown(text);
+  enhance(msg);
 }
 
 function renderStarters() {
-  startersContainer.innerHTML = "";
+  const container = document.createElement("div");
+  container.className = "aiStarters";
   starters.forEach(starter => {
     const btn = document.createElement("button");
     btn.className = "aiStarterBtn";
     btn.textContent = starter.starterName;
     btn.onclick = () => {
       input.value = starter.starterText;
-      startersContainer.innerHTML = "";
+      container.remove();
       sendMessage();
     };
-    startersContainer.appendChild(btn);
+    container.appendChild(btn);
   });
+  document.querySelector(".aiInputWrapper").before(container);
 }
 
 async function sendMessage(isRegenerate = false) {
-  if (readingFiles) return;
+  if (!isRegenerate && !input.value.trim() && pendingAttachments.length === 0) return;
 
-  let parts = [];
+  const parts = [];
+
+  if (!identityInjected) {
+    parts.push({
+      text: "You are Orbit AI, an AI assistant created by gmacbride for https://orbit.foo.ng/. Provide helpful responses."
+    });
+    identityInjected = true;
+  }
 
   if (!isRegenerate) {
-    const text = input.value.trim();
-    if (!text && pendingAttachments.length === 0) return;
-
-    if (!identityInjected) {
-      parts.push({
-        text: "You are Orbit AI, an AI assistant created by gmacbride for https://orbit.foo.ng/. Provide helpful responses."
-      });
-      identityInjected = true;
-    }
-
-    if (text) parts.push({ text });
-
+    if (input.value.trim()) parts.push({ text: input.value.trim() });
     pendingAttachments.forEach(file => {
-      parts.push({
-        inlineData: {
-          mimeType: file.mimeType,
-          data: file.base64
-        }
-      });
+      parts.push({ inlineData: { mimeType: file.mimeType, data: file.base64 } });
     });
-
     lastUserParts = parts;
     contents.push({ role: "user", parts });
-    addUserMessage(parts);
-
+    if (input.value.trim()) addUserTextMessage(input.value.trim());
     input.value = "";
     pendingAttachments = [];
-    startersContainer.innerHTML = "";
+    const startersDiv = document.querySelector(".aiStarters");
+    if (startersDiv) startersDiv.remove();
   } else {
-    parts = lastUserParts;
-    contents.push({ role: "user", parts });
+    contents.push({ role: "user", parts: lastUserParts });
   }
 
   const wrapper = createWrapper("model");
@@ -173,23 +155,14 @@ async function sendMessage(isRegenerate = false) {
     const res = await fetch(endpoint, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        contents,
-        generationConfig: { temperature: 0.7 }
-      })
+      body: JSON.stringify({ contents, generationConfig: { temperature: 0.7 } })
     });
 
     const json = await res.json();
-
     const responseText =
-      json?.candidates?.[0]?.content?.parts?.[0]?.text ||
-      json?.text ||
-      "(No response)";
+      json?.candidates?.[0]?.content?.parts?.[0]?.text || json?.text || "(No response)";
 
-    contents.push({
-      role: "model",
-      parts: [{ text: responseText }]
-    });
+    contents.push({ role: "model", parts: [{ text: responseText }] });
 
     loading.innerHTML = renderMarkdown(responseText);
     enhance(loading);
@@ -204,44 +177,26 @@ async function sendMessage(isRegenerate = false) {
 
 function sendInitialMessage() {
   const welcomeText = "Hello! I'm Orbit AI. How can I help you today?";
-
   const wrapper = createWrapper("model");
   const msg = createMessage("model", wrapper);
   msg.innerHTML = renderMarkdown(welcomeText);
   enhance(msg);
-
-  contents.push({
-    role: "model",
-    parts: [{ text: welcomeText }]
-  });
-
+  addActions(wrapper, welcomeText);
+  contents.push({ role: "model", parts: [{ text: welcomeText }] });
   renderStarters();
 }
 
 attachBtn.addEventListener("click", () => fileInput.click());
 
-fileInput.addEventListener("change", async () => {
-  const files = Array.from(fileInput.files);
-  if (!files.length) return;
-
-  readingFiles = true;
-
-  await Promise.all(files.map(file => {
-    return new Promise(resolve => {
-      const reader = new FileReader();
-      reader.onload = () => {
-        const base64 = reader.result.split(",")[1];
-        pendingAttachments.push({
-          mimeType: file.type || "application/octet-stream",
-          base64
-        });
-        resolve();
-      };
-      reader.readAsDataURL(file);
-    });
-  }));
-
-  readingFiles = false;
+fileInput.addEventListener("change", () => {
+  Array.from(fileInput.files).forEach(file => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const base64 = reader.result.split(",")[1];
+      pendingAttachments.push({ mimeType: file.type || "application/octet-stream", base64 });
+    };
+    reader.readAsDataURL(file);
+  });
   fileInput.value = "";
 });
 

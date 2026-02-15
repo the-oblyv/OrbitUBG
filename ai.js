@@ -32,10 +32,13 @@ function renderMarkdown(text) {
 function addCodeCopyButtons(container) {
   container.querySelectorAll("pre").forEach(pre => {
     if (pre.querySelector(".aicopy-btn")) return;
+
     const btn = document.createElement("button");
     btn.className = "aicopy-btn";
     btn.innerHTML = `<i class="fa-solid fa-copy"></i> Copy code`;
+
     const code = pre.querySelector("code");
+
     btn.onclick = () => {
       navigator.clipboard.writeText(code.innerText).then(() => {
         btn.innerHTML = `<i class="fa-solid fa-check"></i> Copied`;
@@ -44,42 +47,26 @@ function addCodeCopyButtons(container) {
         }, 1200);
       });
     };
+
     pre.appendChild(btn);
   });
 }
 
-function addMessageButtons(wrapper, rawText) {
-  const container = document.createElement("div");
-  container.style.display = "flex";
-  container.style.gap = "10px";
-  container.style.marginTop = "6px";
+function addMessageCopyButton(wrapper, rawText) {
+  const btn = document.createElement("button");
+  btn.className = "aiMessageCopy";
+  btn.innerHTML = `<i class="fa-regular fa-copy"></i> Copy`;
 
-  const copyBtn = document.createElement("button");
-  copyBtn.className = "aiMessageCopy";
-  copyBtn.innerHTML = `<i class="fa-regular fa-copy"></i> Copy`;
-  copyBtn.onclick = () => {
+  btn.onclick = () => {
     navigator.clipboard.writeText(rawText).then(() => {
-      copyBtn.innerHTML = `<i class="fa-solid fa-check"></i> Copied`;
+      btn.innerHTML = `<i class="fa-solid fa-check"></i> Copied`;
       setTimeout(() => {
-        copyBtn.innerHTML = `<i class="fa-regular fa-copy"></i> Copy`;
+        btn.innerHTML = `<i class="fa-regular fa-copy"></i> Copy`;
       }, 1200);
     });
   };
 
-  const regenBtn = document.createElement("button");
-  regenBtn.className = "aiMessageCopy";
-  regenBtn.innerHTML = `<i class="fa-solid fa-arrows-rotate"></i> Regenerate`;
-  regenBtn.onclick = async () => {
-    contents = contents.filter(
-      m => !(m.role === "model" && m.parts?.[0]?.text === rawText)
-    );
-    wrapper.remove();
-    await sendMessage();
-  };
-
-  container.appendChild(copyBtn);
-  container.appendChild(regenBtn);
-  wrapper.appendChild(container);
+  wrapper.appendChild(btn);
 }
 
 function enhance(container) {
@@ -94,22 +81,17 @@ function addUserTextMessage(text) {
   enhance(msg);
 }
 
-async function sendMessage(textOverride) {
-  const text = textOverride || input.value.trim();
+async function sendMessage() {
+  const text = input.value.trim();
   if (!text && pendingAttachments.length === 0) return;
 
-  if (!textOverride && text) addUserTextMessage(text);
+  if (text) addUserTextMessage(text);
 
   const parts = [];
 
   if (!identityInjected) {
-    contents.push({
-      role: "model",
-      parts: [
-        {
-          text: "Hello! I'm Orbit AI. How can I help you today?"
-        }
-      ]
+    parts.push({
+      text: "You are Orbit AI, an AI assistant created by gmacbride for https://orbit.foo.ng/. Provide helpful responses."
     });
     identityInjected = true;
   }
@@ -125,9 +107,9 @@ async function sendMessage(textOverride) {
     });
   });
 
-  if (parts.length > 0) contents.push({ role: "user", parts });
+  contents.push({ role: "user", parts });
 
-  if (!textOverride) input.value = "";
+  input.value = "";
   pendingAttachments = [];
 
   const wrapper = createWrapper("model");
@@ -145,6 +127,7 @@ async function sendMessage(textOverride) {
     });
 
     const json = await res.json();
+
     const responseText =
       json?.candidates?.[0]?.content?.parts?.[0]?.text ||
       json?.text ||
@@ -157,7 +140,8 @@ async function sendMessage(textOverride) {
 
     loadingMsg.innerHTML = renderMarkdown(responseText);
     enhance(loadingMsg);
-    addMessageButtons(wrapper, responseText);
+    addMessageCopyButton(wrapper, responseText);
+
   } catch (err) {
     loadingMsg.innerHTML = "Request Failed: " + err.message;
   }
@@ -165,10 +149,26 @@ async function sendMessage(textOverride) {
   chat.scrollTop = chat.scrollHeight;
 }
 
+function sendInitialMessage() {
+  const welcomeText = "Hello! I'm Orbit AI. How can I help you today?";
+
+  const wrapper = createWrapper("model");
+  const msg = createMessage("model", wrapper);
+  msg.innerHTML = renderMarkdown(welcomeText);
+  enhance(msg);
+  addMessageCopyButton(wrapper, welcomeText);
+
+  contents.push({
+    role: "model",
+    parts: [{ text: welcomeText }]
+  });
+}
+
 attachBtn.addEventListener("click", () => fileInput.click());
 
 fileInput.addEventListener("change", () => {
   const files = Array.from(fileInput.files);
+
   files.forEach(file => {
     const reader = new FileReader();
     reader.onload = () => {
@@ -180,10 +180,11 @@ fileInput.addEventListener("change", () => {
     };
     reader.readAsDataURL(file);
   });
+
   fileInput.value = "";
 });
 
-sendBtn.addEventListener("click", () => sendMessage());
+sendBtn.addEventListener("click", sendMessage);
 
 input.addEventListener("keydown", e => {
   if (e.key === "Enter" && !e.shiftKey) {
@@ -192,4 +193,4 @@ input.addEventListener("keydown", e => {
   }
 });
 
-sendMessage();
+sendInitialMessage();

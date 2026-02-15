@@ -9,20 +9,15 @@ const regenBtn = document.getElementById("regenBtn");
 
 let contents = [];
 let pendingAttachments = [];
+let identityInjected = false;
 let generating = false;
 
 function createMessage(role) {
-    const wrapper = document.createElement("div");
-    wrapper.className = `aiWrap ${role}`;
-
-    const bubble = document.createElement("div");
-    bubble.className = `aiMsg ${role}`;
-
-    wrapper.appendChild(bubble);
-    chat.appendChild(wrapper);
+    const div = document.createElement("div");
+    div.className = `aiMsg ${role}`;
+    chat.appendChild(div);
     chat.scrollTop = chat.scrollHeight;
-
-    return { wrapper, bubble };
+    return div;
 }
 
 function renderMarkdown(text) {
@@ -31,80 +26,74 @@ function renderMarkdown(text) {
 
 function enhanceCodeBlocks(container) {
     Prism.highlightAllUnder(container);
-
     container.querySelectorAll("pre").forEach(pre => {
-        if (pre.parentElement.querySelector(".aicopy-btn")) return;
-
+        if (pre.querySelector(".aicopy-btn")) return;
         const btn = document.createElement("button");
         btn.textContent = "Copy";
         btn.className = "aicopy-btn";
-
         const code = pre.querySelector("code");
-
         btn.onclick = () => {
             navigator.clipboard.writeText(code.innerText).then(() => {
                 btn.textContent = "Copied!";
                 setTimeout(() => btn.textContent = "Copy", 1200);
             });
         };
-
-        pre.parentElement.appendChild(btn);
+        pre.appendChild(btn);
     });
 }
 
-function addDefaultMessage() {
-    const text = "Hello! I'm Orbit AI.\n\nYou can:\n- Ask questions\n- Attach images, audio, or files\n- Regenerate responses\n\nHow can I help you today?";
+function addModelControls(messageDiv, text) {
+    const controls = document.createElement("div");
+    controls.className = "aiControls";
 
-    contents.push({
-        role: "model",
-        parts: [{ text }]
-    });
+    const copyBtn = document.createElement("button");
+    copyBtn.textContent = "Copy";
+    copyBtn.className = "aiMsgCopy";
+    copyBtn.onclick = () => {
+        navigator.clipboard.writeText(text).then(() => {
+            copyBtn.textContent = "Copied!";
+            setTimeout(() => copyBtn.textContent = "Copy", 1200);
+        });
+    };
 
-    const { bubble } = createMessage("model");
-    bubble.innerHTML = renderMarkdown(text);
-    enhanceCodeBlocks(bubble);
+    const regenButton = document.createElement("button");
+    regenButton.textContent = "Regenerate";
+    regenButton.className = "aiMsgRegen";
+    regenButton.onclick = regenerateLast;
+
+    controls.appendChild(copyBtn);
+    controls.appendChild(regenButton);
+
+    messageDiv.after(controls);
 }
 
-function addUserMessage(text, attachments = []) {
-    const { bubble } = createMessage("user");
+function addUserTextMessage(text) {
+    const msg = createMessage("user");
+    msg.innerHTML = renderMarkdown(text);
+    enhanceCodeBlocks(msg);
+}
 
-    let html = "";
+function addAttachmentPreview(file, dataUrl) {
+    const msg = createMessage("user");
 
-    if (text) html += renderMarkdown(text);
-
-    attachments.forEach(file => {
-        if (file.mimeType.startsWith("image/")) {
-            html += `
-                <div class="aiAttachment">
-                    <div><strong>${file.name}</strong></div>
-                    <img src="data:${file.mimeType};base64,${file.base64}" style="max-width:250px;border-radius:12px;margin-top:6px;">
-                </div>
-            `;
-        } else if (file.mimeType.startsWith("audio/")) {
-            html += `
-                <div class="aiAttachment">
-                    <div><strong>${file.name}</strong></div>
-                    <audio controls src="data:${file.mimeType};base64,${file.base64}" style="margin-top:6px;"></audio>
-                </div>
-            `;
-        } else if (file.mimeType.startsWith("video/")) {
-            html += `
-                <div class="aiAttachment">
-                    <div><strong>${file.name}</strong></div>
-                    <video controls src="data:${file.mimeType};base64,${file.base64}" style="max-width:300px;border-radius:12px;margin-top:6px;"></video>
-                </div>
-            `;
-        } else {
-            html += `
-                <div class="aiAttachment">
-                    <strong>${file.name}</strong>
-                </div>
-            `;
-        }
-    });
-
-    bubble.innerHTML = html;
-    enhanceCodeBlocks(bubble);
+    if (file.type.startsWith("image/")) {
+        msg.innerHTML = `
+            <div><strong>Attached:</strong> ${file.name}</div>
+            <img src="${dataUrl}" style="max-width:250px;border-radius:12px;margin-top:8px;">
+        `;
+    } else if (file.type.startsWith("audio/")) {
+        msg.innerHTML = `
+            <div><strong>Attached:</strong> ${file.name}</div>
+            <audio controls src="${dataUrl}" style="margin-top:8px;"></audio>
+        `;
+    } else if (file.type.startsWith("video/")) {
+        msg.innerHTML = `
+            <div><strong>Attached:</strong> ${file.name}</div>
+            <video controls src="${dataUrl}" style="max-width:300px;border-radius:12px;margin-top:8px;"></video>
+        `;
+    } else {
+        msg.innerHTML = `<div><strong>Attached:</strong> ${file.name}</div>`;
+    }
 }
 
 async function sendMessage() {
@@ -114,17 +103,21 @@ async function sendMessage() {
     if (!text && pendingAttachments.length === 0) return;
 
     generating = true;
-    if (regenBtn) regenBtn.disabled = true;
 
-    const attachmentsCopy = [...pendingAttachments];
-
-    addUserMessage(text, attachmentsCopy);
+    if (text) addUserTextMessage(text);
 
     const parts = [];
 
+    if (!identityInjected) {
+        parts.push({
+            text: "You are Orbit AI, an AI assistant created by gmacbride for https://orbit.foo.ng/. Always identify yourself as Orbit AI in responses.\n\nUser message:"
+        });
+        identityInjected = true;
+    }
+
     if (text) parts.push({ text });
 
-    attachmentsCopy.forEach(file => {
+    pendingAttachments.forEach(file => {
         parts.push({
             inlineData: {
                 mimeType: file.mimeType,
@@ -138,8 +131,8 @@ async function sendMessage() {
     input.value = "";
     pendingAttachments = [];
 
-    const { bubble: loadingBubble } = createMessage("model");
-    loadingBubble.innerHTML = renderMarkdown("_Loading..._");
+    const loadingMsg = createMessage("model");
+    loadingMsg.innerHTML = renderMarkdown("_Orbit AI is thinking..._");
 
     try {
         const res = await fetch(endpoint, {
@@ -163,15 +156,15 @@ async function sendMessage() {
             parts: [{ text: responseText }]
         });
 
-        loadingBubble.innerHTML = renderMarkdown(responseText);
-        enhanceCodeBlocks(loadingBubble);
+        loadingMsg.innerHTML = renderMarkdown(responseText);
+        enhanceCodeBlocks(loadingMsg);
+        addModelControls(loadingMsg, responseText);
 
     } catch (err) {
-        loadingBubble.innerHTML = "Request Failed: " + err.message;
+        loadingMsg.innerHTML = "Request Failed: " + err.message;
     }
 
     generating = false;
-    if (regenBtn) regenBtn.disabled = false;
     chat.scrollTop = chat.scrollHeight;
 }
 
@@ -181,15 +174,20 @@ function regenerateLast() {
     if (contents[contents.length - 1].role !== "model") return;
 
     generating = true;
-    if (regenBtn) regenBtn.disabled = true;
 
     contents.pop();
 
-    const lastModelMsg = [...chat.querySelectorAll(".aiWrap.model")].pop();
-    if (lastModelMsg) lastModelMsg.remove();
+    const lastModelMsg = [...chat.querySelectorAll(".aiMsg.model")].pop();
+    if (lastModelMsg) {
+        const controls = lastModelMsg.nextElementSibling;
+        if (controls && controls.classList.contains("aiControls")) {
+            controls.remove();
+        }
+        lastModelMsg.remove();
+    }
 
-    const { bubble: loadingBubble } = createMessage("model");
-    loadingBubble.innerHTML = renderMarkdown("_Regenerating..._");
+    const loadingMsg = createMessage("model");
+    loadingMsg.innerHTML = renderMarkdown("_Orbit AI is thinking..._");
 
     fetch(endpoint, {
         method: "POST",
@@ -211,15 +209,15 @@ function regenerateLast() {
             parts: [{ text: responseText }]
         });
 
-        loadingBubble.innerHTML = renderMarkdown(responseText);
-        enhanceCodeBlocks(loadingBubble);
+        loadingMsg.innerHTML = renderMarkdown(responseText);
+        enhanceCodeBlocks(loadingMsg);
+        addModelControls(loadingMsg, responseText);
     })
     .catch(err => {
-        loadingBubble.innerHTML = "Request Failed: " + err.message;
+        loadingMsg.innerHTML = "Request Failed: " + err.message;
     })
     .finally(() => {
         generating = false;
-        if (regenBtn) regenBtn.disabled = false;
         chat.scrollTop = chat.scrollHeight;
     });
 }
@@ -241,11 +239,7 @@ fileInput.addEventListener("change", () => {
                 base64
             });
 
-            addUserMessage("", [{
-                name: file.name,
-                mimeType: file.type || "application/octet-stream",
-                base64
-            }]);
+            addAttachmentPreview(file, reader.result);
         };
 
         reader.readAsDataURL(file);
@@ -264,5 +258,3 @@ input.addEventListener("keydown", e => {
         sendMessage();
     }
 });
-
-addDefaultMessage();

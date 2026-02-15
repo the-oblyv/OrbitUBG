@@ -42,13 +42,20 @@ function enhanceCodeBlocks(container) {
     });
 }
 
-function addModelControls(messageDiv, text) {
+function addIntroMessage() {
+    const introText = "Hello! I'm Orbit AI.\n\nYou can:\n• Ask questions\n• Attach images, audio, or files\n• Regenerate responses\n\nHow can I help you today?";
+    const msg = createMessage("model");
+    msg.innerHTML = renderMarkdown(introText);
+    enhanceCodeBlocks(msg);
+}
+
+function addModelButtons(messageDiv, text) {
     const controls = document.createElement("div");
-    controls.className = "aiControls";
+    controls.className = "aiUnderControls";
 
     const copyBtn = document.createElement("button");
     copyBtn.textContent = "Copy";
-    copyBtn.className = "aiMsgCopy";
+    copyBtn.className = "aiUnderBtn";
     copyBtn.onclick = () => {
         navigator.clipboard.writeText(text).then(() => {
             copyBtn.textContent = "Copied!";
@@ -58,13 +65,13 @@ function addModelControls(messageDiv, text) {
 
     const regenButton = document.createElement("button");
     regenButton.textContent = "Regenerate";
-    regenButton.className = "aiMsgRegen";
+    regenButton.className = "aiUnderBtn";
     regenButton.onclick = regenerateLast;
 
     controls.appendChild(copyBtn);
     controls.appendChild(regenButton);
 
-    messageDiv.after(controls);
+    chat.appendChild(controls);
 }
 
 function addUserTextMessage(text) {
@@ -158,7 +165,7 @@ async function sendMessage() {
 
         loadingMsg.innerHTML = renderMarkdown(responseText);
         enhanceCodeBlocks(loadingMsg);
-        addModelControls(loadingMsg, responseText);
+        addModelButtons(loadingMsg, responseText);
 
     } catch (err) {
         loadingMsg.innerHTML = "Request Failed: " + err.message;
@@ -177,14 +184,11 @@ function regenerateLast() {
 
     contents.pop();
 
-    const lastModelMsg = [...chat.querySelectorAll(".aiMsg.model")].pop();
-    if (lastModelMsg) {
-        const controls = lastModelMsg.nextElementSibling;
-        if (controls && controls.classList.contains("aiControls")) {
-            controls.remove();
-        }
-        lastModelMsg.remove();
-    }
+    const lastModel = [...chat.querySelectorAll(".aiMsg.model")].pop();
+    const lastControls = [...chat.querySelectorAll(".aiUnderControls")].pop();
+
+    if (lastModel) lastModel.remove();
+    if (lastControls) lastControls.remove();
 
     const loadingMsg = createMessage("model");
     loadingMsg.innerHTML = renderMarkdown("_Orbit AI is thinking..._");
@@ -211,7 +215,7 @@ function regenerateLast() {
 
         loadingMsg.innerHTML = renderMarkdown(responseText);
         enhanceCodeBlocks(loadingMsg);
-        addModelControls(loadingMsg, responseText);
+        addModelButtons(loadingMsg, responseText);
     })
     .catch(err => {
         loadingMsg.innerHTML = "Request Failed: " + err.message;
@@ -229,19 +233,15 @@ fileInput.addEventListener("change", () => {
 
     files.forEach(file => {
         const reader = new FileReader();
-
         reader.onload = () => {
             const base64 = reader.result.split(",")[1];
-
             pendingAttachments.push({
                 name: file.name,
                 mimeType: file.type || "application/octet-stream",
                 base64
             });
-
             addAttachmentPreview(file, reader.result);
         };
-
         reader.readAsDataURL(file);
     });
 
@@ -249,7 +249,6 @@ fileInput.addEventListener("change", () => {
 });
 
 sendBtn.addEventListener("click", sendMessage);
-
 if (regenBtn) regenBtn.addEventListener("click", regenerateLast);
 
 input.addEventListener("keydown", e => {
@@ -258,3 +257,5 @@ input.addEventListener("keydown", e => {
         sendMessage();
     }
 });
+
+addIntroMessage();

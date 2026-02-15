@@ -40,7 +40,6 @@ function renderMarkdown(text) {
 function addCodeCopyButtons(container) {
   container.querySelectorAll("pre").forEach(pre => {
     if (pre.querySelector(".aicopy-btn")) return;
-
     const btn = document.createElement("button");
     btn.className = "aicopy-btn";
     btn.innerHTML = `<i class="fa-solid fa-copy"></i> Copy code`;
@@ -48,9 +47,7 @@ function addCodeCopyButtons(container) {
     btn.onclick = () => {
       navigator.clipboard.writeText(code.innerText).then(() => {
         btn.innerHTML = `<i class="fa-solid fa-check"></i> Copied`;
-        setTimeout(() => {
-          btn.innerHTML = `<i class="fa-solid fa-copy"></i> Copy code`;
-        }, 1200);
+        setTimeout(() => { btn.innerHTML = `<i class="fa-solid fa-copy"></i> Copy code`; }, 1200);
       });
     };
     pre.appendChild(btn);
@@ -74,9 +71,7 @@ function addActions(wrapper, text) {
   copyBtn.onclick = () => {
     navigator.clipboard.writeText(text).then(() => {
       copyBtn.innerHTML = `<i class="fa-solid fa-check"></i> Copied`;
-      setTimeout(() => {
-        copyBtn.innerHTML = `<i class="fa-regular fa-copy"></i> Copy`;
-      }, 1200);
+      setTimeout(() => { copyBtn.innerHTML = `<i class="fa-regular fa-copy"></i> Copy`; }, 1200);
     });
   };
 
@@ -125,22 +120,32 @@ async function sendMessage(isRegenerate = false) {
   const parts = [];
 
   if (!identityInjected) {
-    parts.push({
-      text: "You are Orbit AI, an AI assistant created by gmacbride for https://orbit.foo.ng/. Provide helpful responses."
-    });
+    parts.push({ text: "You are Orbit AI, an AI assistant created by gmacbride for https://orbit.foo.ng/. Provide helpful responses." });
     identityInjected = true;
   }
 
   if (!isRegenerate) {
     if (input.value.trim()) parts.push({ text: input.value.trim() });
-    pendingAttachments.forEach(file => {
-      parts.push({ inlineData: { mimeType: file.mimeType, data: file.base64 } });
-    });
+
+    if (pendingAttachments.length) {
+      const promises = pendingAttachments.map(file => new Promise(resolve => {
+        const reader = new FileReader();
+        reader.onload = () => {
+          const base64 = reader.result.split(",")[1];
+          resolve({ inlineData: { mimeType: file.type || "application/octet-stream", data: base64 } });
+        };
+        reader.readAsDataURL(file.file);
+      }));
+      const loadedFiles = await Promise.all(promises);
+      parts.push(...loadedFiles);
+      pendingAttachments = [];
+    }
+
     lastUserParts = parts;
     contents.push({ role: "user", parts });
+
     if (input.value.trim()) addUserTextMessage(input.value.trim());
     input.value = "";
-    pendingAttachments = [];
     const startersDiv = document.querySelector(".aiStarters");
     if (startersDiv) startersDiv.remove();
   } else {
@@ -157,13 +162,10 @@ async function sendMessage(isRegenerate = false) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ contents, generationConfig: { temperature: 0.7 } })
     });
-
     const json = await res.json();
-    const responseText =
-      json?.candidates?.[0]?.content?.parts?.[0]?.text || json?.text || "(No response)";
+    const responseText = json?.candidates?.[0]?.content?.parts?.[0]?.text || json?.text || "(No response)";
 
     contents.push({ role: "model", parts: [{ text: responseText }] });
-
     loading.innerHTML = renderMarkdown(responseText);
     enhance(loading);
     addActions(wrapper, responseText);
@@ -190,12 +192,7 @@ attachBtn.addEventListener("click", () => fileInput.click());
 
 fileInput.addEventListener("change", () => {
   Array.from(fileInput.files).forEach(file => {
-    const reader = new FileReader();
-    reader.onload = () => {
-      const base64 = reader.result.split(",")[1];
-      pendingAttachments.push({ mimeType: file.type || "application/octet-stream", base64 });
-    };
-    reader.readAsDataURL(file);
+    pendingAttachments.push({ file });
   });
   fileInput.value = "";
 });

@@ -32,13 +32,10 @@ function renderMarkdown(text) {
 function addCodeCopyButtons(container) {
   container.querySelectorAll("pre").forEach(pre => {
     if (pre.querySelector(".aicopy-btn")) return;
-
     const btn = document.createElement("button");
     btn.className = "aicopy-btn";
     btn.innerHTML = `<i class="fa-solid fa-copy"></i> Copy code`;
-
     const code = pre.querySelector("code");
-
     btn.onclick = () => {
       navigator.clipboard.writeText(code.innerText).then(() => {
         btn.innerHTML = `<i class="fa-solid fa-check"></i> Copied`;
@@ -47,17 +44,15 @@ function addCodeCopyButtons(container) {
         }, 1200);
       });
     };
-
     pre.appendChild(btn);
   });
 }
 
-function addMessageControls(wrapper, rawText, messageIndex) {
+function addMessageButtons(wrapper, rawText) {
   const container = document.createElement("div");
   container.style.display = "flex";
   container.style.gap = "10px";
   container.style.marginTop = "6px";
-  container.style.alignItems = "center";
 
   const copyBtn = document.createElement("button");
   copyBtn.className = "aiMessageCopy";
@@ -75,8 +70,11 @@ function addMessageControls(wrapper, rawText, messageIndex) {
   regenBtn.className = "aiMessageCopy";
   regenBtn.innerHTML = `<i class="fa-solid fa-arrows-rotate"></i> Regenerate`;
   regenBtn.onclick = async () => {
-    contents = contents.filter((_, i) => i !== messageIndex);
+    contents = contents.filter(
+      m => !(m.role === "model" && m.parts?.[0]?.text === rawText)
+    );
     wrapper.remove();
+    identityInjected = false;
     await sendMessage(rawText);
   };
 
@@ -97,8 +95,8 @@ function addUserTextMessage(text) {
   enhance(msg);
 }
 
-async function sendMessage(textOverride = null) {
-  const text = textOverride ?? input.value.trim();
+async function sendMessage(textOverride) {
+  const text = textOverride || input.value.trim();
   if (!text && pendingAttachments.length === 0) return;
 
   if (!textOverride && text) addUserTextMessage(text);
@@ -113,15 +111,6 @@ async function sendMessage(textOverride = null) {
   }
 
   if (text) parts.push({ text });
-
-  pendingAttachments.forEach(file => {
-    parts.push({
-      inlineData: {
-        mimeType: file.mimeType,
-        data: file.base64
-      }
-    });
-  });
 
   contents.push({ role: "user", parts });
 
@@ -155,8 +144,7 @@ async function sendMessage(textOverride = null) {
 
     loadingMsg.innerHTML = renderMarkdown(responseText);
     enhance(loadingMsg);
-    addMessageControls(wrapper, responseText, contents.length - 1);
-
+    addMessageButtons(wrapper, responseText);
   } catch (err) {
     loadingMsg.innerHTML = "Request Failed: " + err.message;
   }
@@ -166,12 +154,11 @@ async function sendMessage(textOverride = null) {
 
 function sendInitialMessage() {
   const welcomeText = "Hello! I'm Orbit AI. How can I help you today?";
-
   const wrapper = createWrapper("model");
   const msg = createMessage("model", wrapper);
   msg.innerHTML = renderMarkdown(welcomeText);
   enhance(msg);
-  addMessageControls(wrapper, welcomeText, contents.length);
+  addMessageButtons(wrapper, welcomeText);
 
   contents.push({
     role: "model",
@@ -198,6 +185,7 @@ fileInput.addEventListener("change", () => {
 });
 
 sendBtn.addEventListener("click", () => sendMessage());
+
 input.addEventListener("keydown", e => {
   if (e.key === "Enter" && !e.shiftKey) {
     e.preventDefault();

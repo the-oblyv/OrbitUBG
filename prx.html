@@ -120,22 +120,28 @@ let historyIndex = -1;
 
 function loadUrl(url) {
   url = url.trim();
-  if(!url) url = 'newtab.html';
-  
-  let target = url;
-
-  if(url !== 'newtab.html') {
-    const isUrl = url.startsWith('http') || url.includes('.') || url.startsWith('embed.html');
-    if(!isUrl){
-      target = 'https://start.duckduckgo.com/?q=' + encodeURIComponent(url);
+  if(!url){
+    iframe.src = 'newtab.html';
+    urlInput.value = '';
+    if(historyIndex===-1 || historyStack[historyIndex] !== 'newtab.html'){
+      historyStack = historyStack.slice(0, historyIndex+1);
+      historyStack.push('newtab.html');
+      historyIndex++;
     }
-    if(!target.startsWith('http') && !target.startsWith('embed.html')) target = 'https://' + target;
+    return;
   }
 
-  iframe.src = 'embed.html#' + encodeURIComponent(target);
-  urlInput.value = (url === 'newtab.html') ? '' : url;
+  let target = url;
+  const isUrl = url.startsWith('http') || url.includes('.') || url.startsWith('embed.html');
+  if(!isUrl){
+    target = 'https://start.duckduckgo.com/?q=' + encodeURIComponent(url);
+  }
+  if(!target.startsWith('http') && !target.startsWith('embed.html')) target = 'https://' + target;
 
-  if(historyIndex===-1 || historyStack[historyIndex]!==url){
+  iframe.src = 'embed.html#' + encodeURIComponent(target);
+  urlInput.value = url;
+
+  if(historyIndex===-1 || historyStack[historyIndex] !== url){
     historyStack = historyStack.slice(0, historyIndex+1);
     historyStack.push(url);
     historyIndex++;
@@ -143,29 +149,31 @@ function loadUrl(url) {
 }
 
 function updateInput() {
-  urlInput.value = historyStack[historyIndex]==='newtab.html'?'':historyStack[historyIndex]||'';
+  const current = historyStack[historyIndex] || 'newtab.html';
+  urlInput.value = (current==='newtab.html')?'':current;
 }
 
 backBtn.onclick = () => {
   if(historyIndex>0){
     historyIndex--;
+    const prev = historyStack[historyIndex];
     updateInput();
-    iframe.src='embed.html#'+encodeURIComponent(historyStack[historyIndex]);
+    iframe.src = (prev==='newtab.html')?'newtab.html':'embed.html#'+encodeURIComponent(prev);
   }
 }
 
 forwardBtn.onclick = () => {
   if(historyIndex<historyStack.length-1){
     historyIndex++;
+    const next = historyStack[historyIndex];
     updateInput();
-    iframe.src='embed.html#'+encodeURIComponent(historyStack[historyIndex]);
+    iframe.src = (next==='newtab.html')?'newtab.html':'embed.html#'+encodeURIComponent(next);
   }
 }
 
 refreshBtn.onclick = () => {
-  if(historyIndex>=0){
-    iframe.src='embed.html#'+encodeURIComponent(historyStack[historyIndex]);
-  }
+  const current = historyStack[historyIndex] || 'newtab.html';
+  iframe.src = (current==='newtab.html')?'newtab.html':'embed.html#'+encodeURIComponent(current);
 }
 
 urlInput.addEventListener('keydown', e => {
@@ -176,7 +184,7 @@ const initialFragment = location.hash.slice(1);
 if(initialFragment){
   loadUrl(decodeURIComponent(initialFragment));
 } else {
-  loadUrl('newtab.html');
+  loadUrl('');
 }
 </script>
 </body>

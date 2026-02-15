@@ -10,7 +10,7 @@ const startersContainer = document.getElementById("aiStarters");
 let contents = [];
 let pendingAttachments = [];
 let identityInjected = false;
-let lastUserText = null;
+let lastUserParts = null;
 
 const starters = [
   { starterName: "Explain quantum computing simply", starterText: "Explain quantum computing simply" },
@@ -88,7 +88,7 @@ function addActions(wrapper, text) {
   regenBtn.innerHTML = `<i class="fa-solid fa-rotate"></i> Regenerate`;
 
   regenBtn.onclick = async () => {
-    if (!lastUserText) return;
+    if (!lastUserParts) return;
     wrapper.remove();
     contents.pop();
     await sendMessage(true);
@@ -99,11 +99,15 @@ function addActions(wrapper, text) {
   wrapper.appendChild(actions);
 }
 
-function addUserMessage(text) {
+function addUserMessage(parts) {
   const wrapper = createWrapper("user");
   const msg = createMessage("user", wrapper);
-  msg.innerHTML = renderMarkdown(text);
-  enhance(msg);
+
+  const textPart = parts.find(p => p.text);
+  if (textPart) {
+    msg.innerHTML = renderMarkdown(textPart.text);
+    enhance(msg);
+  }
 }
 
 function renderStarters() {
@@ -125,41 +129,41 @@ function renderStarters() {
 }
 
 async function sendMessage(isRegenerate = false) {
-  const text = isRegenerate ? lastUserText : input.value.trim();
-  if (!text && pendingAttachments.length === 0) return;
+  let parts = [];
 
   if (!isRegenerate) {
-    addUserMessage(text);
-    lastUserText = text;
-  }
+    const text = input.value.trim();
+    if (!text && pendingAttachments.length === 0) return;
 
-  const parts = [];
+    if (!identityInjected) {
+      parts.push({
+        text: "You are Orbit AI, an AI assistant created by gmacbride for https://orbit.foo.ng/. Provide helpful responses."
+      });
+      identityInjected = true;
+    }
 
-  if (!identityInjected) {
-    parts.push({
-      text: "You are Orbit AI, an AI assistant created by gmacbride for https://orbit.foo.ng/. Provide helpful responses."
+    if (text) parts.push({ text });
+
+    pendingAttachments.forEach(file => {
+      parts.push({
+        inlineData: {
+          mimeType: file.mimeType,
+          data: file.base64
+        }
+      });
     });
-    identityInjected = true;
-  }
 
-  if (text) parts.push({ text });
+    lastUserParts = parts;
+    contents.push({ role: "user", parts });
+    addUserMessage(parts);
 
-  pendingAttachments.forEach(file => {
-    parts.push({
-      inlineData: {
-        mimeType: file.mimeType,
-        data: file.base64
-      }
-    });
-  });
-
-  if (!isRegenerate) {
+    input.value = "";
+    pendingAttachments = [];
+    startersContainer.innerHTML = "";
+  } else {
+    parts = lastUserParts;
     contents.push({ role: "user", parts });
   }
-
-  input.value = "";
-  pendingAttachments = [];
-  startersContainer.innerHTML = "";
 
   const wrapper = createWrapper("model");
   const loading = createMessage("model", wrapper);

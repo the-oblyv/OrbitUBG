@@ -18,7 +18,7 @@ function saveSettings(s) {
 }
 
 const settings = getSettings();
-const SJ_PREFIX = "/sj/";
+const SJ_PREFIX = "/prx";
 
 const defaultTitle = document.title;
 let defaultIcon = document.querySelector("link[rel='icon']");
@@ -76,13 +76,26 @@ document.addEventListener("DOMContentLoaded", () => {
   if (menuBtn) menuBtn.onclick = () => menu.classList.toggle("open");
 
   const search = document.getElementById("proxySearch");
-  if (search) {
-    search.addEventListener("keydown", e => {
-      if (e.key !== "Enter") return;
-      let q = search.value.trim();
-      if (!q) return;
-    });
-  }
+if (search) {
+  search.addEventListener("keydown", e => {
+    if (e.key !== "Enter") return;
+
+    let q = search.value.trim();
+    if (!q) return;
+
+    let target;
+
+    if (q.startsWith("http://") || q.startsWith("https://")) {
+      target = q;
+    } else if (q.includes(".")) {
+      target = "https://" + q;
+    } else {
+      target = "https://start.duckduckgo.com/?q=" + encodeURIComponent(q);
+    }
+
+    location.href = "/prx#" + encodeURIComponent(target);
+  });
+}
 
   const gamesGrid = document.getElementById("gamesGrid");
   if (gamesGrid) {

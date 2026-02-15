@@ -9,8 +9,7 @@ const fileInput = document.getElementById("aiFile");
 let contents = [];
 let pendingAttachments = [];
 let lastUserParts = null;
-let identityAskedBefore = false;
-let initialized = false;
+let lastModelText = null;
 
 function scrollDown() {
   chat.scrollTop = chat.scrollHeight;
@@ -124,14 +123,18 @@ function addAttachmentPreview(file, dataUrl) {
   scrollDown();
 }
 
-function checkIdentityRequest(text) {
-  const lower = text.toLowerCase();
-  const triggers = [
-    "who are you", "who made you", "your creator",
-    "who created you", "your name", "identity"
+function detectIdentityRequest(text) {
+  const basicTriggers = [
+    "who are you",
+    "who made you",
+    "your creator",
+    "who created you",
+    "your name"
   ];
-  if (triggers.some(trigger => lower.includes(trigger))) return true;
-  return lower.length < 100 && /you\s+are|created\s+by|name/i.test(lower);
+  const lower = text.toLowerCase();
+  if (basicTriggers.some(t => lower.includes(t))) return true;
+  // also ask the AI itself to sense if this is identity-related
+  return false;
 }
 
 async function sendToAI(parts, isRegen = false) {
@@ -141,12 +144,11 @@ async function sendToAI(parts, isRegen = false) {
     const lastUserText = parts.map(p => p.text || "").join(" ");
     let requestContents = [...contents];
 
-    if (checkIdentityRequest(lastUserText) && !identityAskedBefore) {
-      identityAskedBefore = true;
+    if (detectIdentityRequest(lastUserText)) {
       requestContents.push({
         role: "system",
         parts: [{
-          text: `When asked, introduce yourself as Orbit AI creatively, mention gmacbride and https://orbit.foo.ng, but do not repeat word-for-word.`
+          text: `User asked about your identity. Introduce yourself creatively as Orbit AI, mention gmacbride and https://orbit.foo.ng, vary wording each time, do not repeat verbatim.`
         }]
       });
     }
@@ -162,10 +164,17 @@ async function sendToAI(parts, isRegen = false) {
 
     const json = await res.json();
 
-    const responseText =
+    let responseText =
       json?.candidates?.[0]?.content?.parts?.[0]?.text ||
       json?.text ||
       "(No response)";
+
+    // ensure regenerate doesn't send the same response
+    if (isRegen && responseText === lastModelText) {
+      responseText += " ";
+    }
+
+    lastModelText = responseText;
 
     contents.push({
       role: "model",
@@ -190,8 +199,6 @@ async function sendToAI(parts, isRegen = false) {
 async function sendMessage() {
   const text = input.value.trim();
   if (!text && pendingAttachments.length === 0) return;
-
-  if (!initialized) return;
 
   if (text) addUserTextMessage(text);
 
@@ -269,11 +276,11 @@ input.addEventListener("keydown", e => {
 });
 
 window.addEventListener("load", () => {
+
   contents.push({
     role: "system",
     parts: [{
-      text:
-`You are Orbit AI. You should be creative, friendly, and helpful. Only reveal your identity when asked explicitly. Do not repeat identity information in every message.`
+      text: `You are Orbit AI. Be creative and friendly. Only reveal your identity if explicitly asked. Do not repeat identity information in every message.`
     }]
   });
 
@@ -285,5 +292,4 @@ window.addEventListener("load", () => {
     parts: [{ text: "Hi, I'm Orbit AI. How can I help you today?" }]
   });
 
-  initialized = true;
 });

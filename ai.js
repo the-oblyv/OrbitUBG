@@ -6,10 +6,10 @@ const sendBtn = document.getElementById("sendBtn");
 const attachBtn = document.getElementById("attachBtn");
 const fileInput = document.getElementById("aiFile");
 
-let contents = [];
+let messages = [];
 let pendingAttachments = [];
-let lastUserParts = null;
-let lastModelText = null;
+let lastUserContent = "";
+let lastModelContent = "";
 
 function scrollDown() { chat.scrollTop = chat.scrollHeight; }
 
@@ -98,33 +98,29 @@ function detectIdentityRequest(text) {
   return triggers.some(t => text.toLowerCase().includes(t));
 }
 
-async function sendToAI(parts, isRegen=false) {
+async function sendToAI(userContent, isRegen=false) {
   const loadingBubble = addMessage("model", "_Orbit AI is thinking..._");
 
   try {
-    const lastUserText = parts.map(p => p.text || "").join(" ");
-    let requestContents = [...contents];
+    let payload = [...messages];
 
-    if (detectIdentityRequest(lastUserText)) {
-      requestContents.push({
-        role: "system",
-        parts: [{ text: "User asked about your identity. Introduce yourself creatively as Orbit AI, mention gmacbride and https://orbit.foo.ng, vary wording each time, do not repeat verbatim." }]
-      });
+    if (detectIdentityRequest(userContent)) {
+      payload.push({ role: "system", content: "User asked about your identity. Introduce yourself creatively as Orbit AI, mention gmacbride and https://orbit.foo.ng, vary wording, do not repeat verbatim." });
     }
 
     const res = await fetch(endpoint, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ contents: requestContents, generationConfig: { temperature: 0.7 } })
+      body: JSON.stringify({ messages: payload })
     });
 
     const json = await res.json();
-    let responseText = json?.candidates?.[0]?.content?.parts?.[0]?.text || json?.text || "(No response)";
 
-    if (isRegen && responseText === lastModelText) responseText += " ";
+    let responseText = json?.text || "(No response)";
+    if (isRegen && responseText === lastModelContent) responseText += " ";
 
-    lastModelText = responseText;
-    contents.push({ role: "model", parts: [{ text: responseText }] });
+    lastModelContent = responseText;
+    messages.push({ role: "assistant", content: responseText });
 
     const wrapper = loadingBubble.parentElement;
     wrapper.innerHTML = "";
@@ -135,36 +131,40 @@ async function sendToAI(parts, isRegen=false) {
     enhanceCodeBlocks(bubble);
     addCopyControls(wrapper, responseText);
     scrollDown();
-  } catch (err) { loadingBubble.innerHTML = "Request Failed: " + err.message; }
+  } catch (err) {
+    loadingBubble.innerHTML = "Request Failed: " + err.message;
+  }
 }
 
 async function sendMessage() {
   const text = input.value.trim();
   if (!text && pendingAttachments.length === 0) return;
+
   if (text) addUserTextMessage(text);
 
-  const parts = [];
-  if (text) parts.push({ text });
-  pendingAttachments.forEach(file => { parts.push({ inlineData: { mimeType: file.mimeType, data: file.base64 } }); });
+  let combinedContent = text || "";
+  pendingAttachments.forEach(f => { combinedContent += `\n[Attachment: ${f.name} | ${f.mimeType} | base64 data]`; });
 
-  contents.push({ role: "user", parts });
-  lastUserParts = parts;
+  messages.push({ role: "user", content: combinedContent });
+  lastUserContent = combinedContent;
 
   input.value = "";
   pendingAttachments = [];
-  await sendToAI(parts);
+
+  await sendToAI(combinedContent);
 }
 
 async function regenerateLast() {
-  if (!lastUserParts) return;
-  const modelWrappers = chat.querySelectorAll(".aiWrapper.model");
-  if (modelWrappers.length > 0) modelWrappers[modelWrappers.length - 1].remove();
+  if (!lastUserContent) return;
 
-  for (let i = contents.length - 1; i >= 0; i--) {
-    if (contents[i].role === "model") { contents.splice(i, 1); break; }
+  const modelWrappers = chat.querySelectorAll(".aiWrapper.model");
+  if (modelWrappers.length > 0) modelWrappers[modelWrappers.length-1].remove();
+
+  for (let i = messages.length - 1; i >= 0; i--) {
+    if (messages[i].role === "assistant") { messages.splice(i, 1); break; }
   }
 
-  await sendToAI(lastUserParts, true);
+  await sendToAI(lastUserContent, true);
 }
 
 attachBtn.addEventListener("click", () => fileInput.click());
@@ -182,10 +182,10 @@ fileInput.addEventListener("change", () => {
 });
 
 sendBtn.addEventListener("click", sendMessage);
-input.addEventListener("keydown", e => { if (e.key==="Enter"&&!e.shiftKey){e.preventDefault();sendMessage();} });
+input.addEventListener("keydown", e => { if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();sendMessage();} });
 
 window.addEventListener("load", () => {
-  contents.push({ role:"system", parts:[{text:"You are Orbit AI. Be creative and friendly. Only reveal your identity if explicitly asked. Do not repeat identity information in every message."}] });
+  messages.push({ role: "system", content: "You are Orbit AI. Be creative and friendly. Only reveal your identity if explicitly asked. Do not repeat identity information in every message." });
   addMessage("model","Hi, I'm **Orbit AI** 👋\n\nAsk me anything — code, homework help, explanations, ideas, or just chat.");
-  contents.push({ role:"model", parts:[{text:"Hi, I'm Orbit AI. How can I help you today?"}] });
+  messages.push({ role:"assistant", content:"Hi, I'm Orbit AI. How can I help you today?" });
 });

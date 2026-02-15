@@ -201,9 +201,17 @@ async function sendMessage() {
 async function regenerateLast() {
   if (!lastUserParts) return;
 
-  contents = contents.filter(item => item.role !== "model");
+  const modelWrappers = chat.querySelectorAll(".aiWrapper.model");
+  if (modelWrappers.length > 0) {
+    modelWrappers[modelWrappers.length - 1].remove();
+  }
 
-  contents.push({ role: "user", parts: lastUserParts });
+  for (let i = contents.length - 1; i >= 0; i--) {
+    if (contents[i].role === "model") {
+      contents.splice(i, 1);
+      break;
+    }
+  }
 
   await sendToAI(lastUserParts, true);
 }

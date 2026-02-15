@@ -101,7 +101,7 @@ let historyIndex=-1
 const key="orbit"
 
 function randomSubdomain(length=6){
-  const chars="abcdefghijklmnopqrstuvwxyz0123456789"
+  const chars="abcdefghijklmnopqrstuvwxyz0123456789-"
   let result=""
   for(let i=0;i<length;i++){
     result+=chars[Math.floor(Math.random()*chars.length)]
@@ -155,7 +155,7 @@ function load(value,addHistory=true){
     return
   }
 
-  const embedURL=`https://${sessionSub}.prx.orbit.foo.ng/embed.html#${encodeURIComponent(formatted)}`
+  const embedURL=`https://${sessionSub}.gmsexpress.org/embed.html#${encodeURIComponent(formatted)}`
   iframe.src=embedURL
 
   input.value=value

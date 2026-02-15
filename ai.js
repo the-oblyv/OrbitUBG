@@ -11,6 +11,7 @@ let contents = [];
 let pendingAttachments = [];
 let identityInjected = false;
 let lastUserParts = null;
+let readingFiles = false;
 
 const starters = [
   { starterName: "Explain quantum computing simply", starterText: "Explain quantum computing simply" },
@@ -112,23 +113,22 @@ function addUserMessage(parts) {
 
 function renderStarters() {
   startersContainer.innerHTML = "";
-
   starters.forEach(starter => {
     const btn = document.createElement("button");
     btn.className = "aiStarterBtn";
     btn.textContent = starter.starterName;
-
     btn.onclick = () => {
       input.value = starter.starterText;
       startersContainer.innerHTML = "";
       sendMessage();
     };
-
     startersContainer.appendChild(btn);
   });
 }
 
 async function sendMessage(isRegenerate = false) {
+  if (readingFiles) return;
+
   let parts = [];
 
   if (!isRegenerate) {
@@ -220,21 +220,28 @@ function sendInitialMessage() {
 
 attachBtn.addEventListener("click", () => fileInput.click());
 
-fileInput.addEventListener("change", () => {
+fileInput.addEventListener("change", async () => {
   const files = Array.from(fileInput.files);
+  if (!files.length) return;
 
-  files.forEach(file => {
-    const reader = new FileReader();
-    reader.onload = () => {
-      const base64 = reader.result.split(",")[1];
-      pendingAttachments.push({
-        mimeType: file.type || "application/octet-stream",
-        base64
-      });
-    };
-    reader.readAsDataURL(file);
-  });
+  readingFiles = true;
 
+  await Promise.all(files.map(file => {
+    return new Promise(resolve => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const base64 = reader.result.split(",")[1];
+        pendingAttachments.push({
+          mimeType: file.type || "application/octet-stream",
+          base64
+        });
+        resolve();
+      };
+      reader.readAsDataURL(file);
+    });
+  }));
+
+  readingFiles = false;
   fileInput.value = "";
 });
 

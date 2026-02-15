@@ -142,6 +142,15 @@ function formatInput(value){
   return "https://start.duckduckgo.com/?q="+encodeURIComponent(value)
 }
 
+function randomSubdomain(length=6){
+  const chars="abcdefghijklmnopqrstuvwxyz0123456789"
+  let result=""
+  for(let i=0;i<length;i++){
+    result+=chars[Math.floor(Math.random()*chars.length)]
+  }
+  return result
+}
+
 function load(value,addHistory=true){
   const formatted=formatInput(value)
   if(!formatted){
@@ -149,9 +158,14 @@ function load(value,addHistory=true){
     input.value=""
     return
   }
-  iframe.src="embed.html#"+encodeURIComponent(formatted)
+
+  const sub=randomSubdomain()
+  const embedURL=`https://${sub}.prx.orbit.foo.ng/embed.html#${encodeURIComponent(formatted)}`
+  iframe.src=embedURL
+
   input.value=value
   location.hash=encodeURIComponent(value)
+
   if(addHistory){
     historyStack=historyStack.slice(0,historyIndex+1)
     historyStack.push(value)

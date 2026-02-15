@@ -6,18 +6,16 @@ const sendBtn = document.getElementById("sendBtn");
 const attachBtn = document.getElementById("attachBtn");
 const fileInput = document.getElementById("aiFile");
 
-let contents = [
-  {
-    role: "user",
-    parts: [{
-      text:
-        "SYSTEM: You are Orbit AI. If you are unsure of a factual answer, especially song identification, you MUST say you are not certain. Do NOT guess. Do NOT fabricate. If you cannot verify, say you do not know."
-    }]
-  }
-];
-
+let contents = [];
 let pendingAttachments = [];
 let lastUserParts = null;
+
+const systemInstruction = {
+  role: "system",
+  parts: [{
+    text: "You are Orbit AI. Do not introduce yourself unless asked. If you are unsure of factual information, say you are not certain. Do not guess. Do not fabricate."
+  }]
+};
 
 function scrollDown() {
   chat.scrollTop = chat.scrollHeight;
@@ -131,6 +129,7 @@ async function sendToAI() {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
+        systemInstruction,
         contents,
         generationConfig: {
           temperature: 0.2,
@@ -145,7 +144,7 @@ async function sendToAI() {
     const responseText =
       json?.candidates?.[0]?.content?.parts?.[0]?.text ||
       json?.text ||
-      "I’m not sure about that.";
+      "I'm not sure about that.";
 
     contents.push({
       role: "model",
@@ -246,5 +245,5 @@ input.addEventListener("keydown", e => {
 });
 
 window.addEventListener("load", () => {
-  addMessage("model", "Hello. I'm **Orbit AI**. How can I assist you?");
+  addMessage("model", "Hello. How can I help?");
 });

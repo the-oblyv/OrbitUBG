@@ -74,8 +74,7 @@ function addMessageButtons(wrapper, rawText) {
       m => !(m.role === "model" && m.parts?.[0]?.text === rawText)
     );
     wrapper.remove();
-    identityInjected = false;
-    await sendMessage(rawText);
+    await sendMessage();
   };
 
   container.appendChild(copyBtn);
@@ -104,15 +103,29 @@ async function sendMessage(textOverride) {
   const parts = [];
 
   if (!identityInjected) {
-    parts.push({
-      text: "You are Orbit AI, an AI assistant created by gmacbride for https://orbit.foo.ng/. Provide helpful responses."
+    contents.push({
+      role: "model",
+      parts: [
+        {
+          text: "Hello! I'm Orbit AI. How can I help you today?"
+        }
+      ]
     });
     identityInjected = true;
   }
 
   if (text) parts.push({ text });
 
-  contents.push({ role: "user", parts });
+  pendingAttachments.forEach(file => {
+    parts.push({
+      inlineData: {
+        mimeType: file.mimeType,
+        data: file.base64
+      }
+    });
+  });
+
+  if (parts.length > 0) contents.push({ role: "user", parts });
 
   if (!textOverride) input.value = "";
   pendingAttachments = [];
@@ -152,20 +165,6 @@ async function sendMessage(textOverride) {
   chat.scrollTop = chat.scrollHeight;
 }
 
-function sendInitialMessage() {
-  const welcomeText = "Hello! I'm Orbit AI. How can I help you today?";
-  const wrapper = createWrapper("model");
-  const msg = createMessage("model", wrapper);
-  msg.innerHTML = renderMarkdown(welcomeText);
-  enhance(msg);
-  addMessageButtons(wrapper, welcomeText);
-
-  contents.push({
-    role: "model",
-    parts: [{ text: welcomeText }]
-  });
-}
-
 attachBtn.addEventListener("click", () => fileInput.click());
 
 fileInput.addEventListener("change", () => {
@@ -193,4 +192,4 @@ input.addEventListener("keydown", e => {
   }
 });
 
-sendInitialMessage();
+sendMessage();

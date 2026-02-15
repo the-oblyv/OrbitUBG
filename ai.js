@@ -9,6 +9,8 @@ const fileInput = document.getElementById("aiFile");
 let contents = [];
 let pendingAttachments = [];
 let lastUserParts = null;
+let identityAskedBefore = false;
+let initialized = false;
 
 function scrollDown() {
   chat.scrollTop = chat.scrollHeight;
@@ -139,11 +141,12 @@ async function sendToAI(parts, isRegen = false) {
     const lastUserText = parts.map(p => p.text || "").join(" ");
     let requestContents = [...contents];
 
-    if (checkIdentityRequest(lastUserText)) {
+    if (checkIdentityRequest(lastUserText) && !identityAskedBefore) {
+      identityAskedBefore = true;
       requestContents.push({
         role: "system",
         parts: [{
-          text: `When asked, introduce yourself as Orbit AI creatively, mention that you were created by gmacbride for https://orbit.foo.ng, but do not repeat word-for-word.`
+          text: `When asked, introduce yourself as Orbit AI creatively, mention gmacbride and https://orbit.foo.ng, but do not repeat word-for-word.`
         }]
       });
     }
@@ -187,6 +190,8 @@ async function sendToAI(parts, isRegen = false) {
 async function sendMessage() {
   const text = input.value.trim();
   if (!text && pendingAttachments.length === 0) return;
+
+  if (!initialized) return;
 
   if (text) addUserTextMessage(text);
 
@@ -279,4 +284,6 @@ window.addEventListener("load", () => {
     role: "model",
     parts: [{ text: "Hi, I'm Orbit AI. How can I help you today?" }]
   });
+
+  initialized = true;
 });

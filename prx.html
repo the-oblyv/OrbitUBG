@@ -7,7 +7,6 @@
 <link rel="icon" href="/res/orbit.png">
 <link rel="stylesheet" href="/style.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-
 <style>
 :root {
   --main-bg: #0f1420;
@@ -100,7 +99,7 @@ body, html {
   <button class="addr-btn" id="backBtn"><i class="fa-solid fa-arrow-left"></i></button>
   <button class="addr-btn" id="forwardBtn"><i class="fa-solid fa-arrow-right"></i></button>
   <button class="addr-btn" id="refreshBtn"><i class="fa-solid fa-rotate-right"></i></button>
-  <input id="urlInput" placeholder="Enter URL..." autocomplete="off">
+  <input id="urlInput" placeholder="Search or enter address" autocomplete="off">
 </div>
 
 <div id="proxyContainer">
@@ -120,51 +119,52 @@ let historyStack = [];
 let historyIndex = -1;
 
 function loadUrl(url) {
-  if (!url.startsWith('http')) url = 'https://' + url;
+  if(!url) url = 'newtab.html';
+  if(!url.startsWith('http') && !url.startsWith('embed.html') && !url.startsWith('newtab.html')) url = 'https://' + url;
   iframe.src = 'embed.html#' + encodeURIComponent(url);
-  urlInput.value = url;
-  if (historyIndex === -1 || historyStack[historyIndex] !== url) {
-    historyStack = historyStack.slice(0, historyIndex + 1);
+  urlInput.value = url === 'newtab.html' ? '' : url;
+  if(historyIndex===-1||historyStack[historyIndex]!==url){
+    historyStack = historyStack.slice(0, historyIndex+1);
     historyStack.push(url);
     historyIndex++;
   }
 }
 
 function updateInput() {
-  urlInput.value = historyStack[historyIndex] || '';
+  urlInput.value = historyStack[historyIndex]==='newtab.html'?'':historyStack[historyIndex]||'';
 }
 
 backBtn.onclick = () => {
-  if (historyIndex > 0) {
+  if(historyIndex>0){
     historyIndex--;
     updateInput();
-    iframe.src = 'embed.html#' + encodeURIComponent(historyStack[historyIndex]);
+    iframe.src='embed.html#'+encodeURIComponent(historyStack[historyIndex]);
   }
 }
 
 forwardBtn.onclick = () => {
-  if (historyIndex < historyStack.length -1) {
+  if(historyIndex<historyStack.length-1){
     historyIndex++;
     updateInput();
-    iframe.src = 'embed.html#' + encodeURIComponent(historyStack[historyIndex]);
+    iframe.src='embed.html#'+encodeURIComponent(historyStack[historyIndex]);
   }
 }
 
 refreshBtn.onclick = () => {
-  if(historyIndex >=0){
-    iframe.src = 'embed.html#' + encodeURIComponent(historyStack[historyIndex]);
+  if(historyIndex>=0){
+    iframe.src='embed.html#'+encodeURIComponent(historyStack[historyIndex]);
   }
 }
 
 urlInput.addEventListener('keydown', e => {
-  if(e.key === 'Enter') loadUrl(urlInput.value);
+  if(e.key==='Enter') loadUrl(urlInput.value);
 });
 
 const initialFragment = location.hash.slice(1);
 if(initialFragment){
   loadUrl(decodeURIComponent(initialFragment));
 } else {
-  loadUrl('embed.html');
+  loadUrl('newtab.html');
 }
 </script>
 </body>

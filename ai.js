@@ -5,6 +5,12 @@ const chat = document.getElementById("aiChat");
 const sendBtn = document.getElementById("sendBtn");
 const attachBtn = document.getElementById("attachBtn");
 const fileInput = document.getElementById("aiFile");
+const starters = [
+  { starterName: "Explain quantum computing simply", starterText: "Explain quantum computing simply" },
+  { starterName: "Help me write a resume", starterText: "Help me write a resume" },
+  { starterName: "Give me a coding project idea", starterText: "Give me a coding project idea" },
+  { starterName: "Summarize a topic for me", starterText: "Summarize a topic for me" }
+];
 
 let contents = [];
 let pendingAttachments = [];

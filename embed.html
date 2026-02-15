@@ -60,7 +60,7 @@
         }
       });
       scramjet.init();
-      navigator.serviceWorker.register('https://ptza.env.pm/sw.js');
+      navigator.serviceWorker.register('/sw.js');
       const connection = new BareMux.BareMuxConnection('https://ptza.env.pm/baremux/worker.js');
       const store = {
         wispurl: _CONFIG?.wispurl || (location.protocol === 'https:' ? 'wss' : 'ws') + '://' + location.host + '/wisp/',

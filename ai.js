@@ -86,43 +86,35 @@ function addMessage(role, text) {
   return bubble;
 }
 
-function addUserTextMessage(text) {
-  addMessage("user", text);
-}
+function addAttachmentPreview(file, dataUrl) {
+  const wrapper = createWrapper("user");
+  const bubble = document.createElement("div");
+  bubble.className = "aiMsg user";
 
-function isFactualQuery(text) {
-  const triggers = [
-    "who",
-    "what",
-    "when",
-    "where",
-    "release",
-    "song",
-    "artist",
-    "album",
-    "date",
-    "year",
-    "born",
-    "net worth"
-  ];
-  return triggers.some(word => text.toLowerCase().includes(word));
-}
-
-async function searchOnline(query) {
-  try {
-    const res = await fetch("https://api.duckduckgo.com/?q=" + encodeURIComponent(query) + "&format=json&no_html=1");
-    const data = await res.json();
-    if (data.AbstractText) return data.AbstractText;
-    if (data.RelatedTopics && data.RelatedTopics.length > 0) {
-      return data.RelatedTopics[0].Text || "";
-    }
-    return "";
-  } catch {
-    return "";
+  if (file.type.startsWith("image/")) {
+    bubble.innerHTML = `
+      <div><strong>Attached:</strong> ${file.name}</div>
+      <img src="${dataUrl}" style="max-width:250px;border-radius:12px;margin-top:8px;">
+    `;
+  } else if (file.type.startsWith("audio/")) {
+    bubble.innerHTML = `
+      <div><strong>Attached:</strong> ${file.name}</div>
+      <audio controls src="${dataUrl}" style="margin-top:8px;"></audio>
+    `;
+  } else if (file.type.startsWith("video/")) {
+    bubble.innerHTML = `
+      <div><strong>Attached:</strong> ${file.name}</div>
+      <video controls src="${dataUrl}" style="max-width:300px;border-radius:12px;margin-top:8px;"></video>
+    `;
+  } else {
+    bubble.innerHTML = `<div><strong>Attached:</strong> ${file.name}</div>`;
   }
+
+  wrapper.appendChild(bubble);
+  scrollDown();
 }
 
-async function sendToAI(parts) {
+async function sendToAI() {
   const loadingBubble = addMessage("model", "_Thinking..._");
 
   try {
@@ -133,8 +125,8 @@ async function sendToAI(parts) {
         contents,
         generationConfig: {
           temperature: 0.3,
-          topK: 40,
-          topP: 0.8
+          topP: 0.8,
+          topK: 40
         }
       })
     });
@@ -169,22 +161,11 @@ async function sendMessage() {
   const text = input.value.trim();
   if (!text && pendingAttachments.length === 0) return;
 
-  if (text) addUserTextMessage(text);
-
-  let searchContext = "";
-
-  if (text && isFactualQuery(text)) {
-    const result = await searchOnline(text);
-    if (result) {
-      searchContext = "Verified information: " + result;
-    }
-  }
+  if (text) addMessage("user", text);
 
   const parts = [];
 
   if (text) parts.push({ text });
-
-  if (searchContext) parts.push({ text: searchContext });
 
   pendingAttachments.forEach(file => {
     parts.push({
@@ -201,7 +182,7 @@ async function sendMessage() {
   input.value = "";
   pendingAttachments = [];
 
-  await sendToAI(parts);
+  await sendToAI();
 }
 
 async function regenerateLast() {
@@ -219,25 +200,30 @@ async function regenerateLast() {
     }
   }
 
-  await sendToAI(lastUserParts);
+  await sendToAI();
 }
 
 attachBtn.addEventListener("click", () => fileInput.click());
 
 fileInput.addEventListener("change", () => {
   const files = Array.from(fileInput.files);
+
   files.forEach(file => {
     const reader = new FileReader();
     reader.onload = () => {
       const base64 = reader.result.split(",")[1];
+
       pendingAttachments.push({
         name: file.name,
         mimeType: file.type || "application/octet-stream",
         base64
       });
+
+      addAttachmentPreview(file, reader.result);
     };
     reader.readAsDataURL(file);
   });
+
   fileInput.value = "";
 });
 
@@ -251,6 +237,5 @@ input.addEventListener("keydown", e => {
 });
 
 window.addEventListener("load", () => {
-  const intro = "Hello. I'm **Orbit AI**. How can I assist you today?";
-  addMessage("model", intro);
+  addMessage("model", "Hello. I'm **Orbit AI**. How can I assist you?");
 });

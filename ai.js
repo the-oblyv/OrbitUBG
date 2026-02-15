@@ -5,257 +5,250 @@ const chat = document.getElementById("aiChat");
 const sendBtn = document.getElementById("sendBtn");
 const attachBtn = document.getElementById("attachBtn");
 const fileInput = document.getElementById("aiFile");
-const regenBtn = document.getElementById("regenBtn");
 
 let contents = [];
 let pendingAttachments = [];
 let identityInjected = false;
-let generating = false;
+let lastUserParts = null;
 
-function createMessage(role) {
-    const div = document.createElement("div");
-    div.className = `aiMsg ${role}`;
-    chat.appendChild(div);
-    chat.scrollTop = chat.scrollHeight;
-    return div;
+function scrollDown() {
+  chat.scrollTop = chat.scrollHeight;
+}
+
+function createWrapper(role) {
+  const wrapper = document.createElement("div");
+  wrapper.className = `aiWrapper ${role}`;
+  chat.appendChild(wrapper);
+  return wrapper;
 }
 
 function renderMarkdown(text) {
-    return marked.parse(text || "");
+  return marked.parse(text || "");
 }
 
 function enhanceCodeBlocks(container) {
-    Prism.highlightAllUnder(container);
-    container.querySelectorAll("pre").forEach(pre => {
-        if (pre.querySelector(".aicopy-btn")) return;
-        const btn = document.createElement("button");
-        btn.textContent = "Copy";
-        btn.className = "aicopy-btn";
-        const code = pre.querySelector("code");
-        btn.onclick = () => {
-            navigator.clipboard.writeText(code.innerText).then(() => {
-                btn.textContent = "Copied!";
-                setTimeout(() => btn.textContent = "Copy", 1200);
-            });
-        };
-        pre.appendChild(btn);
-    });
-}
-
-function addIntroMessage() {
-    const introText = "Hello! I'm Orbit AI.\n\nYou can:\n• Ask questions\n• Attach images, audio, or files\n• Regenerate responses\n\nHow can I help you today?";
-    const msg = createMessage("model");
-    msg.innerHTML = renderMarkdown(introText);
-    enhanceCodeBlocks(msg);
-}
-
-function addModelButtons(messageDiv, text) {
-    const controls = document.createElement("div");
-    controls.className = "aiUnderControls";
-
-    const copyBtn = document.createElement("button");
-    copyBtn.textContent = "Copy";
-    copyBtn.className = "aiUnderBtn";
-    copyBtn.onclick = () => {
-        navigator.clipboard.writeText(text).then(() => {
-            copyBtn.textContent = "Copied!";
-            setTimeout(() => copyBtn.textContent = "Copy", 1200);
-        });
+  Prism.highlightAllUnder(container);
+  container.querySelectorAll("pre").forEach(pre => {
+    if (pre.querySelector(".aicopy-btn")) return;
+    const btn = document.createElement("button");
+    btn.className = "aicopy-btn";
+    btn.innerHTML = `<i class="fa-solid fa-copy"></i> Copy code`;
+    const code = pre.querySelector("code");
+    btn.onclick = () => {
+      navigator.clipboard.writeText(code.innerText).then(() => {
+        btn.innerHTML = `<i class="fa-solid fa-check"></i> Copied`;
+        setTimeout(() => {
+          btn.innerHTML = `<i class="fa-solid fa-copy"></i> Copy code`;
+        }, 1200);
+      });
     };
+    pre.appendChild(btn);
+  });
+}
 
-    const regenButton = document.createElement("button");
-    regenButton.textContent = "Regenerate";
-    regenButton.className = "aiUnderBtn";
-    regenButton.onclick = regenerateLast;
+function addCopyControls(wrapper, text) {
+  const controls = document.createElement("div");
+  controls.style.display = "flex";
+  controls.style.gap = "14px";
+  controls.style.marginTop = "6px";
+  controls.style.alignItems = "center";
 
-    controls.appendChild(copyBtn);
-    controls.appendChild(regenButton);
+  const copyBtn = document.createElement("button");
+  copyBtn.className = "aiMessageCopy";
+  copyBtn.innerHTML = `<i class="fa-solid fa-copy"></i> Copy`;
+  copyBtn.onclick = () => {
+    navigator.clipboard.writeText(text).then(() => {
+      copyBtn.innerHTML = `<i class="fa-solid fa-check"></i> Copied`;
+      setTimeout(() => {
+        copyBtn.innerHTML = `<i class="fa-solid fa-copy"></i> Copy`;
+      }, 1200);
+    });
+  };
 
-    chat.appendChild(controls);
+  const regenBtn = document.createElement("button");
+  regenBtn.className = "aiMessageCopy";
+  regenBtn.innerHTML = `<i class="fa-solid fa-rotate"></i> Regenerate`;
+  regenBtn.onclick = () => regenerateLast();
+
+  controls.appendChild(copyBtn);
+  controls.appendChild(regenBtn);
+  wrapper.appendChild(controls);
+}
+
+function addMessage(role, text) {
+  const wrapper = createWrapper(role);
+  const bubble = document.createElement("div");
+  bubble.className = `aiMsg ${role}`;
+  bubble.innerHTML = renderMarkdown(text);
+  wrapper.appendChild(bubble);
+  enhanceCodeBlocks(bubble);
+
+  if (role === "model") {
+    addCopyControls(wrapper, text);
+  }
+
+  scrollDown();
+  return bubble;
 }
 
 function addUserTextMessage(text) {
-    const msg = createMessage("user");
-    msg.innerHTML = renderMarkdown(text);
-    enhanceCodeBlocks(msg);
+  addMessage("user", text);
 }
 
 function addAttachmentPreview(file, dataUrl) {
-    const msg = createMessage("user");
+  const wrapper = createWrapper("user");
+  const bubble = document.createElement("div");
+  bubble.className = "aiMsg user";
 
-    if (file.type.startsWith("image/")) {
-        msg.innerHTML = `
-            <div><strong>Attached:</strong> ${file.name}</div>
-            <img src="${dataUrl}" style="max-width:250px;border-radius:12px;margin-top:8px;">
-        `;
-    } else if (file.type.startsWith("audio/")) {
-        msg.innerHTML = `
-            <div><strong>Attached:</strong> ${file.name}</div>
-            <audio controls src="${dataUrl}" style="margin-top:8px;"></audio>
-        `;
-    } else if (file.type.startsWith("video/")) {
-        msg.innerHTML = `
-            <div><strong>Attached:</strong> ${file.name}</div>
-            <video controls src="${dataUrl}" style="max-width:300px;border-radius:12px;margin-top:8px;"></video>
-        `;
-    } else {
-        msg.innerHTML = `<div><strong>Attached:</strong> ${file.name}</div>`;
-    }
+  if (file.type.startsWith("image/")) {
+    bubble.innerHTML = `
+      <div><strong>Attached:</strong> ${file.name}</div>
+      <img src="${dataUrl}" style="max-width:250px;border-radius:12px;margin-top:8px;">
+    `;
+  } else if (file.type.startsWith("audio/")) {
+    bubble.innerHTML = `
+      <div><strong>Attached:</strong> ${file.name}</div>
+      <audio controls src="${dataUrl}" style="margin-top:8px;"></audio>
+    `;
+  } else if (file.type.startsWith("video/")) {
+    bubble.innerHTML = `
+      <div><strong>Attached:</strong> ${file.name}</div>
+      <video controls src="${dataUrl}" style="max-width:300px;border-radius:12px;margin-top:8px;"></video>
+    `;
+  } else {
+    bubble.innerHTML = `<div><strong>Attached:</strong> ${file.name}</div>`;
+  }
+
+  wrapper.appendChild(bubble);
+  scrollDown();
+}
+
+async function sendToAI(parts, isRegen = false) {
+  const loadingBubble = addMessage("model", "_Orbit AI is thinking..._");
+
+  try {
+    const res = await fetch(endpoint, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        contents,
+        generationConfig: { temperature: 0.7 }
+      })
+    });
+
+    const json = await res.json();
+
+    const responseText =
+      json?.candidates?.[0]?.content?.parts?.[0]?.text ||
+      json?.text ||
+      "(No response)";
+
+    contents.push({
+      role: "model",
+      parts: [{ text: responseText }]
+    });
+
+    const wrapper = loadingBubble.parentElement;
+    wrapper.innerHTML = "";
+    const bubble = document.createElement("div");
+    bubble.className = "aiMsg model";
+    bubble.innerHTML = renderMarkdown(responseText);
+    wrapper.appendChild(bubble);
+    enhanceCodeBlocks(bubble);
+    addCopyControls(wrapper, responseText);
+
+    scrollDown();
+  } catch (err) {
+    loadingBubble.innerHTML = "Request Failed: " + err.message;
+  }
 }
 
 async function sendMessage() {
-    if (generating) return;
+  const text = input.value.trim();
+  if (!text && pendingAttachments.length === 0) return;
 
-    const text = input.value.trim();
-    if (!text && pendingAttachments.length === 0) return;
+  if (text) addUserTextMessage(text);
 
-    generating = true;
+  const parts = [];
 
-    if (text) addUserTextMessage(text);
-
-    const parts = [];
-
-    if (!identityInjected) {
-        parts.push({
-            text: "You are Orbit AI, an AI assistant created by gmacbride for https://orbit.foo.ng/. Always identify yourself as Orbit AI in responses.\n\nUser message:"
-        });
-        identityInjected = true;
-    }
-
-    if (text) parts.push({ text });
-
-    pendingAttachments.forEach(file => {
-        parts.push({
-            inlineData: {
-                mimeType: file.mimeType,
-                data: file.base64
-            }
-        });
+  if (!identityInjected) {
+    parts.push({
+      text: "You are Orbit AI, created by gmacbride for https://orbit.foo.ng/. Always identify yourself as Orbit AI."
     });
+    identityInjected = true;
+  }
 
-    contents.push({ role: "user", parts });
+  if (text) parts.push({ text });
 
-    input.value = "";
-    pendingAttachments = [];
+  pendingAttachments.forEach(file => {
+    parts.push({
+      inlineData: {
+        mimeType: file.mimeType,
+        data: file.base64
+      }
+    });
+  });
 
-    const loadingMsg = createMessage("model");
-    loadingMsg.innerHTML = renderMarkdown("_Orbit AI is thinking..._");
+  contents.push({ role: "user", parts });
+  lastUserParts = parts;
 
-    try {
-        const res = await fetch(endpoint, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                contents,
-                generationConfig: { temperature: 0.7 }
-            })
-        });
+  input.value = "";
+  pendingAttachments = [];
 
-        const json = await res.json();
-
-        const responseText =
-            json?.candidates?.[0]?.content?.parts?.[0]?.text ||
-            json?.text ||
-            "(No response)";
-
-        contents.push({
-            role: "model",
-            parts: [{ text: responseText }]
-        });
-
-        loadingMsg.innerHTML = renderMarkdown(responseText);
-        enhanceCodeBlocks(loadingMsg);
-        addModelButtons(loadingMsg, responseText);
-
-    } catch (err) {
-        loadingMsg.innerHTML = "Request Failed: " + err.message;
-    }
-
-    generating = false;
-    chat.scrollTop = chat.scrollHeight;
+  await sendToAI(parts);
 }
 
-function regenerateLast() {
-    if (generating) return;
-    if (contents.length < 2) return;
-    if (contents[contents.length - 1].role !== "model") return;
+async function regenerateLast() {
+  if (!lastUserParts) return;
 
-    generating = true;
+  contents = contents.filter(item => item.role !== "model");
 
-    contents.pop();
+  contents.push({ role: "user", parts: lastUserParts });
 
-    const lastModel = [...chat.querySelectorAll(".aiMsg.model")].pop();
-    const lastControls = [...chat.querySelectorAll(".aiUnderControls")].pop();
-
-    if (lastModel) lastModel.remove();
-    if (lastControls) lastControls.remove();
-
-    const loadingMsg = createMessage("model");
-    loadingMsg.innerHTML = renderMarkdown("_Orbit AI is thinking..._");
-
-    fetch(endpoint, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-            contents,
-            generationConfig: { temperature: 0.7 }
-        })
-    })
-    .then(res => res.json())
-    .then(json => {
-        const responseText =
-            json?.candidates?.[0]?.content?.parts?.[0]?.text ||
-            json?.text ||
-            "(No response)";
-
-        contents.push({
-            role: "model",
-            parts: [{ text: responseText }]
-        });
-
-        loadingMsg.innerHTML = renderMarkdown(responseText);
-        enhanceCodeBlocks(loadingMsg);
-        addModelButtons(loadingMsg, responseText);
-    })
-    .catch(err => {
-        loadingMsg.innerHTML = "Request Failed: " + err.message;
-    })
-    .finally(() => {
-        generating = false;
-        chat.scrollTop = chat.scrollHeight;
-    });
+  await sendToAI(lastUserParts, true);
 }
 
 attachBtn.addEventListener("click", () => fileInput.click());
 
 fileInput.addEventListener("change", () => {
-    const files = Array.from(fileInput.files);
+  const files = Array.from(fileInput.files);
 
-    files.forEach(file => {
-        const reader = new FileReader();
-        reader.onload = () => {
-            const base64 = reader.result.split(",")[1];
-            pendingAttachments.push({
-                name: file.name,
-                mimeType: file.type || "application/octet-stream",
-                base64
-            });
-            addAttachmentPreview(file, reader.result);
-        };
-        reader.readAsDataURL(file);
-    });
+  files.forEach(file => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const base64 = reader.result.split(",")[1];
 
-    fileInput.value = "";
+      pendingAttachments.push({
+        name: file.name,
+        mimeType: file.type || "application/octet-stream",
+        base64
+      });
+
+      addAttachmentPreview(file, reader.result);
+    };
+    reader.readAsDataURL(file);
+  });
+
+  fileInput.value = "";
 });
 
 sendBtn.addEventListener("click", sendMessage);
-if (regenBtn) regenBtn.addEventListener("click", regenerateLast);
 
 input.addEventListener("keydown", e => {
-    if (e.key === "Enter" && !e.shiftKey) {
-        e.preventDefault();
-        sendMessage();
-    }
+  if (e.key === "Enter" && !e.shiftKey) {
+    e.preventDefault();
+    sendMessage();
+  }
 });
 
-addIntroMessage();
+window.addEventListener("load", () => {
+  const intro = "Hi, I'm **Orbit AI** 👋\n\nAsk me anything — code, homework help, explanations, ideas, or just chat.";
+  addMessage("model", intro);
+
+  contents.push({
+    role: "model",
+    parts: [{ text: "Hi, I'm Orbit AI. How can I help you today?" }]
+  });
+
+  identityInjected = true;
+});

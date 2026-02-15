@@ -108,10 +108,39 @@ const refreshBtn=document.getElementById("refreshBtn")
 
 let historyStack=[]
 let historyIndex=-1
+const key="orbit"
+
+function vigenereDecrypt(text,key){
+  let result=""
+  let j=0
+  for(let i=0;i<text.length;i++){
+    const c=text[i]
+    if(/[a-z]/i.test(c)){
+      const isUpper=c===c.toUpperCase()
+      const base=isUpper?65:97
+      const k=key[j%key.length].toLowerCase().charCodeAt(0)-97
+      const decoded=(c.charCodeAt(0)-base-k+26)%26+base
+      result+=String.fromCharCode(decoded)
+      j++
+    }else{
+      result+=c
+    }
+  }
+  return result
+}
+
+function looksLikeCipher(str){
+  return /^[a-z]+:\/\//i.test(str)
+}
 
 function formatInput(value){
   value=value.trim()
   if(!value)return null
+
+  if(looksLikeCipher(value)){
+    value=vigenereDecrypt(value,key)
+  }
+
   if(value.startsWith("http"))return value
   if(value.includes("."))return "https://"+value
   return "https://start.duckduckgo.com/?q="+encodeURIComponent(value)
@@ -170,6 +199,5 @@ window.addEventListener("load",()=>{
   }
 })
 </script>
-
 </body>
 </html>

@@ -5,12 +5,12 @@ const chat = document.getElementById("aiChat");
 const sendBtn = document.getElementById("sendBtn");
 const attachBtn = document.getElementById("attachBtn");
 const fileInput = document.getElementById("aiFile");
+const startersContainer = document.getElementById("aiStarters");
 
 let contents = [];
 let pendingAttachments = [];
 let identityInjected = false;
 let lastUserText = null;
-let lastModelWrapper = null;
 
 const starters = [
   { starterName: "Explain quantum computing simply", starterText: "Explain quantum computing simply" },
@@ -62,56 +62,53 @@ function addCodeCopyButtons(container) {
   });
 }
 
-function addMessageCopyButton(wrapper, rawText) {
-  const btn = document.createElement("button");
-  btn.className = "aiMessageCopy";
-  btn.innerHTML = `<i class="fa-regular fa-copy"></i> Copy`;
-
-  btn.onclick = () => {
-    navigator.clipboard.writeText(rawText).then(() => {
-      btn.innerHTML = `<i class="fa-solid fa-check"></i> Copied`;
-      setTimeout(() => {
-        btn.innerHTML = `<i class="fa-regular fa-copy"></i> Copy`;
-      }, 1200);
-    });
-  };
-
-  wrapper.appendChild(btn);
-}
-
-function addRegenerateButton(wrapper) {
-  const btn = document.createElement("button");
-  btn.className = "aiMessageCopy";
-  btn.innerHTML = `<i class="fa-solid fa-rotate"></i> Regenerate`;
-
-  btn.onclick = async () => {
-    if (!lastUserText) return;
-
-    wrapper.remove();
-    contents.pop();
-
-    await sendMessage(true);
-  };
-
-  wrapper.appendChild(btn);
-}
-
 function enhance(container) {
   Prism.highlightAllUnder(container);
   addCodeCopyButtons(container);
 }
 
-function addUserTextMessage(text) {
+function addActions(wrapper, text) {
+  const actions = document.createElement("div");
+  actions.className = "aiActions";
+
+  const copyBtn = document.createElement("button");
+  copyBtn.className = "aiMessageCopy";
+  copyBtn.innerHTML = `<i class="fa-regular fa-copy"></i> Copy`;
+
+  copyBtn.onclick = () => {
+    navigator.clipboard.writeText(text).then(() => {
+      copyBtn.innerHTML = `<i class="fa-solid fa-check"></i> Copied`;
+      setTimeout(() => {
+        copyBtn.innerHTML = `<i class="fa-regular fa-copy"></i> Copy`;
+      }, 1200);
+    });
+  };
+
+  const regenBtn = document.createElement("button");
+  regenBtn.className = "aiRegenerateBtn";
+  regenBtn.innerHTML = `<i class="fa-solid fa-rotate"></i> Regenerate`;
+
+  regenBtn.onclick = async () => {
+    if (!lastUserText) return;
+    wrapper.remove();
+    contents.pop();
+    await sendMessage(true);
+  };
+
+  actions.appendChild(copyBtn);
+  actions.appendChild(regenBtn);
+  wrapper.appendChild(actions);
+}
+
+function addUserMessage(text) {
   const wrapper = createWrapper("user");
   const msg = createMessage("user", wrapper);
   msg.innerHTML = renderMarkdown(text);
   enhance(msg);
-  addMessageCopyButton(wrapper, text);
 }
 
 function renderStarters() {
-  const container = document.createElement("div");
-  container.className = "aiStarters";
+  startersContainer.innerHTML = "";
 
   starters.forEach(starter => {
     const btn = document.createElement("button");
@@ -120,25 +117,20 @@ function renderStarters() {
 
     btn.onclick = () => {
       input.value = starter.starterText;
-      container.remove();
+      startersContainer.innerHTML = "";
       sendMessage();
     };
 
-    container.appendChild(btn);
+    startersContainer.appendChild(btn);
   });
-
-  chat.appendChild(container);
 }
 
 async function sendMessage(isRegenerate = false) {
-  const starterBox = document.querySelector(".aiStarters");
-  if (starterBox) starterBox.remove();
-
   const text = isRegenerate ? lastUserText : input.value.trim();
   if (!text && pendingAttachments.length === 0) return;
 
-  if (!isRegenerate && text) {
-    addUserTextMessage(text);
+  if (!isRegenerate) {
+    addUserMessage(text);
     lastUserText = text;
   }
 
@@ -168,12 +160,11 @@ async function sendMessage(isRegenerate = false) {
 
   input.value = "";
   pendingAttachments = [];
+  startersContainer.innerHTML = "";
 
   const wrapper = createWrapper("model");
-  lastModelWrapper = wrapper;
-
-  const loadingMsg = createMessage("model", wrapper);
-  loadingMsg.innerHTML = renderMarkdown("_Thinking..._");
+  const loading = createMessage("model", wrapper);
+  loading.innerHTML = renderMarkdown("_Thinking..._");
 
   try {
     const res = await fetch(endpoint, {
@@ -197,13 +188,12 @@ async function sendMessage(isRegenerate = false) {
       parts: [{ text: responseText }]
     });
 
-    loadingMsg.innerHTML = renderMarkdown(responseText);
-    enhance(loadingMsg);
-    addMessageCopyButton(wrapper, responseText);
-    addRegenerateButton(wrapper);
+    loading.innerHTML = renderMarkdown(responseText);
+    enhance(loading);
+    addActions(wrapper, responseText);
 
   } catch (err) {
-    loadingMsg.innerHTML = "Request Failed: " + err.message;
+    loading.innerHTML = "Request Failed: " + err.message;
   }
 
   chat.scrollTop = chat.scrollHeight;
@@ -216,7 +206,6 @@ function sendInitialMessage() {
   const msg = createMessage("model", wrapper);
   msg.innerHTML = renderMarkdown(welcomeText);
   enhance(msg);
-  addMessageCopyButton(wrapper, welcomeText);
 
   contents.push({
     role: "model",
@@ -246,7 +235,7 @@ fileInput.addEventListener("change", () => {
   fileInput.value = "";
 });
 
-sendBtn.addEventListener("click", sendMessage);
+sendBtn.addEventListener("click", () => sendMessage());
 
 input.addEventListener("keydown", e => {
   if (e.key === "Enter" && !e.shiftKey) {

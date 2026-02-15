@@ -6,7 +6,16 @@ const sendBtn = document.getElementById("sendBtn");
 const attachBtn = document.getElementById("attachBtn");
 const fileInput = document.getElementById("aiFile");
 
-let contents = [];
+let contents = [
+  {
+    role: "user",
+    parts: [{
+      text:
+        "SYSTEM: You are Orbit AI. If you are unsure of a factual answer, especially song identification, you MUST say you are not certain. Do NOT guess. Do NOT fabricate. If you cannot verify, say you do not know."
+    }]
+  }
+];
+
 let pendingAttachments = [];
 let lastUserParts = null;
 
@@ -124,8 +133,8 @@ async function sendToAI() {
       body: JSON.stringify({
         contents,
         generationConfig: {
-          temperature: 0.3,
-          topP: 0.8,
+          temperature: 0.2,
+          topP: 0.7,
           topK: 40
         }
       })
@@ -136,7 +145,7 @@ async function sendToAI() {
     const responseText =
       json?.candidates?.[0]?.content?.parts?.[0]?.text ||
       json?.text ||
-      "(No response)";
+      "I’m not sure about that.";
 
     contents.push({
       role: "model",

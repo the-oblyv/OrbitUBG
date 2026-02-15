@@ -46,6 +46,7 @@
   line-height:1.5;
   font-size:15px;
   word-wrap:break-word;
+  position:relative;
 }
 
 .aiMsg.user{
@@ -58,44 +59,20 @@
   color:#ddd;
 }
 
-.aiMessageCopy,
-.aiRegenerateBtn{
+.aiMessageCopy{
   background:none;
   border:none;
   color:#888;
   cursor:pointer;
   font-size:13px;
-  margin-top:6px;
   padding:0;
   display:flex;
   align-items:center;
   gap:6px;
 }
 
-.aiMessageCopy:hover,
-.aiRegenerateBtn:hover{
+.aiMessageCopy:hover{
   color:#fff;
-}
-
-.aiStarters{
-  display:flex;
-  flex-wrap:wrap;
-  gap:10px;
-  margin-bottom:8px;
-}
-
-.aiStarterBtn{
-  background:#232a40;
-  border:none;
-  padding:8px 14px;
-  border-radius:999px;
-  color:#e6e9f2;
-  cursor:pointer;
-  font-size:13px;
-}
-
-.aiStarterBtn:hover{
-  background:#6c7cff;
 }
 
 .aiInputBar{
@@ -104,7 +81,7 @@
   left:0;
   width:100%;
   padding:18px 20px;
-  background:linear-gradient(to top,#0f1420 70%,transparent);
+  background:linear-gradient(to top,#0f1220 70%,transparent);
   display:flex;
   justify-content:center;
 }
@@ -171,6 +148,10 @@ pre{
   align-items:center;
   gap:6px;
 }
+
+.aicopy-btn:hover{
+  opacity:0.9;
+}
 </style>
 </head>
 <body>
@@ -187,8 +168,11 @@ pre{
     <button class="aiBtn aiAttach" id="attachBtn">
       <i class="fa-solid fa-paperclip"></i>
     </button>
+
     <input type="file" id="aiFile" multiple>
+
     <input id="aiInput" placeholder="Ask Orbit AI anything..." autocomplete="off">
+
     <button class="aiBtn" id="sendBtn">
       <i class="fa-solid fa-paper-plane"></i>
     </button>

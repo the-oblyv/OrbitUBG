@@ -149,24 +149,25 @@ function formatInput(value){
   return "https://start.duckduckgo.com/?q="+encodeURIComponent(value)
 }
 
-function load(value,addHistory=true){
-  const formatted=formatInput(value)
-  if(!formatted){
-    iframe.src="newtab.html"
-    input.value=""
-    return
+function load(value, addHistory = true) {
+  const formatted = formatInput(value);
+
+  if (!formatted) {
+    iframe.src = "newtab.html";
+    input.value = "";
+    return;
   }
 
-  const embedURL=`https://${sessionSub}.gmsexpress.org/scramjet/${encodeURIComponent(formatted)}`
-  iframe.src=embedURL
+  const embedURL = `https://${sessionSub}.gmsexpress.org/scramjet?url=${encodeURIComponent(formatted)}`;
+  iframe.src = embedURL;
 
-  input.value=value
+  input.value = value;
 
-  if(addHistory){
-    historyStack=historyStack.slice(0,historyIndex+1)
-    historyStack.push(value)
-    historyIndex++
-    location.hash=encodeURIComponent(value)
+  if (addHistory) {
+    historyStack = historyStack.slice(0, historyIndex + 1);
+    historyStack.push(value);
+    historyIndex++;
+    location.hash = encodeURIComponent(value);
   }
 }
 

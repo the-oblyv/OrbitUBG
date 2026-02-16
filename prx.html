@@ -143,7 +143,11 @@ function looksLikeCipher(str) {
 function normalizeURL(value) {
   value = value.trim();
   if (!value) return null;
-  if (looksLikeCipher(value)) value = vigenereDecrypt(value, key);
+
+  if (!value.startsWith("http://") && !value.startsWith("https://") && looksLikeCipher(value)) {
+    value = vigenereDecrypt(value, key);
+  }
+
   if (value.startsWith("http://") || value.startsWith("https://")) return value;
   if (value.includes(".")) return "https://" + value;
   return "https://start.duckduckgo.com/?q=" + encodeURIComponent(value);

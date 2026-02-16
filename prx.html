@@ -140,34 +140,34 @@ function looksLikeCipher(str){
   return /^[a-z]+:\/\//i.test(str)
 }
 
-function formatInput(value){
+function normalizeURL(value){
   value=value.trim()
   if(!value)return null
   if(looksLikeCipher(value)) value=vigenereDecrypt(value,key)
-  if(value.startsWith("http")) return value
+  if(value.startsWith("http://")||value.startsWith("https://")) return value
   if(value.includes(".")) return "https://"+value
   return "https://start.duckduckgo.com/?q="+encodeURIComponent(value)
 }
 
-function load(value, addHistory = true) {
-  const formatted = formatInput(value);
-
-  if (!formatted) {
-    iframe.src = "newtab.html";
-    input.value = "";
-    return;
+function load(value,addHistory=true){
+  const decodedURL=normalizeURL(value)
+  if(!decodedURL){
+    iframe.src="newtab.html"
+    input.value=""
+    return
   }
 
-  const embedURL = `https://${sessionSub}.gmsexpress.org/scramjet?url=${encodeURIComponent(formatted)}`;
-  iframe.src = embedURL;
+  const encoded=encodeURIComponent(decodedURL)
+  const embedURL="https://"+sessionSub+".gmsexpress.org/scramjet/"+encoded
 
-  input.value = value;
+  iframe.src=embedURL
+  input.value=value
 
-  if (addHistory) {
-    historyStack = historyStack.slice(0, historyIndex + 1);
-    historyStack.push(value);
-    historyIndex++;
-    location.hash = encodeURIComponent(value);
+  if(addHistory){
+    historyStack=historyStack.slice(0,historyIndex+1)
+    historyStack.push(value)
+    historyIndex++
+    location.hash=encodeURIComponent(value)
   }
 }
 

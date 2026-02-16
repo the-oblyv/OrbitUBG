@@ -10,7 +10,7 @@ let contents = [
   {
     role: "user",
     parts: [{
-      text: "You are Orbit AI. Respond calmly and concisely. Do not roleplay. Do not simulate system errors. Do not dramatize confusion. If unsure about factual information, say you don’t know. Do not fabricate information."
+      text: "You are Orbit AI. Respond in a calm, neutral, professional tone similar to ChatGPT. Be clear, structured, and helpful. Do not roleplay. Do not simulate emotions, system errors, or dramatic reactions. Do not over-apologize. If unsure about factual information, say so briefly. If asked for full copyrighted song lyrics, refuse briefly and offer a summary instead. Do not fabricate information."
     }]
   },
   {
@@ -136,8 +136,8 @@ async function sendToAI() {
       body: JSON.stringify({
         contents,
         generationConfig: {
-          temperature: 0.25,
-          topP: 0.8,
+          temperature: 0.3,
+          topP: 0.9,
           topK: 40
         }
       })

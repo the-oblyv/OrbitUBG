@@ -10,13 +10,6 @@ let contents = [];
 let pendingAttachments = [];
 let lastUserParts = null;
 
-const systemInstruction = {
-  role: "system",
-  parts: [{
-    text: "You are Orbit AI. Do not introduce yourself unless asked. If you are unsure of factual information, search it up. If you are wrong, say you are not certain. Do not guess. Do not fabricate."
-  }]
-};
-
 function scrollDown() {
   chat.scrollTop = chat.scrollHeight;
 }
@@ -129,11 +122,10 @@ async function sendToAI() {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        systemInstruction,
         contents,
         generationConfig: {
-          temperature: 0.2,
-          topP: 0.7,
+          temperature: 0.3,
+          topP: 0.8,
           topK: 40
         }
       })
@@ -144,7 +136,7 @@ async function sendToAI() {
     const responseText =
       json?.candidates?.[0]?.content?.parts?.[0]?.text ||
       json?.text ||
-      "I'm not sure about that.";
+      "No response received.";
 
     contents.push({
       role: "model",
@@ -245,5 +237,5 @@ input.addEventListener("keydown", e => {
 });
 
 window.addEventListener("load", () => {
-  addMessage("model", "Hello. How can I help?");
+  addMessage("model", "Hello. I'm **Orbit AI**. How can I assist you?");
 });

@@ -75,25 +75,47 @@ document.addEventListener("DOMContentLoaded", () => {
   const menu = document.getElementById("menu");
   if (menuBtn) menuBtn.onclick = () => menu.classList.toggle("open");
 
-  const search = document.getElementById("proxySearch");
+ const search = document.getElementById("proxySearch");
+
 if (search) {
+  function vigenereEncrypt(text, key) {
+    let result = "";
+    let j = 0;
+    for (let i = 0; i < text.length; i++) {
+      const c = text[i];
+      if (/[a-z]/i.test(c)) {
+        const isUpper = c === c.toUpperCase();
+        const base = isUpper ? 65 : 97;
+        const k = key[j % key.length].toLowerCase().charCodeAt(0) - 97;
+        const encoded = (c.charCodeAt(0) - base + k) % 26 + base;
+        result += String.fromCharCode(encoded);
+        j++;
+      } else {
+        result += c;
+      }
+    }
+    return result;
+  }
+
+  function normalizeForSearch(value) {
+    value = value.trim();
+    if (!value) return null;
+
+    if (value.startsWith("http://") || value.startsWith("https://")) return value;
+    if (value.includes(".")) return "https://" + value;
+    return "https://start.duckduckgo.com/?q=" + encodeURIComponent(value);
+  }
+
   search.addEventListener("keydown", e => {
     if (e.key !== "Enter") return;
 
     let q = search.value.trim();
     if (!q) return;
 
-    let target;
+    const normalized = normalizeForSearch(q);
+    const encrypted = vigenereEncrypt(normalized, "orbit");
 
-    if (q.startsWith("http://") || q.startsWith("https://")) {
-      target = q;
-    } else if (q.includes(".")) {
-      target = "https://" + q;
-    } else {
-      target = "https://start.duckduckgo.com/?q=" + encodeURIComponent(q);
-    }
-
-    location.href = "/prx#" + encodeURIComponent(target);
+    location.href = "/prx#" + encodeURIComponent(encrypted);
   });
 }
 

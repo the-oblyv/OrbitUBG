@@ -92,124 +92,124 @@ html,body{
 <script src="frame.js"></script>
 <script src="script.js"></script>
 <script>
-const iframe=document.getElementById("proxyFrame")
-const input=document.getElementById("urlInput")
-const backBtn=document.getElementById("backBtn")
-const forwardBtn=document.getElementById("forwardBtn")
-const refreshBtn=document.getElementById("refreshBtn")
+const iframe = document.getElementById("proxyFrame");
+const input = document.getElementById("urlInput");
+const backBtn = document.getElementById("backBtn");
+const forwardBtn = document.getElementById("forwardBtn");
+const refreshBtn = document.getElementById("refreshBtn");
 
-let historyStack=[]
-let historyIndex=-1
-const key="orbit"
+let historyStack = [];
+let historyIndex = -1;
+const key = "orbit";
 
-function randomSubdomain(length=6){
-  const chars="abcdefghijklmnopqrstuvwxyz0123456789"
-  let result=""
-  for(let i=0;i<length;i++){
-    result+=chars[Math.floor(Math.random()*chars.length)]
+function randomSubdomain(length = 6) {
+  const chars = "abcdefghijklmnopqrstuvwxyz0123456789";
+  let result = "";
+  for (let i = 0; i < length; i++) {
+    result += chars[Math.floor(Math.random() * chars.length)];
   }
-  return result
+  return result;
 }
 
-let sessionSub=sessionStorage.getItem("orbit_sub")
-if(!sessionSub){
-  sessionSub=randomSubdomain()
-  sessionStorage.setItem("orbit_sub",sessionSub)
+let sessionSub = sessionStorage.getItem("orbit_sub");
+if (!sessionSub) {
+  sessionSub = randomSubdomain();
+  sessionStorage.setItem("orbit_sub", sessionSub);
 }
 
-function vigenereDecrypt(text,key){
-  let result=""
-  let j=0
-  for(let i=0;i<text.length;i++){
-    const c=text[i]
-    if(/[a-z]/i.test(c)){
-      const isUpper=c===c.toUpperCase()
-      const base=isUpper?65:97
-      const k=key[j%key.length].toLowerCase().charCodeAt(0)-97
-      const decoded=(c.charCodeAt(0)-base-k+26)%26+base
-      result+=String.fromCharCode(decoded)
-      j++
-    }else{
-      result+=c
+function vigenereDecrypt(text, key) {
+  let result = "";
+  let j = 0;
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    if (/[a-z]/i.test(c)) {
+      const isUpper = c === c.toUpperCase();
+      const base = isUpper ? 65 : 97;
+      const k = key[j % key.length].toLowerCase().charCodeAt(0) - 97;
+      const decoded = (c.charCodeAt(0) - base - k + 26) % 26 + base;
+      result += String.fromCharCode(decoded);
+      j++;
+    } else {
+      result += c;
     }
   }
-  return result
+  return result;
 }
 
-function looksLikeCipher(str){
-  return /^[a-z]+:\/\//i.test(str)
+function looksLikeCipher(str) {
+  return /^[a-z]+:\/\//i.test(str);
 }
 
-function normalizeURL(value){
-  value=value.trim()
-  if(!value)return null
-  if(looksLikeCipher(value)) value=vigenereDecrypt(value,key)
-  if(value.startsWith("http://")||value.startsWith("https://")) return value
-  if(value.includes(".")) return "https://"+value
-  return "https://start.duckduckgo.com/?q="+encodeURIComponent(value)
+function normalizeURL(value) {
+  value = value.trim();
+  if (!value) return null;
+  if (looksLikeCipher(value)) value = vigenereDecrypt(value, key);
+  if (value.startsWith("http://") || value.startsWith("https://")) return value;
+  if (value.includes(".")) return "https://" + value;
+  return "https://start.duckduckgo.com/?q=" + encodeURIComponent(value);
 }
 
-function load(value,addHistory=true){
-  const decodedURL=normalizeURL(value)
-  if(!decodedURL){
-    iframe.src="newtab.html"
-    input.value=""
-    return
+function load(value, addHistory = true) {
+  const decodedURL = normalizeURL(value);
+  if (!decodedURL) {
+    iframe.src = "newtab.html";
+    input.value = "";
+    return;
   }
 
-  const encoded=encodeURIComponent(decodedURL)
-  const embedURL="https://"+sessionSub+".gmsexpress.org/scramjet/"+encoded
+  const encoded = encodeURIComponent(decodedURL);
+  const embedURL = "https://" + sessionSub + ".gmsexpress.org/scramjet/" + encoded;
 
-  iframe.src=embedURL
-  input.value=value
+  iframe.src = embedURL;
+  input.value = value;
 
-  if(addHistory){
-    historyStack=historyStack.slice(0,historyIndex+1)
-    historyStack.push(value)
-    historyIndex++
-    location.hash=encodeURIComponent(value)
-  }
-}
-
-input.addEventListener("keydown",e=>{
-  if(e.key==="Enter") load(input.value)
-})
-
-backBtn.onclick=()=>{
-  if(historyIndex>0){
-    historyIndex--
-    load(historyStack[historyIndex],false)
+  if (addHistory) {
+    historyStack = historyStack.slice(0, historyIndex + 1);
+    historyStack.push(value);
+    historyIndex++;
+    location.hash = encodeURIComponent(value);
   }
 }
 
-forwardBtn.onclick=()=>{
-  if(historyIndex<historyStack.length-1){
-    historyIndex++
-    load(historyStack[historyIndex],false)
-  }
-}
+input.addEventListener("keydown", e => {
+  if (e.key === "Enter") load(input.value);
+});
 
-refreshBtn.onclick=()=>{
-  if(historyIndex>=0){
-    load(historyStack[historyIndex],false)
+backBtn.onclick = () => {
+  if (historyIndex > 0) {
+    historyIndex--;
+    load(historyStack[historyIndex], false);
   }
-}
+};
 
-window.addEventListener("hashchange",()=>{
-  const hash=decodeURIComponent(location.hash.slice(1))
-  if(hash){
-    load(hash,false)
+forwardBtn.onclick = () => {
+  if (historyIndex < historyStack.length - 1) {
+    historyIndex++;
+    load(historyStack[historyIndex], false);
   }
-})
+};
 
-window.addEventListener("load",()=>{
-  const hash=decodeURIComponent(location.hash.slice(1))
-  if(hash){
-    load(hash)
-  }else{
-    iframe.src="newtab.html"
+refreshBtn.onclick = () => {
+  if (historyIndex >= 0) {
+    load(historyStack[historyIndex], false);
   }
-})
+};
+
+window.addEventListener("hashchange", () => {
+  const hash = decodeURIComponent(location.hash.slice(1));
+  if (hash) {
+    load(hash, false);
+  }
+});
+
+window.addEventListener("load", () => {
+  const hash = decodeURIComponent(location.hash.slice(1));
+  if (hash) {
+    load(hash);
+  } else {
+    load("https://start.duckduckgo.com");
+  }
+});
 </script>
 
 </body>

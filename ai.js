@@ -6,7 +6,19 @@ const sendBtn = document.getElementById("sendBtn");
 const attachBtn = document.getElementById("attachBtn");
 const fileInput = document.getElementById("aiFile");
 
-let contents = [];
+let contents = [
+  {
+    role: "user",
+    parts: [{
+      text: "You are Orbit AI. Respond calmly and concisely. Do not roleplay. Do not simulate system errors. Do not dramatize confusion. If unsure about factual information, say you don’t know. Do not fabricate information."
+    }]
+  },
+  {
+    role: "model",
+    parts: [{ text: "Understood." }]
+  }
+];
+
 let pendingAttachments = [];
 let lastUserParts = null;
 
@@ -124,7 +136,7 @@ async function sendToAI() {
       body: JSON.stringify({
         contents,
         generationConfig: {
-          temperature: 0.3,
+          temperature: 0.25,
           topP: 0.8,
           topK: 40
         }

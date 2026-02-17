@@ -146,15 +146,12 @@ async function sendToAI() {
   bubble.innerHTML = "_Thinking..._";
   wrapper.appendChild(bubble);
 
-  let fullText = "";
-
   try {
-    const response = await fetch(endpoint, {
+    const res = await fetch(endpoint, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         contents,
-        stream: true,
         generationConfig: {
           temperature: 0.3,
           topP: 0.9,
@@ -163,21 +160,21 @@ async function sendToAI() {
       })
     });
 
-    const reader = response.body.getReader();
-    const decoder = new TextDecoder("utf-8");
+    const json = await res.json();
+
+    const fullText =
+      json?.candidates?.[0]?.content?.parts?.[0]?.text ||
+      json?.text ||
+      "No response received.";
 
     bubble.innerHTML = "";
+    let displayed = "";
 
-    while (true) {
-      const { value, done } = await reader.read();
-      if (done) break;
-
-      const chunk = decoder.decode(value, { stream: true });
-
-      fullText += chunk;
-
-      bubble.innerHTML = renderMarkdown(fullText);
+    for (let i = 0; i < fullText.length; i++) {
+      displayed += fullText[i];
+      bubble.innerHTML = renderMarkdown(displayed);
       scrollDown();
+      await new Promise(r => setTimeout(r, 8));
     }
 
     enhanceCodeBlocks(bubble);

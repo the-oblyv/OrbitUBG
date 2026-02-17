@@ -39,12 +39,16 @@ function renderMarkdown(text) {
 
 function enhanceCodeBlocks(container) {
   Prism.highlightAllUnder(container);
+
   container.querySelectorAll("pre").forEach(pre => {
     if (pre.querySelector(".aicopy-btn")) return;
+
     const btn = document.createElement("button");
     btn.className = "aicopy-btn";
     btn.innerHTML = `<i class="fa-solid fa-copy"></i> Copy code`;
+
     const code = pre.querySelector("code");
+
     btn.onclick = () => {
       navigator.clipboard.writeText(code.innerText).then(() => {
         btn.innerHTML = `<i class="fa-solid fa-check"></i> Copied`;
@@ -53,6 +57,7 @@ function enhanceCodeBlocks(container) {
         }, 1200);
       });
     };
+
     pre.appendChild(btn);
   });
 }
@@ -67,6 +72,7 @@ function addCopyControls(wrapper, text) {
   const copyBtn = document.createElement("button");
   copyBtn.className = "aiMessageCopy";
   copyBtn.innerHTML = `<i class="fa-solid fa-copy"></i> Copy`;
+
   copyBtn.onclick = () => {
     navigator.clipboard.writeText(text).then(() => {
       copyBtn.innerHTML = `<i class="fa-solid fa-check"></i> Copied`;
@@ -88,12 +94,19 @@ function addCopyControls(wrapper, text) {
 
 function addMessage(role, text) {
   const wrapper = createWrapper(role);
+
   const bubble = document.createElement("div");
   bubble.className = `aiMsg ${role}`;
   bubble.innerHTML = renderMarkdown(text);
+
   wrapper.appendChild(bubble);
+
   enhanceCodeBlocks(bubble);
-  if (role === "model") addCopyControls(wrapper, text);
+
+  if (role === "model") {
+    addCopyControls(wrapper, text);
+  }
+
   scrollDown();
   return bubble;
 }
@@ -127,14 +140,21 @@ function addAttachmentPreview(file, dataUrl) {
 }
 
 async function sendToAI() {
-  const loadingBubble = addMessage("model", "_Thinking..._");
+  const wrapper = createWrapper("model");
+  const bubble = document.createElement("div");
+  bubble.className = "aiMsg model";
+  bubble.innerHTML = "_Thinking..._";
+  wrapper.appendChild(bubble);
+
+  let fullText = "";
 
   try {
-    const res = await fetch(endpoint, {
+    const response = await fetch(endpoint, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         contents,
+        stream: true,
         generationConfig: {
           temperature: 0.3,
           topP: 0.9,
@@ -143,29 +163,34 @@ async function sendToAI() {
       })
     });
 
-    const json = await res.json();
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder("utf-8");
 
-    const responseText =
-      json?.candidates?.[0]?.content?.parts?.[0]?.text ||
-      json?.text ||
-      "No response received.";
+    bubble.innerHTML = "";
+
+    while (true) {
+      const { value, done } = await reader.read();
+      if (done) break;
+
+      const chunk = decoder.decode(value, { stream: true });
+
+      fullText += chunk;
+
+      bubble.innerHTML = renderMarkdown(fullText);
+      scrollDown();
+    }
+
+    enhanceCodeBlocks(bubble);
 
     contents.push({
       role: "model",
-      parts: [{ text: responseText }]
+      parts: [{ text: fullText }]
     });
 
-    const wrapper = loadingBubble.parentElement;
-    wrapper.innerHTML = "";
-    const bubble = document.createElement("div");
-    bubble.className = "aiMsg model";
-    bubble.innerHTML = renderMarkdown(responseText);
-    wrapper.appendChild(bubble);
-    enhanceCodeBlocks(bubble);
-    addCopyControls(wrapper, responseText);
-    scrollDown();
+    addCopyControls(wrapper, fullText);
+
   } catch (err) {
-    loadingBubble.innerHTML = "Request Failed: " + err.message;
+    bubble.innerHTML = "Request Failed: " + err.message;
   }
 }
 

@@ -143,8 +143,16 @@ async function sendToAI() {
   const wrapper = createWrapper("model");
   const bubble = document.createElement("div");
   bubble.className = "aiMsg model";
-  bubble.innerHTML = "_Thinking..._";
   wrapper.appendChild(bubble);
+
+  let dotCount = 1;
+  bubble.innerText = "Thinking.";
+
+  const thinkingInterval = setInterval(() => {
+    dotCount++;
+    if (dotCount > 3) dotCount = 1;
+    bubble.innerText = "Thinking" + ".".repeat(dotCount);
+  }, 450);
 
   try {
     const res = await fetch(endpoint, {
@@ -167,6 +175,8 @@ async function sendToAI() {
       json?.text ||
       "No response received.";
 
+    clearInterval(thinkingInterval);
+
     bubble.innerHTML = "";
     let displayed = "";
 
@@ -187,7 +197,8 @@ async function sendToAI() {
     addCopyControls(wrapper, fullText);
 
   } catch (err) {
-    bubble.innerHTML = "Request Failed: " + err.message;
+    clearInterval(thinkingInterval);
+    bubble.innerText = "Request Failed: " + err.message;
   }
 }
 

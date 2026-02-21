@@ -121,12 +121,21 @@ function normalizeURL(value){
 function openNewTab(){
   iframe.src = "/newtab.html";
   input.value = "";
-  location.hash = "";
+}
+
+function uvReady(){
+  return typeof __uv$config !== "undefined" &&
+         navigator.serviceWorker &&
+         navigator.serviceWorker.controller;
 }
 
 function load(value, addHistory = true){
-  const decodedURL = normalizeURL(value);
+  if(!uvReady()){
+    openNewTab();
+    return;
+  }
 
+  const decodedURL = normalizeURL(value);
   if(!decodedURL){
     openNewTab();
     return;
@@ -177,7 +186,11 @@ window.addEventListener("hashchange", ()=>{
   }
 });
 
-window.addEventListener("load", ()=>{
+window.addEventListener("load", async ()=>{
+  if(navigator.serviceWorker){
+    await navigator.serviceWorker.ready;
+  }
+
   const hash = decodeURIComponent(location.hash.slice(1));
   if(hash){
     load(hash);

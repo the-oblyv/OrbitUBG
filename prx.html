@@ -106,43 +106,37 @@ const refreshBtn = document.getElementById("refreshBtn");
 let historyStack = [];
 let historyIndex = -1;
 
-function looksLikeURL(str){
-  return /^https?:\/\//i.test(str);
-}
+iframe.style.display = "none";
 
-function normalizeURL(value){
-  value = value.trim();
-  if(!value) return null;
-  if(looksLikeURL(value)) return value;
-  if(value.includes(".")) return "https://" + value;
-  return "https://start.duckduckgo.com/?q=" + encodeURIComponent(value);
+function search(value){
+  try {
+    return new URL(value).toString();
+  } catch {}
+
+  try {
+    const url = new URL("http://" + value);
+    if(url.hostname.includes(".")) return url.toString();
+  } catch {}
+
+  return "https://www.google.com/search?q=" + encodeURIComponent(value);
 }
 
 function openNewTab(){
+  iframe.style.display = "none";
   iframe.src = "/newtab.html";
   input.value = "";
 }
 
-function uvReady(){
-  return typeof __uv$config !== "undefined" &&
-         navigator.serviceWorker &&
-         navigator.serviceWorker.controller;
-}
-
 function load(value, addHistory = true){
-  if(!uvReady()){
+  if(!value){
     openNewTab();
     return;
   }
 
-  const decodedURL = normalizeURL(value);
-  if(!decodedURL){
-    openNewTab();
-    return;
-  }
+  const finalURL = search(value);
 
-  const encoded = __uv$config.encodeUrl(decodedURL);
-  iframe.src = __uv$config.prefix + encoded;
+  iframe.style.display = "block";
+  iframe.src = __uv$config.prefix + __uv$config.encodeUrl(finalURL);
   input.value = value;
 
   if(addHistory){
@@ -154,7 +148,9 @@ function load(value, addHistory = true){
 }
 
 input.addEventListener("keydown", e=>{
-  if(e.key === "Enter") load(input.value);
+  if(e.key === "Enter"){
+    load(input.value);
+  }
 });
 
 backBtn.onclick = ()=>{
@@ -187,9 +183,7 @@ window.addEventListener("hashchange", ()=>{
 });
 
 window.addEventListener("load", async ()=>{
-  if(navigator.serviceWorker){
-    await navigator.serviceWorker.ready;
-  }
+  await navigator.serviceWorker.ready;
 
   const hash = decodeURIComponent(location.hash.slice(1));
   if(hash){

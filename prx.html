@@ -118,17 +118,22 @@ function normalizeURL(value){
   return "https://start.duckduckgo.com/?q=" + encodeURIComponent(value);
 }
 
+function openNewTab(){
+  iframe.src = "/newtab.html";
+  input.value = "";
+  location.hash = "";
+}
+
 function load(value, addHistory = true){
   const decodedURL = normalizeURL(value);
 
   if(!decodedURL){
-    iframe.src = "newtab.html";
-    input.value = "";
+    openNewTab();
     return;
   }
 
   const encoded = __uv$config.encodeUrl(decodedURL);
-  iframe.src = "/uv/" + encoded;
+  iframe.src = __uv$config.prefix + encoded;
   input.value = value;
 
   if(addHistory){
@@ -167,6 +172,8 @@ window.addEventListener("hashchange", ()=>{
   const hash = decodeURIComponent(location.hash.slice(1));
   if(hash){
     load(hash, false);
+  } else {
+    openNewTab();
   }
 });
 
@@ -175,10 +182,9 @@ window.addEventListener("load", ()=>{
   if(hash){
     load(hash);
   } else {
-    load("https://start.duckduckgo.com");
+    openNewTab();
   }
 });
 </script>
-
 </body>
 </html>

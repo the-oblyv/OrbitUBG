@@ -2,14 +2,11 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Orbit | Proxy</title>
+<title>Proxy | Orbit</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" href="/res/orbit.png">
 <link rel="stylesheet" href="/style.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-<script src="/uv/uv.bundle.js" charset="UTF-8"></script>
-<script src="/uv/uv.config.js"></script>
-<script src="/js/preload.js"></script>
 
 <style>
 :root{
@@ -28,46 +25,12 @@ html,body{
   color:var(--text);
   overflow:hidden;
 }
-#browserUI{
+#proxyContainer{
   position:fixed;
   top:110px;
   left:0;
   width:100%;
-  background:var(--panel);
-  padding:10px 14px;
-  display:flex;
-  align-items:center;
-  gap:10px;
-  z-index:5;
-  box-sizing:border-box;
-}
-.nav-btn{
-  background:var(--panel2);
-  border:none;
-  color:var(--text);
-  padding:8px 10px;
-  border-radius:8px;
-  cursor:pointer;
-}
-.nav-btn:hover{
-  background:var(--accent);
-}
-#urlInput{
-  flex:1;
-  padding:9px 14px;
-  border-radius:30px;
-  border:none;
-  outline:none;
-  font-size:14px;
-  background:#0f1420;
-  color:white;
-}
-#proxyContainer{
-  position:fixed;
-  top:170px;
-  left:0;
-  width:100%;
-  height:calc(100vh - 170px);
+  height:calc(100vh - 110px);
 }
 #proxyFrame{
   width:100%;
@@ -81,116 +44,15 @@ html,body{
 <header class="topbar" id="navMount"></header>
 <nav class="menu" id="menu"></nav>
 
-<div id="browserUI">
-  <button class="nav-btn" id="backBtn"><i class="fa-solid fa-arrow-left"></i></button>
-  <button class="nav-btn" id="forwardBtn"><i class="fa-solid fa-arrow-right"></i></button>
-  <button class="nav-btn" id="refreshBtn"><i class="fa-solid fa-rotate-right"></i></button>
-  <input id="urlInput" type="text" placeholder="Search or type a URL">
-</div>
-
 <div id="proxyContainer">
-  <iframe id="proxyFrame"></iframe>
+  <iframe id="proxyFrame"
+    src="https://scramjet-uv-example-production.up.railway.app/"
+    allowfullscreen
+  ></iframe>
 </div>
 
 <script src="frame.js"></script>
 <script src="script.js"></script>
 
-<script>
-const iframe = document.getElementById("proxyFrame");
-const input = document.getElementById("urlInput");
-const backBtn = document.getElementById("backBtn");
-const forwardBtn = document.getElementById("forwardBtn");
-const refreshBtn = document.getElementById("refreshBtn");
-
-let historyStack = [];
-let historyIndex = -1;
-
-iframe.style.display = "none";
-
-function search(value){
-  try {
-    return new URL(value).toString();
-  } catch {}
-
-  try {
-    const url = new URL("http://" + value);
-    if(url.hostname.includes(".")) return url.toString();
-  } catch {}
-
-  return "https://www.google.com/search?q=" + encodeURIComponent(value);
-}
-
-function openNewTab(){
-  iframe.style.display = "none";
-  iframe.src = "/newtab.html";
-  input.value = "";
-}
-
-function load(value, addHistory = true){
-  if(!value){
-    openNewTab();
-    return;
-  }
-
-  const finalURL = search(value);
-
-  iframe.style.display = "block";
-  iframe.src = __uv$config.prefix + __uv$config.encodeUrl(finalURL);
-  input.value = value;
-
-  if(addHistory){
-    historyStack = historyStack.slice(0, historyIndex + 1);
-    historyStack.push(value);
-    historyIndex++;
-    location.hash = encodeURIComponent(value);
-  }
-}
-
-input.addEventListener("keydown", e=>{
-  if(e.key === "Enter"){
-    load(input.value);
-  }
-});
-
-backBtn.onclick = ()=>{
-  if(historyIndex > 0){
-    historyIndex--;
-    load(historyStack[historyIndex], false);
-  }
-};
-
-forwardBtn.onclick = ()=>{
-  if(historyIndex < historyStack.length - 1){
-    historyIndex++;
-    load(historyStack[historyIndex], false);
-  }
-};
-
-refreshBtn.onclick = ()=>{
-  if(historyIndex >= 0){
-    load(historyStack[historyIndex], false);
-  }
-};
-
-window.addEventListener("hashchange", ()=>{
-  const hash = decodeURIComponent(location.hash.slice(1));
-  if(hash){
-    load(hash, false);
-  } else {
-    openNewTab();
-  }
-});
-
-window.addEventListener("load", async ()=>{
-  await navigator.serviceWorker.ready;
-
-  const hash = decodeURIComponent(location.hash.slice(1));
-  if(hash){
-    load(hash);
-  } else {
-    openNewTab();
-  }
-});
-</script>
 </body>
 </html>

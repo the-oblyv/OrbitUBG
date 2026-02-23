@@ -1,4 +1,4 @@
-app = "orbit-proxy"
+app = "orbit-ubg-8063"
 primary_region = "iad"
 
 [env]

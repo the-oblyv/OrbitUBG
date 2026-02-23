@@ -1,7 +1,0 @@
-tunnel: 6fad2016-1552-4b36-9394-762c266fd3bd
-credentials-file: ./6fad2016-1552-4b36-9394-762c266fd3bd.json
-
-ingress:
-  - hostname: "*.orbit.foo.ng"
-    service: http://localhost:3000
-  - service: http_status:404

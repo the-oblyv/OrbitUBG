@@ -13,9 +13,12 @@
   --main-bg:#0f1420;
   --panel:#1b2133;
   --panel2:#232a40;
+  --border:#2f3652;
   --text:#e6e9f2;
+  --muted:#9aa3c7;
   --accent:#6c7cff;
 }
+
 html,body{
   margin:0;
   padding:0;
@@ -25,32 +28,177 @@ html,body{
   color:var(--text);
   overflow:hidden;
 }
+
 #proxyContainer{
   position:fixed;
   top:110px;
   left:0;
   width:100%;
   height:calc(100vh - 110px);
+  display:flex;
+  flex-direction:column;
 }
+
+#newtab{
+  flex:1;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:var(--main-bg);
+}
+
+.clock{
+  display:flex;
+  gap:1rem;
+  font-size:4rem;
+  font-weight:600;
+  align-items:center;
+}
+
+.clock-section{
+  height:5rem;
+  overflow:hidden;
+  position:relative;
+}
+
+.clock-track{
+  transition:transform 0.5s ease;
+}
+
+.clock-number{
+  height:5rem;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  opacity:0.2;
+}
+
+.clock-separator{
+  opacity:0.6;
+}
+
+.clock-toggle{
+  position:absolute;
+  bottom:40px;
+  font-size:0.9rem;
+  padding:0.5rem 1rem;
+  background:var(--panel2);
+  border:1px solid var(--border);
+  border-radius:8px;
+  cursor:pointer;
+  color:var(--text);
+  transition:0.2s;
+}
+
+.clock-toggle:hover{
+  border-color:var(--accent);
+}
+
 #proxyFrame{
+  display:none;
   width:100%;
   height:100%;
   border:none;
+  background:#000;
 }
 </style>
 </head>
 
 <body>
+
 <header class="topbar" id="navMount"></header>
 <nav class="menu" id="menu"></nav>
 
 <div id="proxyContainer">
-  <iframe id="proxyFrame"
-    src="https://scramjet-uv-example-production.up.railway.app/"
-    allowfullscreen
-  ></iframe>
+  <div id="newtab">
+    <div class="clock" id="clock"></div>
+    <button class="clock-toggle" id="formatToggle">
+      Toggle 12h / 24h
+    </button>
+  </div>
+  <iframe id="proxyFrame" allowfullscreen></iframe>
 </div>
 
+<script>
+const clock = document.getElementById("clock");
+const toggleBtn = document.getElementById("formatToggle");
+const iframe = document.getElementById("proxyFrame");
+const newtab = document.getElementById("newtab");
+
+let is12Hour = localStorage.getItem("orbitClockFormat") === "12";
+
+function createColumn(max){
+  const section = document.createElement("div");
+  section.className = "clock-section";
+
+  const track = document.createElement("div");
+  track.className = "clock-track";
+
+  for(let i=0;i<max;i++){
+    const num = document.createElement("div");
+    num.className = "clock-number";
+    num.textContent = i.toString().padStart(2,"0");
+    track.appendChild(num);
+  }
+
+  section.appendChild(track);
+  clock.appendChild(section);
+
+  return track;
+}
+
+const hourTrack = createColumn(24);
+const minuteTrack = createColumn(60);
+const secondTrack = createColumn(60);
+
+function updateClock(){
+  const now = new Date();
+  let hours = now.getHours();
+  const minutes = now.getMinutes();
+  const seconds = now.getSeconds();
+
+  if(is12Hour){
+    hours = hours % 12 || 12;
+  }
+
+  hourTrack.style.transform = `translateY(-${hours * 5}rem)`;
+  minuteTrack.style.transform = `translateY(-${minutes * 5}rem)`;
+  secondTrack.style.transform = `translateY(-${seconds * 5}rem)`;
+}
+
+setInterval(updateClock,1000);
+updateClock();
+
+const sep1 = document.createElement("div");
+sep1.className="clock-separator";
+sep1.textContent=":";
+clock.insertBefore(sep1, clock.children[1]);
+
+const sep2 = document.createElement("div");
+sep2.className="clock-separator";
+sep2.textContent=":";
+clock.insertBefore(sep2, clock.children[3]);
+
+toggleBtn.addEventListener("click",()=>{
+  is12Hour = !is12Hour;
+  localStorage.setItem("orbitClockFormat", is12Hour ? "12" : "24");
+  location.reload();
+});
+
+function startProxy(url){
+  newtab.style.display="none";
+  iframe.style.display="block";
+  iframe.src=url;
+}
+
+window.startProxy = startProxy;
+</script>
+
+<script src="/baremux/index.js" defer></script>
+<script src="/uv/uv.bundle.js" defer></script>
+<script src="/uv/uv.config.js" defer></script>
+<script src="/scram/scramjet.all.js" defer></script>
+<script src="/stuff.js" defer></script>
 <script src="frame.js"></script>
 <script src="script.js"></script>
 

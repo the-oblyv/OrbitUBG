@@ -14,6 +14,7 @@ import wisp from "wisp-server-node";
 
 const bare = createBareServer("/bare/");
 const app = express();
+app.set("trust proxy", 1);
 
 app.use(express.static("."));
 app.use("/uv/", express.static(uvPath));
@@ -38,9 +39,7 @@ server.on("upgrade", (req, socket, head) => {
   } else socket.end();
 });
 
-let port = parseInt(process.env.PORT || "");
-
-if (isNaN(port)) port = 8080;
+const port = Number(process.env.PORT) || 8080;
 
 server.on("listening", () => {
   const address = server.address();

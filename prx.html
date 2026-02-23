@@ -142,7 +142,7 @@ html,body{
   background:#000;
 }
 
-  #optionsModal{
+#optionsModal{
   position:fixed;
   inset:0;
   background:rgba(0,0,0,0.6);
@@ -162,10 +162,6 @@ html,body{
   box-shadow:0 20px 60px rgba(0,0,0,0.5);
 }
 
-#optionsPanel h2{
-  margin-top:0;
-}
-
 .option-group{
   margin-bottom:20px;
 }
@@ -183,7 +179,6 @@ html,body{
   background:var(--panel2);
   color:var(--text);
   cursor:pointer;
-  transition:0.2s;
 }
 
 .proxy-btn.active{
@@ -210,11 +205,6 @@ textarea{
   background:var(--panel2);
   color:var(--text);
   cursor:pointer;
-  transition:0.2s;
-}
-
-#runJS:hover, #closeOptions:hover{
-  border-color:var(--accent);
 }
 </style>
 </head>
@@ -228,7 +218,7 @@ textarea{
   <button class="nav-btn" id="backBtn"><i class="fa-solid fa-arrow-left"></i></button>
   <button class="nav-btn" id="forwardBtn"><i class="fa-solid fa-arrow-right"></i></button>
   <button class="nav-btn" id="refreshBtn"><i class="fa-solid fa-rotate-right"></i></button>
-  <input id="urlInput" type="text" placeholder="Search or enter URL" autocomplete="off">
+  <input id="urlInput" type="text" placeholder="Search or enter URL">
   <button class="nav-btn" id="optionsBtn"><i class="fa-solid fa-gear"></i></button>
 </div>
 
@@ -240,131 +230,123 @@ textarea{
   <iframe id="proxyFrame" allowfullscreen></iframe>
 </div>
 
-<script>
-const input = document.getElementById("urlInput");
-const backBtn = document.getElementById("backBtn");
-const forwardBtn = document.getElementById("forwardBtn");
-const refreshBtn = document.getElementById("refreshBtn");
-const iframe = document.getElementById("proxyFrame");
-const newtab = document.getElementById("newtab");
+<div id="optionsModal">
+  <div id="optionsPanel">
+    <h2>Options</h2>
+    <div class="option-group">
+      <h3>Proxy</h3>
+      <div class="proxy-buttons">
+        <button class="proxy-btn" data-proxy="uv">Ultraviolet</button>
+        <button class="proxy-btn" data-proxy="scramjet">Scramjet</button>
+      </div>
+    </div>
+    <div class="option-group">
+      <h3>Eval JS</h3>
+      <textarea id="jsEvalBox"></textarea>
+      <button id="runJS">Execute</button>
+    </div>
+    <button id="closeOptions">Close</button>
+  </div>
+</div>
 
-let historyStack = [];
-let historyIndex = -1;
+<script src="/baremux/index.js"></script>
+<script src="/uv/uv.bundle.js"></script>
+<script src="/uv/uv.config.js"></script>
+<script src="/scram/scramjet.all.js"></script>
+
+<script>
+const input=document.getElementById("urlInput");
+const backBtn=document.getElementById("backBtn");
+const forwardBtn=document.getElementById("forwardBtn");
+const refreshBtn=document.getElementById("refreshBtn");
+const iframe=document.getElementById("proxyFrame");
+const newtab=document.getElementById("newtab");
+
+const optionsBtn=document.getElementById("optionsBtn");
+const optionsModal=document.getElementById("optionsModal");
+const closeOptions=document.getElementById("closeOptions");
+const proxyButtons=document.querySelectorAll(".proxy-btn");
+const runJS=document.getElementById("runJS");
+const jsEvalBox=document.getElementById("jsEvalBox");
+
+let currentProxy=localStorage.getItem("orbitProxy")||"uv";
+let historyStack=[];
+let historyIndex=-1;
 
 function search(value){
-  try{ return new URL(value).toString(); }catch{}
+  try{return new URL(value).toString();}catch{}
   try{
-    const url = new URL("http://" + value);
-    if(url.hostname.includes(".")) return url.toString();
+    const url=new URL("http://"+value);
+    if(url.hostname.includes("."))return url.toString();
   }catch{}
-  return "https://www.google.com/search?q=" + encodeURIComponent(value);
+  return "https://www.google.com/search?q="+encodeURIComponent(value);
 }
 
-function load(url, addHistory=true){
-  if(!url) return;
-  const finalURL = search(url);
+function load(url,addHistory=true){
+  if(!url)return;
+  const finalURL=search(url);
   newtab.style.display="none";
   iframe.style.display="block";
-  iframe.src = __uv$config.prefix + __uv$config.encodeUrl(finalURL);
-  input.value = url;
-
+  if(currentProxy==="uv"){
+    iframe.src=__uv$config.prefix+__uv$config.encodeUrl(finalURL);
+  }else{
+    iframe.src="/scram/"+finalURL;
+  }
+  input.value=url;
   if(addHistory){
-    historyStack = historyStack.slice(0, historyIndex+1);
+    historyStack=historyStack.slice(0,historyIndex+1);
     historyStack.push(url);
     historyIndex++;
   }
 }
 
-input.addEventListener("keydown", e=>{
-  if(e.key==="Enter") load(input.value);
+input.addEventListener("keydown",e=>{
+  if(e.key==="Enter")load(input.value);
 });
 
-backBtn.onclick = ()=>{
+backBtn.onclick=()=>{
   if(historyIndex>0){
     historyIndex--;
-    load(historyStack[historyIndex], false);
+    load(historyStack[historyIndex],false);
   }
 };
 
-forwardBtn.onclick = ()=>{
-  if(historyIndex < historyStack.length-1){
+forwardBtn.onclick=()=>{
+  if(historyIndex<historyStack.length-1){
     historyIndex++;
-    load(historyStack[historyIndex], false);
+    load(historyStack[historyIndex],false);
   }
 };
 
-refreshBtn.onclick = ()=>{
-  if(historyIndex>=0){
-    load(historyStack[historyIndex], false);
-  }
+refreshBtn.onclick=()=>{
+  if(historyIndex>=0)load(historyStack[historyIndex],false);
 };
 
-  const optionsBtn = document.getElementById("optionsBtn");
-const optionsModal = document.getElementById("optionsModal");
-const closeOptions = document.getElementById("closeOptions");
-const proxyButtons = document.querySelectorAll(".proxy-btn");
-const runJS = document.getElementById("runJS");
-const jsEvalBox = document.getElementById("jsEvalBox");
-
-let currentProxy = localStorage.getItem("orbitProxy") || "uv";
-
-function updateProxyButtons(){
-  proxyButtons.forEach(btn=>{
-    btn.classList.toggle("active", btn.dataset.proxy === currentProxy);
-  });
-}
-updateProxyButtons();
-
-optionsBtn.onclick = ()=> optionsModal.style.display="flex";
-closeOptions.onclick = ()=> optionsModal.style.display="none";
-optionsModal.onclick = e=>{
-  if(e.target===optionsModal) optionsModal.style.display="none";
+optionsBtn.onclick=()=>optionsModal.style.display="flex";
+closeOptions.onclick=()=>optionsModal.style.display="none";
+optionsModal.onclick=e=>{
+  if(e.target===optionsModal)optionsModal.style.display="none";
 };
 
 proxyButtons.forEach(btn=>{
-  btn.onclick = ()=>{
-    currentProxy = btn.dataset.proxy;
-    localStorage.setItem("orbitProxy", currentProxy);
-    updateProxyButtons();
+  btn.classList.toggle("active",btn.dataset.proxy===currentProxy);
+  btn.onclick=()=>{
+    currentProxy=btn.dataset.proxy;
+    localStorage.setItem("orbitProxy",currentProxy);
+    proxyButtons.forEach(b=>b.classList.remove("active"));
+    btn.classList.add("active");
   };
 });
 
-function load(url, addHistory=true){
-  if(!url) return;
-  const finalURL = search(url);
-
-  newtab.style.display="none";
-  iframe.style.display="block";
-
-  if(currentProxy==="uv"){
-    iframe.src = __uv$config.prefix + __uv$config.encodeUrl(finalURL);
-  }else{
-    iframe.src = "/scram/" + finalURL;
-  }
-
-  input.value = url;
-
-  if(addHistory){
-    historyStack = historyStack.slice(0, historyIndex+1);
-    historyStack.push(url);
-    historyIndex++;
-  }
-}
-
-runJS.onclick = ()=>{
-  const code = jsEvalBox.value.trim();
-  if(!code || !iframe.contentWindow) return;
-
-  try{
-    iframe.contentWindow.eval(code);
-  }catch(err){
-    alert("Execution failed.");
-  }
+runJS.onclick=()=>{
+  const code=jsEvalBox.value.trim();
+  if(!code||!iframe.contentWindow)return;
+  try{iframe.contentWindow.eval(code);}catch{}
 };
 
-const clock = document.getElementById("clock");
-const toggleBtn = document.getElementById("formatToggle");
-let is12Hour = localStorage.getItem("orbitClockFormat")==="12";
+const clock=document.getElementById("clock");
+const toggleBtn=document.getElementById("formatToggle");
+let is12Hour=localStorage.getItem("orbitClockFormat")==="12";
 
 function createColumn(max){
   const section=document.createElement("div");
@@ -391,7 +373,7 @@ function updateClock(){
   let hours=now.getHours();
   const minutes=now.getMinutes();
   const seconds=now.getSeconds();
-  if(is12Hour) hours=hours%12||12;
+  if(is12Hour)hours=hours%12||12;
   hourTrack.style.transform=`translateY(-${hours*5}rem)`;
   minuteTrack.style.transform=`translateY(-${minutes*5}rem)`;
   secondTrack.style.transform=`translateY(-${seconds*5}rem)`;
@@ -417,33 +399,5 @@ toggleBtn.onclick=()=>{
 };
 </script>
 
-<script src="/baremux/index.js" defer></script>
-<script src="/uv/uv.bundle.js" defer></script>
-<script src="/uv/uv.config.js" defer></script>
-<script src="/scram/scramjet.all.js" defer></script>
-<script src="/stuff.js" defer></script>
-<script src="frame.js"></script>
-<script src="script.js"></script>
-<div id="optionsModal">
-  <div id="optionsPanel">
-    <h2>Options</h2>
-
-    <div class="option-group">
-      <h3>Proxy</h3>
-      <div class="proxy-buttons">
-        <button class="proxy-btn" data-proxy="uv">Ultraviolet</button>
-        <button class="proxy-btn" data-proxy="scramjet">Scramjet</button>
-      </div>
-    </div>
-
-    <div class="option-group">
-      <h3>Eval JS</h3>
-      <textarea id="jsEvalBox" placeholder="Enter JavaScript to execute on proxied page..."></textarea>
-      <button id="runJS">Execute</button>
-    </div>
-
-    <button id="closeOptions">Close</button>
-  </div>
-</div>
 </body>
 </html>

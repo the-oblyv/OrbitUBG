@@ -19,6 +19,7 @@ const systemPrompt = `
 You are Orbit AI.
 Respond clearly, professionally, and structured.
 Avoid roleplay unless specifically asked. Be empathetic but not overly dramatic.
+You may use emojis but try not to over use them.
 `;
 
 function saveChat() {

@@ -9,6 +9,44 @@ import { bareModulePath } from "@mercuryworkshop/bare-as-module3";
 import { baremuxPath } from "@mercuryworkshop/bare-mux/node";
 import wisp from "wisp-server-node";
 
+app.use(express.json());
+app.post("/api/text", async (req,res)=>{
+  try{
+    const response=await fetch("https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.2",{
+      method:"POST",
+      headers:{
+        Authorization:`Bearer ${process.env.HF_TOKEN}`,
+        "Content-Type":"application/json"
+      },
+      body:JSON.stringify(req.body)
+    });
+
+    const data=await response.json();
+    res.json(data);
+  }catch{
+    res.status(500).json({error:"Text failed"});
+  }
+});
+
+app.post("/api/image", async (req,res)=>{
+  try{
+    const response=await fetch("https://api-inference.huggingface.co/models/stabilityai/stable-diffusion-xl-base-1.0",{
+      method:"POST",
+      headers:{
+        Authorization:`Bearer ${process.env.HF_TOKEN}`,
+        "Content-Type":"application/json"
+      },
+      body:JSON.stringify(req.body)
+    });
+
+    const buffer=await response.arrayBuffer();
+    res.set("Content-Type","image/png");
+    res.send(Buffer.from(buffer));
+  }catch{
+    res.status(500).json({error:"Image failed"});
+  }
+});
+
 // scramjet on npm is outdated
 // import { scramjetPath } from "@mercuryworkshop/scramjet";
 

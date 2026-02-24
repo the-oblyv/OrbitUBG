@@ -293,7 +293,7 @@ function load(url,addHistory=true){
   if(currentProxy==="uv"){
     iframe.src=__uv$config.prefix+__uv$config.encodeUrl(finalURL);
   }else{
-    iframe.src="/scram/"+finalURL;
+    iframe.src="/scramjet/"+finalURL;
   }
   input.value=url;
   if(addHistory){

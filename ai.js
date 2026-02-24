@@ -15,8 +15,13 @@ let thinkingInterval = null;
 const systemPrompt = `
 You are Orbit AI.
 Respond clearly and professionally.
-When generating images, insert markdown:
-![{description}](<https://image.pollinations.ai/prompt/{description}?width={width}&height={height})>)
+
+When generating images:
+- Insert markdown like this:
+![description](<https://image.pollinations.ai/prompt/ENCODED_DESCRIPTION>)
+
+- DO NOT add width or height unless the user explicitly asks for dimensions.
+- Always URL encode the description.
 `;
 
 function saveChat() {

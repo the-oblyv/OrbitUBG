@@ -1,5 +1,8 @@
-const TEXT_API = "https://text.pollinations.ai/";
-const IMAGE_API = "https://image.pollinations.ai/prompt/";
+const HF_TEXT_API =
+  "https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.2";
+
+const HF_IMAGE_API =
+  "https://api-inference.huggingface.co/models/stabilityai/stable-diffusion-xl-base-1.0";
 
 const input = document.getElementById("aiInput");
 const chat = document.getElementById("aiChat");
@@ -14,14 +17,8 @@ let thinkingInterval = null;
 
 const systemPrompt = `
 You are Orbit AI.
-Respond clearly and professionally.
-
-When generating images:
-- Insert markdown like this:
-![description](<https://image.pollinations.ai/prompt/ENCODED_DESCRIPTION>)
-
-- DO NOT add width or height unless the user explicitly asks for dimensions.
-- Always URL encode the description.
+Respond clearly, professionally, and structured.
+Avoid roleplay. Avoid emotions.
 `;
 
 function saveChat() {
@@ -47,10 +44,9 @@ function enhanceCodeBlocks(container) {
     btn.className = "code-copy";
 
     btn.onclick = () => {
-      const code = block.innerText;
-      navigator.clipboard.writeText(code);
+      navigator.clipboard.writeText(block.innerText);
       btn.innerText = "Copied";
-      setTimeout(() => btn.innerText = "Copy", 1200);
+      setTimeout(() => (btn.innerText = "Copy"), 1200);
     };
 
     block.style.position = "relative";
@@ -76,7 +72,6 @@ function addMessage(role, text, save = true) {
   bubble.innerHTML = renderMarkdown(text);
   wrapper.appendChild(bubble);
   enhanceCodeBlocks(bubble);
-
   scrollDown();
 
   if (save) {
@@ -100,9 +95,78 @@ function stopThinkingAnimation() {
   clearInterval(thinkingInterval);
 }
 
+async function generateHFText(prompt) {
+  const response = await fetch(HF_TEXT_API, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${HF_TOKEN}`,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      inputs: prompt,
+      parameters: {
+        max_new_tokens: 800,
+        temperature: 0.7,
+        return_full_text: false
+      }
+    })
+  });
+
+  const data = await response.json();
+
+  if (data.error) {
+    throw new Error(data.error);
+  }
+
+  return data[0]?.generated_text || "No response.";
+}
+
+async function generateHFImage(prompt) {
+  const response = await fetch(HF_IMAGE_API, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${HF_TOKEN}`,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      inputs: prompt
+    })
+  });
+
+  if (!response.ok) {
+    throw new Error("Image generation failed");
+  }
+
+  const blob = await response.blob();
+  return URL.createObjectURL(blob);
+}
+
 async function sendToAI(userText) {
   addMessage("user", userText);
 
+  // IMAGE REQUEST
+  if (userText.toLowerCase().startsWith("generate an image of")) {
+    const prompt = userText.replace("generate an image of", "").trim();
+    const bubble = addMessage("model", "Generating image...", false);
+
+    try {
+      const imgUrl = await generateHFImage(prompt);
+      bubble.innerHTML = `<img src="${imgUrl}" style="max-width:100%;border-radius:12px;">`;
+
+      contents.push({
+        role: "model",
+        content: `![${prompt}](${imgUrl})`
+      });
+
+      saveChat();
+    } catch (err) {
+      bubble.innerText = "Image generation failed.";
+    }
+
+    return;
+  }
+
+  // TEXT REQUEST
   const wrapper = createWrapper("model");
   const bubble = document.createElement("div");
   bubble.className = "aiMsg model";
@@ -111,37 +175,21 @@ async function sendToAI(userText) {
   startThinkingAnimation(bubble);
 
   try {
-    const prompt = systemPrompt + "\n\n" + contents.map(m => `${m.role}: ${m.content}`).join("\n");
+    const conversation =
+      systemPrompt +
+      "\n\n" +
+      contents.map(m => `${m.role.toUpperCase()}: ${m.content}`).join("\n") +
+      `\nUSER: ${userText}\nASSISTANT:`;
 
-    const res = await fetch(TEXT_API + encodeURIComponent(prompt), {
-      method: "GET"
-    });
+    const reply = await generateHFText(conversation);
 
     stopThinkingAnimation();
 
-    const reader = res.body.getReader();
-    const decoder = new TextDecoder();
-    let result = "";
+    bubble.innerHTML = renderMarkdown(reply);
+    enhanceCodeBlocks(bubble);
 
-    bubble.innerHTML = "";
-    contents.push({ role: "model", content: "" });
-
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-
-      const chunk = decoder.decode(value);
-      result += chunk;
-
-      bubble.innerHTML = renderMarkdown(result);
-      enhanceCodeBlocks(bubble);
-      scrollDown();
-
-      contents[contents.length - 1].content = result;
-    }
-
+    contents.push({ role: "model", content: reply });
     saveChat();
-
   } catch (err) {
     stopThinkingAnimation();
     bubble.innerText = "Request failed.";
@@ -174,15 +222,13 @@ fileInput.addEventListener("change", () => {
   files.forEach(file => {
     const reader = new FileReader();
     reader.onload = e => {
-      const img = `![uploaded image](${e.target.result})`;
-      input.value += "\n" + img;
+      input.value += `\n![uploaded image](${e.target.result})`;
     };
     reader.readAsDataURL(file);
   });
 });
 
 trashBtn.addEventListener("click", clearChat);
-
 sendBtn.addEventListener("click", sendMessage);
 
 input.addEventListener("keydown", e => {

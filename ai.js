@@ -1,4 +1,5 @@
-const API_URL = "https://text.pollinations.ai/openai";
+const TEXT_API = "https://text.pollinations.ai/";
+const IMAGE_API = "https://image.pollinations.ai/prompt/";
 
 const input = document.getElementById("aiInput");
 const chat = document.getElementById("aiChat");
@@ -9,12 +10,14 @@ const trashBtn = document.getElementById("trashBtn");
 const fileInput = document.getElementById("aiFile");
 
 let contents = JSON.parse(localStorage.getItem("orbitChat")) || [];
+let thinkingInterval = null;
 
-const systemPrompt = `You are Orbit AI. Respond in a calm, neutral, professional tone similar to ChatGPT.
-Be clear, structured, and helpful. Do not roleplay unless asked to. Do not over simulate emotions or overreact (You may show empathy).
-If unsure about factual information, say so briefly.
-When generating an image, insert markdown:
-![description](https://image.pollinations.ai/prompt/description?width=1024&height=1024)`;
+const systemPrompt = `
+You are Orbit AI.
+Respond clearly and professionally.
+When generating images, insert markdown:
+![{description}](<https://image.pollinations.ai/prompt/{description}?width={width}&height={height})>)
+`;
 
 function saveChat() {
   localStorage.setItem("orbitChat", JSON.stringify(contents));
@@ -30,6 +33,28 @@ function renderMarkdown(text) {
 
 function enhanceCodeBlocks(container) {
   Prism.highlightAllUnder(container);
+
+  container.querySelectorAll("pre").forEach(block => {
+    if (block.querySelector(".code-copy")) return;
+
+    const btn = document.createElement("button");
+    btn.innerText = "Copy";
+    btn.className = "code-copy";
+
+    btn.onclick = () => {
+      const code = block.innerText;
+      navigator.clipboard.writeText(code);
+      btn.innerText = "Copied";
+      setTimeout(() => btn.innerText = "Copy", 1200);
+    };
+
+    block.style.position = "relative";
+    btn.style.position = "absolute";
+    btn.style.top = "6px";
+    btn.style.right = "6px";
+
+    block.appendChild(btn);
+  });
 }
 
 function createWrapper(role) {
@@ -37,36 +62,6 @@ function createWrapper(role) {
   wrapper.className = `aiWrapper ${role}`;
   chat.appendChild(wrapper);
   return wrapper;
-}
-
-function addCopyControls(wrapper, text) {
-  const controls = document.createElement("div");
-  controls.style.display = "flex";
-  controls.style.gap = "14px";
-  controls.style.marginTop = "6px";
-
-  const copyBtn = document.createElement("button");
-  copyBtn.className = "aiMessageCopy";
-  copyBtn.innerHTML = `<i class="fa-solid fa-copy"></i> Copy`;
-
-  copyBtn.onclick = () => {
-    navigator.clipboard.writeText(text).then(() => {
-      copyBtn.innerHTML = `<i class="fa-solid fa-check"></i> Copied`;
-      setTimeout(() => {
-        copyBtn.innerHTML = `<i class="fa-solid fa-copy"></i> Copy`;
-      }, 1200);
-    });
-  };
-
-  const regenBtn = document.createElement("button");
-  regenBtn.className = "aiMessageCopy";
-  regenBtn.innerHTML = `<i class="fa-solid fa-rotate"></i> Regenerate`;
-
-  regenBtn.onclick = regenerateLast;
-
-  controls.appendChild(copyBtn);
-  controls.appendChild(regenBtn);
-  wrapper.appendChild(controls);
 }
 
 function addMessage(role, text, save = true) {
@@ -77,16 +72,27 @@ function addMessage(role, text, save = true) {
   wrapper.appendChild(bubble);
   enhanceCodeBlocks(bubble);
 
-  if (role === "model") {
-    addCopyControls(wrapper, text);
-  }
-
   scrollDown();
 
   if (save) {
     contents.push({ role, content: text });
     saveChat();
   }
+
+  return bubble;
+}
+
+function startThinkingAnimation(bubble) {
+  let dots = 1;
+  bubble.innerText = "Thinking.";
+  thinkingInterval = setInterval(() => {
+    dots = (dots % 3) + 1;
+    bubble.innerText = "Thinking" + ".".repeat(dots);
+  }, 400);
+}
+
+function stopThinkingAnimation() {
+  clearInterval(thinkingInterval);
 }
 
 async function sendToAI(userText) {
@@ -95,42 +101,44 @@ async function sendToAI(userText) {
   const wrapper = createWrapper("model");
   const bubble = document.createElement("div");
   bubble.className = "aiMsg model";
-  bubble.innerText = "Thinking...";
   wrapper.appendChild(bubble);
-  scrollDown();
+
+  startThinkingAnimation(bubble);
 
   try {
-    const messages = [
-      { role: "system", content: systemPrompt },
-      ...contents.map(m => ({
-        role: m.role === "model" ? "assistant" : m.role,
-        content: m.content
-      }))
-    ];
+    const prompt = systemPrompt + "\n\n" + contents.map(m => `${m.role}: ${m.content}`).join("\n");
 
-    const res = await fetch(API_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        messages,
-        model: "openai",
-        jsonMode: false,
-        seed: Math.floor(Math.random() * 10000)
-      })
+    const res = await fetch(TEXT_API + encodeURIComponent(prompt), {
+      method: "GET"
     });
 
-    const data = await res.json();
-    const reply =
-      data?.choices?.[0]?.message?.content ||
-      "No response received.";
+    stopThinkingAnimation();
 
-    bubble.innerHTML = renderMarkdown(reply);
-    enhanceCodeBlocks(bubble);
+    const reader = res.body.getReader();
+    const decoder = new TextDecoder();
+    let result = "";
 
-    contents.push({ role: "model", content: reply });
+    bubble.innerHTML = "";
+    contents.push({ role: "model", content: "" });
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+
+      const chunk = decoder.decode(value);
+      result += chunk;
+
+      bubble.innerHTML = renderMarkdown(result);
+      enhanceCodeBlocks(bubble);
+      scrollDown();
+
+      contents[contents.length - 1].content = result;
+    }
+
     saveChat();
 
   } catch (err) {
+    stopThinkingAnimation();
     bubble.innerText = "Request failed.";
   }
 }
@@ -138,29 +146,8 @@ async function sendToAI(userText) {
 function sendMessage() {
   const text = input.value.trim();
   if (!text) return;
-
   input.value = "";
   sendToAI(text);
-}
-
-async function regenerateLast() {
-  for (let i = contents.length - 1; i >= 0; i--) {
-    if (contents[i].role === "model") {
-      contents.splice(i, 1);
-      break;
-    }
-  }
-
-  chat.querySelectorAll(".aiWrapper.model").forEach((el, index, arr) => {
-    if (index === arr.length - 1) el.remove();
-  });
-
-  saveChat();
-
-  const lastUser = [...contents].reverse().find(m => m.role === "user");
-  if (lastUser) {
-    sendToAI(lastUser.content);
-  }
 }
 
 function clearChat() {
@@ -176,6 +163,18 @@ imageBtn.addEventListener("click", () => {
 });
 
 attachBtn.addEventListener("click", () => fileInput.click());
+
+fileInput.addEventListener("change", () => {
+  const files = Array.from(fileInput.files);
+  files.forEach(file => {
+    const reader = new FileReader();
+    reader.onload = e => {
+      const img = `![uploaded image](${e.target.result})`;
+      input.value += "\n" + img;
+    };
+    reader.readAsDataURL(file);
+  });
+});
 
 trashBtn.addEventListener("click", clearChat);
 

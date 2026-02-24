@@ -13,50 +13,24 @@ const app = express();
 app.set("trust proxy", 1);
 app.use(express.json());
 
-const ORBIT_UPSTREAM = process.env.ORBIT_UPSTREAM;
-
 app.use("/api", async (req, res) => {
   try {
-    const targetUrl = ORBIT_UPSTREAM + req.originalUrl.replace("/api", "/api");
-
-    const response = await fetch(targetUrl, {
+    const upstream = process.env.ORBIT_UPSTREAM;
+    const url = `${upstream}${req.originalUrl.replace(/^\/api/, "")}`;
+    const response = await fetch(url, {
       method: req.method,
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: req.method === "GET" ? undefined : JSON.stringify(req.body)
+      headers: { ...req.headers },
+      body: ["GET", "HEAD"].includes(req.method) ? undefined : JSON.stringify(req.body)
     });
-
-    const contentType = response.headers.get("content-type");
-
-    if (contentType && contentType.includes("application/json")) {
-      const data = await response.json();
-      res.json(data);
-    } else {
-      const buffer = await response.arrayBuffer();
-      res.set("Content-Type", contentType || "application/octet-stream");
-      res.send(Buffer.from(buffer));
-    }
+    const data = await response.arrayBuffer();
+    res.set("Content-Type", response.headers.get("content-type") || "application/json");
+    res.send(Buffer.from(data));
   } catch {
-    res.status(500).json({ error: "Service unavailable" });
+    res.status(500).json({ error: "Upstream failed" });
   }
 });
 
 const bare = createBareServer("/bare/");
-
-app.get("/g", (_, res) => res.sendFile("g.html", { root: "." }));
-app.get("/a", (_, res) => res.sendFile("a.html", { root: "." }));
-app.get("/s", (_, res) => res.sendFile("s.html", { root: "." }));
-app.get("/p", (_, res) => res.sendFile("p.html", { root: "." }));
-app.get("/pr", (_, res) => res.sendFile("pr.html", { root: "." }));
-app.get("/ai", (_, res) => res.sendFile("ai.html", { root: "." }));
-app.get("/mov", (_, res) => res.sendFile("mov.html", { root: "." }));
-app.get("/med", (_, res) => res.sendFile("med.html", { root: "." }));
-app.get("/music", (_, res) => res.sendFile("music.html", { root: "." }));
-app.get("/prx", (_, res) => res.sendFile("prx.html", { root: "." }));
-app.get("/mov/", (_, res) => res.sendFile("mov.html", { root: "." }));
-app.get("/mov/p", (_, res) => res.sendFile("mov/p.html", { root: "." }));
-app.get("/404", (_, res) => res.sendFile("404.html", { root: "." }));
 
 app.use(express.static("."));
 app.use("/uv/", express.static(uvPath));
@@ -84,11 +58,18 @@ server.on("upgrade", (req, socket, head) => {
 
 const port = Number(process.env.PORT) || 8080;
 
+server.listen({ port });
+
 server.on("listening", () => {
   const address = server.address();
   console.log("Listening on:");
-  console.log(`http://localhost:${address.port}`);
-  console.log(`http://${hostname()}:${address.port}`);
+  console.log(`\thttp://localhost:${address.port}`);
+  console.log(`\thttp://${hostname()}:${address.port}`);
+  console.log(
+    `\thttp://${
+      address.family === "IPv6" ? `[${address.address}]` : address.address
+    }:${address.port}`
+  );
 });
 
 process.on("SIGINT", shutdown);
@@ -99,5 +80,3 @@ function shutdown() {
   bare.close();
   process.exit(0);
 }
-
-server.listen({ port });

@@ -13,44 +13,32 @@ const app = express();
 app.set("trust proxy", 1);
 app.use(express.json());
 
-app.post("/api/text", async (req, res) => {
-  try {
-    const response = await fetch(
-      "https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.2",
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${process.env.HF_TOKEN}`,
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify(req.body)
-      }
-    );
-    const data = await response.json();
-    res.json(data);
-  } catch {
-    res.status(500).json({ error: "Text failed" });
-  }
-});
+const ORBIT_UPSTREAM = process.env.ORBIT_UPSTREAM;
 
-app.post("/api/image", async (req, res) => {
+app.use("/api", async (req, res) => {
   try {
-    const response = await fetch(
-      "https://api-inference.huggingface.co/models/stabilityai/stable-diffusion-xl-base-1.0",
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${process.env.HF_TOKEN}`,
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify(req.body)
-      }
-    );
-    const buffer = await response.arrayBuffer();
-    res.set("Content-Type", "image/png");
-    res.send(Buffer.from(buffer));
+    const targetUrl = ORBIT_UPSTREAM + req.originalUrl.replace("/api", "/api");
+
+    const response = await fetch(targetUrl, {
+      method: req.method,
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: req.method === "GET" ? undefined : JSON.stringify(req.body)
+    });
+
+    const contentType = response.headers.get("content-type");
+
+    if (contentType && contentType.includes("application/json")) {
+      const data = await response.json();
+      res.json(data);
+    } else {
+      const buffer = await response.arrayBuffer();
+      res.set("Content-Type", contentType || "application/octet-stream");
+      res.send(Buffer.from(buffer));
+    }
   } catch {
-    res.status(500).json({ error: "Image failed" });
+    res.status(500).json({ error: "Service unavailable" });
   }
 });
 
@@ -99,20 +87,14 @@ const port = Number(process.env.PORT) || 8080;
 server.on("listening", () => {
   const address = server.address();
   console.log("Listening on:");
-  console.log(`\thttp://localhost:${address.port}`);
-  console.log(`\thttp://${hostname()}:${address.port}`);
-  console.log(
-    `\thttp://${
-      address.family === "IPv6" ? `[${address.address}]` : address.address
-    }:${address.port}`
-  );
+  console.log(`http://localhost:${address.port}`);
+  console.log(`http://${hostname()}:${address.port}`);
 });
 
 process.on("SIGINT", shutdown);
 process.on("SIGTERM", shutdown);
 
 function shutdown() {
-  console.log("SIGTERM signal received: closing HTTP server");
   server.close();
   bare.close();
   process.exit(0);

@@ -32,13 +32,8 @@
   max-width:85%;
 }
 
-.aiWrapper.user{
-  align-self:flex-end;
-}
-
-.aiWrapper.model{
-  align-self:flex-start;
-}
+.aiWrapper.user{ align-self:flex-end; }
+.aiWrapper.model{ align-self:flex-start; }
 
 .aiMsg{
   padding:14px 18px;
@@ -59,21 +54,12 @@
   color:#ddd;
 }
 
-.aiMessageCopy{
-  background:none;
-  border:none;
-  color:#888;
-  cursor:pointer;
-  font-size:13px;
-  margin-top:6px;
-  padding:0;
-  display:flex;
-  align-items:center;
-  gap:6px;
-}
-
-.aiMessageCopy:hover{
-  color:#fff;
+.aiMsg img{
+  max-width:100%;
+  height:auto;
+  border-radius:12px;
+  display:block;
+  margin-top:8px;
 }
 
 .aiInputBar{
@@ -124,9 +110,7 @@
   background:#1f2338;
 }
 
-#aiFile{
-  display:none;
-}
+#aiFile{ display:none; }
 
 pre{
   position:relative;
@@ -134,7 +118,7 @@ pre{
   overflow:auto;
 }
 
-.aicopy-btn{
+.code-copy{
   position:absolute;
   top:8px;
   right:8px;
@@ -145,13 +129,6 @@ pre{
   padding:6px 10px;
   border-radius:6px;
   cursor:pointer;
-  display:flex;
-  align-items:center;
-  gap:6px;
-}
-
-.aicopy-btn:hover{
-  opacity:0.9;
 }
 </style>
 </head>
@@ -166,26 +143,26 @@ pre{
 
 <div class="aiInputBar">
   <div class="aiInputWrapper">
-  <button class="aiBtn aiAttach" id="attachBtn">
-    <i class="fa-solid fa-paperclip"></i>
-  </button>
+    <button class="aiBtn aiAttach" id="attachBtn">
+      <i class="fa-solid fa-paperclip"></i>
+    </button>
 
-  <button class="aiBtn aiAttach" id="imageBtn">
-    <i class="fa-solid fa-image"></i>
-  </button>
+    <button class="aiBtn aiAttach" id="imageBtn">
+      <i class="fa-solid fa-image"></i>
+    </button>
 
-  <input type="file" id="aiFile" multiple>
+    <input type="file" id="aiFile" multiple>
 
-  <input id="aiInput" placeholder="Ask Orbit AI anything..." autocomplete="off">
+    <input id="aiInput" placeholder="Ask Orbit AI anything..." autocomplete="off">
 
-  <button class="aiBtn" id="sendBtn">
-    <i class="fa-solid fa-paper-plane"></i>
-  </button>
+    <button class="aiBtn" id="sendBtn">
+      <i class="fa-solid fa-paper-plane"></i>
+    </button>
 
-  <button class="aiBtn aiAttach" id="trashBtn">
-    <i class="fa-solid fa-trash"></i>
-  </button>
-</div>
+    <button class="aiBtn aiAttach" id="trashBtn">
+      <i class="fa-solid fa-trash"></i>
+    </button>
+  </div>
 </div>
 
 <script src="frame.js"></script>

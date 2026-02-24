@@ -20,7 +20,7 @@ app.use("/api", async (req, res) => {
     const response = await fetch(url, {
       method: req.method,
       headers: { ...req.headers },
-      body: ["GET", "HEAD"].includes(req.method) ? undefined : JSON.stringify(req.body)
+      body: ["GET", "HEAD"].includes(req.method) ? undefined : JSON.stringify(req.body),
     });
     const data = await response.arrayBuffer();
     res.set("Content-Type", response.headers.get("content-type") || "application/json");
@@ -30,7 +30,19 @@ app.use("/api", async (req, res) => {
   }
 });
 
-const bare = createBareServer("/bare/");
+app.get("/g", (_, res) => res.sendFile("g.html", { root: "." }));
+app.get("/a", (_, res) => res.sendFile("a.html", { root: "." }));
+app.get("/s", (_, res) => res.sendFile("s.html", { root: "." }));
+app.get("/p", (_, res) => res.sendFile("p.html", { root: "." }));
+app.get("/pr", (_, res) => res.sendFile("pr.html", { root: "." }));
+app.get("/ai", (_, res) => res.sendFile("ai.html", { root: "." }));
+app.get("/mov", (_, res) => res.sendFile("mov.html", { root: "." }));
+app.get("/med", (_, res) => res.sendFile("med.html", { root: "." }));
+app.get("/music", (_, res) => res.sendFile("music.html", { root: "." }));
+app.get("/prx", (_, res) => res.sendFile("prx.html", { root: "." }));
+app.get("/mov/", (_, res) => res.sendFile("mov.html", { root: "." }));
+app.get("/mov/p", (_, res) => res.sendFile("mov/p.html", { root: "." }));
+app.get("/404", (_, res) => res.sendFile("404.html", { root: "." }));
 
 app.use(express.static("."));
 app.use("/uv/", express.static(uvPath));
@@ -40,6 +52,7 @@ app.use("/bareasmodule/", express.static(bareModulePath));
 app.use("/baremux/", express.static(baremuxPath));
 app.use("/scram/", express.static("scramjet"));
 
+const bare = createBareServer("/bare/");
 const server = createServer();
 
 server.on("request", (req, res) => {
@@ -57,7 +70,6 @@ server.on("upgrade", (req, socket, head) => {
 });
 
 const port = Number(process.env.PORT) || 8080;
-
 server.listen({ port });
 
 server.on("listening", () => {

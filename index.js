@@ -9,50 +9,52 @@ import { bareModulePath } from "@mercuryworkshop/bare-as-module3";
 import { baremuxPath } from "@mercuryworkshop/bare-mux/node";
 import wisp from "wisp-server-node";
 
-app.use(express.json());
-app.post("/api/text", async (req,res)=>{
-  try{
-    const response=await fetch("https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.2",{
-      method:"POST",
-      headers:{
-        Authorization:`Bearer ${process.env.HF_TOKEN}`,
-        "Content-Type":"application/json"
-      },
-      body:JSON.stringify(req.body)
-    });
-
-    const data=await response.json();
-    res.json(data);
-  }catch{
-    res.status(500).json({error:"Text failed"});
-  }
-});
-
-app.post("/api/image", async (req,res)=>{
-  try{
-    const response=await fetch("https://api-inference.huggingface.co/models/stabilityai/stable-diffusion-xl-base-1.0",{
-      method:"POST",
-      headers:{
-        Authorization:`Bearer ${process.env.HF_TOKEN}`,
-        "Content-Type":"application/json"
-      },
-      body:JSON.stringify(req.body)
-    });
-
-    const buffer=await response.arrayBuffer();
-    res.set("Content-Type","image/png");
-    res.send(Buffer.from(buffer));
-  }catch{
-    res.status(500).json({error:"Image failed"});
-  }
-});
-
-// scramjet on npm is outdated
-// import { scramjetPath } from "@mercuryworkshop/scramjet";
-
-const bare = createBareServer("/bare/");
 const app = express();
 app.set("trust proxy", 1);
+app.use(express.json());
+
+app.post("/api/text", async (req, res) => {
+  try {
+    const response = await fetch(
+      "https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.2",
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${process.env.HF_TOKEN}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(req.body)
+      }
+    );
+    const data = await response.json();
+    res.json(data);
+  } catch {
+    res.status(500).json({ error: "Text failed" });
+  }
+});
+
+app.post("/api/image", async (req, res) => {
+  try {
+    const response = await fetch(
+      "https://api-inference.huggingface.co/models/stabilityai/stable-diffusion-xl-base-1.0",
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${process.env.HF_TOKEN}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(req.body)
+      }
+    );
+    const buffer = await response.arrayBuffer();
+    res.set("Content-Type", "image/png");
+    res.send(Buffer.from(buffer));
+  } catch {
+    res.status(500).json({ error: "Image failed" });
+  }
+});
+
+const bare = createBareServer("/bare/");
 
 app.get("/g", (_, res) => res.sendFile("g.html", { root: "." }));
 app.get("/a", (_, res) => res.sendFile("a.html", { root: "." }));
@@ -67,6 +69,7 @@ app.get("/prx", (_, res) => res.sendFile("prx.html", { root: "." }));
 app.get("/mov/", (_, res) => res.sendFile("mov.html", { root: "." }));
 app.get("/mov/p", (_, res) => res.sendFile("mov/p.html", { root: "." }));
 app.get("/404", (_, res) => res.sendFile("404.html", { root: "." }));
+
 app.use(express.static("."));
 app.use("/uv/", express.static(uvPath));
 app.use("/epoxy/", express.static(epoxyPath));
@@ -82,6 +85,7 @@ server.on("request", (req, res) => {
     bare.routeRequest(req, res);
   } else app(req, res);
 });
+
 server.on("upgrade", (req, socket, head) => {
   if (bare.shouldRoute(req)) {
     bare.routeUpgrade(req, socket, head);
@@ -94,9 +98,6 @@ const port = Number(process.env.PORT) || 8080;
 
 server.on("listening", () => {
   const address = server.address();
-
-  // by default we are listening on 0.0.0.0 (every interface)
-  // we just need to list a few
   console.log("Listening on:");
   console.log(`\thttp://localhost:${address.port}`);
   console.log(`\thttp://${hostname()}:${address.port}`);
@@ -107,7 +108,6 @@ server.on("listening", () => {
   );
 });
 
-// https://expressjs.com/en/advanced/healthcheck-graceful-shutdown.html
 process.on("SIGINT", shutdown);
 process.on("SIGTERM", shutdown);
 
@@ -118,6 +118,4 @@ function shutdown() {
   process.exit(0);
 }
 
-server.listen({
-  port,
-});
+server.listen({ port });

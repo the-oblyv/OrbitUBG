@@ -256,12 +256,28 @@ function load(url,addHistory=true){
     iframe.src="/scramjet/"+finalURL;
   }
   input.value=url;
+  location.hash=encodeURIComponent(finalURL);
   if(addHistory){
     historyStack=historyStack.slice(0,historyIndex+1);
     historyStack.push(url);
     historyIndex++;
   }
 }
+
+function handleHashRoute(){
+  if(!location.hash)return;
+  const raw=location.hash.substring(1);
+  try{
+    const decoded=decodeURIComponent(raw);
+    if(decoded&&decoded.trim()){
+      input.value=decoded;
+      load(decoded,false);
+    }
+  }catch{}
+}
+
+window.addEventListener("load",handleHashRoute);
+window.addEventListener("hashchange",handleHashRoute);
 
 input.addEventListener("keydown",e=>{
   if(e.key==="Enter")load(input.value);
@@ -360,27 +376,7 @@ toggleBtn.onclick=()=>{
   localStorage.setItem("orbitClockFormat",is12Hour?"12":"24");
   location.reload();
 };
-
-  function handleHashRoute() {
-  if (!location.hash) return;
-
-  const raw = location.hash.substring(1);
-  try {
-    const decoded = decodeURIComponent(raw);
-
-    if (decoded && decoded.trim()) {
-      input.value = decoded;
-      load(decoded);
-    }
-  } catch (err) {
-    console.warn("Invalid hash URL");
-  }
-}
-
-window.addEventListener("load", handleHashRoute);
-
-window.addEventListener("hashchange", handleHashRoute);
 </script>
-
+  
 </body>
 </html>

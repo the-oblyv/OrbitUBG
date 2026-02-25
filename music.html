@@ -1,0 +1,413 @@
+<!doctype html>
+
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width,initial-scale=1">
+        <title>Music | Orbit</title>
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+        <link href="https://fonts.googleapis.com/css2?family=Inconsolata:wght@400;700&display=swap" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@4.7.0/fonts/remixicon.css">
+        <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
+        <style>
+          :root {
+  --bg: #0f1420;
+  --panel: #1b2133;
+  --panel2: #232a40;
+  --text: #e6e9f2;
+  --muted: #aab0c5;
+  --accent: #6c7cff;
+  --radius: 22px;
+}
+
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+}
+
+.main-container {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  max-width: 1200px;
+  margin-top: 80px;
+}
+
+.favorites-column {
+  width: 35%;
+  background: var(--panel2);
+  border-radius: var(--radius);
+  padding: 15px;
+  margin-left: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  border: 1px solid rgba(230, 233, 242, 0.1);
+  max-height: 500px;
+  overflow-y: auto;
+  box-shadow: 4px 4px 1px rgba(0, 0, 0, 0.3);
+}
+
+.favorites-column::-webkit-scrollbar {
+  width: 6px;
+}
+
+.favorites-column::-webkit-scrollbar-track {
+  background: rgba(230, 233, 242, 0.05);
+  border-radius: 3px;
+}
+
+.favorites-column::-webkit-scrollbar-thumb {
+  background: rgba(230, 233, 242, 0.3);
+  border-radius: 3px;
+}
+
+.favorites-title {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 10px;
+  text-align: center;
+}
+
+.favorite-item {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 10px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.favorite-item:hover {
+  background: rgba(230, 233, 242, 0.08);
+}
+
+.favorite-item .result-img {
+  width: 40px;
+  height: 40px;
+  margin-right: 10px;
+}
+
+.favorite-item .result-info {
+  flex: 1;
+}
+
+.favorite-item .result-title {
+  font-size: 10px;
+  color: var(--text);
+}
+
+.favorite-item .result-artist {
+  font-size: 8px;
+  color: var(--muted);
+}
+
+.favorite-item .remove-fav,
+.favorite-item .skip-next,
+.favorite-item .skip-prev {
+  font-size: 12px;
+  opacity: 0.6;
+  margin-left: 5px;
+  cursor: pointer;
+  transition: opacity 0.2s;
+  color: var(--text);
+}
+
+.favorite-item .remove-fav:hover,
+.favorite-item .skip-next:hover,
+.favorite-item .skip-prev:hover {
+  opacity: 1;
+}
+
+.play-favorites-btn {
+  padding: 8px;
+  font-size: 16px;
+  background: rgba(230, 233, 242, 0.08);
+  border-radius: var(--radius);
+  color: var(--text);
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.play-favorites-btn:hover {
+  background: rgba(230, 233, 242, 0.15);
+}
+
+.play-favorites-btn:active {
+  transform: scale(0.95);
+}
+
+.player {
+  width: 65%;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 25px;
+  background: var(--panel2);
+  border-radius: var(--radius);
+  box-shadow: 4px 4px 1px rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(230, 233, 242, 0.1);
+}
+
+.album-art {
+  flex: 0 0 250px;
+  height: 250px;
+  border-radius: var(--radius);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(230, 233, 242, 0.08);
+  position: relative;
+}
+
+.album-art i {
+  font-size: 120px;
+  color: rgba(230, 233, 242, 0.5);
+  position: absolute;
+}
+
+.album-art img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  position: relative;
+  z-index: 1;
+}
+
+.info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding-left: 0;
+  text-shadow: none;
+  position: relative;
+}
+
+.top-icons {
+  position: absolute;
+  top: 0;
+  right: 0;
+}
+
+.top-icons i {
+  font-size: 18px;
+  opacity: 0.6;
+  color: var(--text);
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.top-icons i:hover {
+  opacity: 1;
+}
+
+.track-title {
+  font-size: 32px;
+  font-weight: 700;
+  margin-bottom: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 350px;
+  color: var(--text);
+}
+
+.artist {
+  font-size: 18px;
+  opacity: 0.75;
+  margin-bottom: 20px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 350px;
+  color: var(--text);
+}
+
+.controls {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 18px;
+}
+
+.control-row {
+  display: flex;
+  gap: 6px;
+}
+
+.controls i {
+  font-size: 18px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  opacity: 0.8;
+  color: var(--text);
+  padding: 10px;
+  border-radius: 50%;
+  background: rgba(230, 233, 242, 0.08);
+  width: 38px;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.controls i:hover {
+  opacity: 1;
+  background: rgba(230, 233, 242, 0.15);
+}
+
+.controls i:active {
+  transform: scale(0.95);
+}
+
+.seekbar {
+  height: 6px;
+  background: rgba(230, 233, 242, 0.2);
+  border-radius: 6px;
+  position: relative;
+  cursor: pointer;
+  transition: height 0.2s ease;
+}
+
+.seekbar.active {
+  height: 8px;
+}
+
+#progress {
+  height: 100%;
+  width: 0%;
+  background: var(--text);
+  border-radius: 3px;
+}
+
+.timecodes {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+  opacity: 0.7;
+  margin-top: 4px;
+  color: var(--text);
+  font-family: Inconsolata, monospace;
+}
+
+.lyrics-toggle {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 40px;
+  height: 40px;
+  background: rgba(230, 233, 242, 0.08);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  backdrop-filter: blur(5px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  transition: all 0.2s ease;
+  z-index: 100;
+}
+
+.lyrics-toggle:hover {
+  background: rgba(230, 233, 242, 0.15);
+}
+
+.lyrics-toggle i {
+  font-size: 16px;
+  color: var(--text);
+}
+
+.lyrics-content {
+  max-height: 250px;
+  overflow-y: auto;
+  text-align: left;
+  white-space: pre-line;
+  padding-right: 10px;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--text);
+}
+
+.lyric-line {
+  transition: all 0.2s ease;
+  color: var(--muted);
+  opacity: 0.4;
+  padding: 3px 0;
+  margin: 3px 0;
+  filter: blur(2px);
+  line-height: 1.6;
+  font-size: 12px;
+}
+
+.lyric-line.active {
+  color: var(--text);
+  font-weight: 700;
+  opacity: 1;
+  font-size: 14px;
+  filter: blur(0px);
+}
+
+.lyric-line.next {
+  color: #ccc;
+  opacity: 0.7;
+  filter: blur(0.6px);
+}
+
+.lyric-line.prev {
+  color: #bbb;
+  opacity: 0.55;
+  filter: blur(1px);
+}
+          </style>
+    </head>
+    <body>
+        <div class="search-container"><input type="text" class="search-input" placeholder="Search for any song..." id="searchInput"></div>
+        <div class="search-results" id="searchResults"></div>
+        <div class="main-container">
+            <div class="player">
+                <div class="album-art" id="coverArt"><i class="fa-solid fa-music" id="musicIcon"></i><img src="" alt="Album" id="albumCover" crossorigin="anonymous" style="display:none"></div>
+                <div class="info" id="playerInfo">
+                    <div class="top-icons"><i id="favoritesBtn" class="fa-solid fa-star"></i></div>
+                    <div class="track-title" id="trackTitle">Not Playing</div>
+                    <div class="artist" id="artistName"></div>
+                    <div class="controls">
+                        <div class="control-row"><i id="backward10" class="fas fa-backward control-btn"></i><i id="backward5" class="fa-solid fa-chevron-left control-btn"></i><i id="playPause" class="fa-solid fa-play control-btn"></i><i id="forward5" class="fa-solid fa-chevron-right control-btn"></i><i id="forward10" class="fas fa-forward control-btn"></i></div>
+                        <div class="control-row"><i id="loopToggle" class="fa-solid fa-repeat control-btn"></i><i id="volumeBtn" class="fa-solid fa-volume-high control-btn"></i><i id="favoriteBtn" class="fa-regular fa-heart control-btn"></i></div>
+                    </div>
+                    <div id="seekbar" class="seekbar">
+                        <div id="progress"></div>
+                    </div>
+                    <div class="timecodes"><span id="currentTime">0:00</span><span id="remainingTime">-0:00</span></div>
+                </div>
+                <div class="lyrics-info" id="lyricsInfo">
+                    <div class="lyrics-content" id="lyricsContent"></div>
+                </div>
+            </div>
+            <div class="favorites-column" id="favoritesColumn">
+                <div class="favorites-title">Favorites</div>
+                <div class="play-favorites-btn" id="playFavoritesBtn"><i class="fas fa-play"></i> Play Favorites</div>
+            </div>
+            <div class="lyrics-toggle" id="lyricsToggle"><i class="fa-solid fa-align-left"></i></div>
+        </div>
+        <script>
+!function(){var t="favorites",e={r:localStorage.getItem("default_music_provider")||"tidal",q:"",p:0,o:!1,n:!0,m:[],l:-1,k:!1,j:!1,i:!1,h:null,g:[],f:-1,d:!1,c:!1,b:!1,a:JSON.parse(localStorage.getItem(t))||[],z:-1},n={y:new Audio,x:document.getElementById("searchInput"),A:document.getElementById("searchResults"),B:document.getElementById("trackTitle"),C:document.getElementById("artistName"),D:document.getElementById("albumCover"),E:document.getElementById("musicIcon"),F:document.getElementById("playPause"),G:document.getElementById("volumeBtn"),H:document.getElementById("seekbar"),I:document.getElementById("progress"),J:document.getElementById("currentTime"),K:document.getElementById("remainingTime"),L:document.getElementById("lyricsToggle"),M:document.getElementById("playerInfo"),N:document.getElementById("lyricsInfo"),O:document.getElementById("lyricsContent"),P:document.getElementById("favoriteBtn"),Q:document.getElementById("favoritesBtn"),R:document.getElementById("favoritesColumn"),S:document.getElementById("playFavoritesBtn")};async function a(t){e.q=t,e.p=0,e.n=!0,e.m=[],n.A.classList.add("active"),n.A.innerHTML='<div class="loading">Searching...</div>';const i=encodeURIComponent(t),s=Math.floor(0)+1,r="tidal"===e.r?"/api/music-search-1/"+i+"&max=15&page="+s:"/api/music-search-2/"+i+"?max=15&offset=0";try{const t=await fetch(r);!function(t){if(n.A.innerHTML="",!t||"tidal"===e.r&&!t.items||"soundcloud"===e.r&&!t.results)return void(n.A.innerHTML='<div class="loading">No results found</div>');const a=i(t);e.m=a,function(t){t.forEach((t,e)=>{const i=document.createElement("div");i.className="result-item",i.innerHTML='\n<div class="result-img">\n<img src="'+(t.aa||"")+'" alt="'+t.V+'" crossorigin="anonymous" onerror="this.style.display=\'none\'">\n</div>\n<div class="result-info">\n<div class="result-title">'+t.V+'</div>\n<div class="result-artist">'+t.U+"</div>\n</div>",i.addEventListener("click",()=>{o(t),c(),n.x.value="",e.z=-1}),n.A.appendChild(i)})}(a)}(await t.json())}catch(t){n.A.innerHTML='<div class="error-message">Search failed. Please try again.</div>'}}function i(t){return"tidal"===e.r?t.items.map(t=>{var e=function(t){return["https:","","resources.tidal.com","images",...t.split("-"),"320x320.jpg"].join("/")} (t.album.cover);return{W:t.id,V:t.title,U:t.artists.map(t=>t.name).join(", "),aa:t.album?e:null,Z:"tidal",Y:"",X:t.mediaMetadata?t.mediaMetadata.tags:[]}}):t.results.map(t=>({W:t.url.split("/").pop(),V:t.title,U:t.artist,aa:t.artwork,Z:"soundcloud",Y:t.url,X:[]}))}function c(){n.A.classList.remove("active")}function o(t){n.B.textContent=t.V,n.C.textContent=t.U,n.D.src=t.aa?t.aa.replace("100x100","600x600"):"",n.D.style.display=t.aa?"block":"none",n.E.style.display=t.aa?"none":"block",e.c&&y(t.U,t.V),localStorage.setItem("lastPlayed",JSON.stringify(t));const a=e.a.some(e=>e.title===t.V&&e.artist===t.U);e.b=a,n.P.className=a?"fa-solid fa-heart control-btn":"fa-regular fa-heart control-btn","tidal"===t.Z?async function(t){let e="low";t.X&&t.X.includes("LOSSLESS")?e="lossless":t.X&&t.X.includes("HIGH")&&(e="high");try{const a=await fetch("/api/music-lyric-1/"+e+"/"+t.W),i=await a.json();i&&i.streamUrl?(n.y.src=i.streamUrl,n.y.load(),n.y.play()):n.A.innerHTML='<div class="error-message">No stream URL found</div>'}catch(t){n.A.innerHTML='<div class="error-message">Failed to load track</
+
+
+div>'}}(t):async function(t){const e=t.Y.split("/").slice(-2).join("/");try{const t=await fetch("/api/music-lyric-2/"+e),a=await t.json();a&&a.streamUrl&&(n.y.src=a.streamUrl,n.y.load(),n.y.play())}catch(t){n.A.innerHTML='<div class="error-message">Track not available</div>'}}(t)}function s(t){const e=n.H.getBoundingClientRect(),a=Math.max(0,Math.min(1,(t.clientX-e.left)/e.width));n.I.style.width=100*a+"%",n.y.currentTime=a*n.y.duration}function r(t){if(isNaN(t)||t<0)return"0:00";const e=Math.floor(t/60),n=Math.floor(t%60);return""+e+":"+(n<10?"0":"")+n}function l(){n.R.innerHTML='\n<div class="favorites-title">Favorites</div>\n<div class="play-favorites-btn" id="playFavoritesBtn">\n<i class="fas fa-play"></i> Play Favorites\n</div>\n'+e.a.map((t,e)=>'\n<div class="favorite-item" data-index="'+e+'">\n<div class="result-img">\n<img src="'+t.artwork.replace("100x100","600x600")+'" alt="'+t.title+'">\n</div>\n<div class="result-info">\n<div class="result-title">'+t.title+'</div>\n<div class="result-artist">'+t.artist+'</div>\n</div>\n<i class="fa-solid fa-times remove-fav" data-action="remove"></i>\n<i class="fa-solid fa-step-backward skip-prev" data-action="prev"></i>\n<i class="fa-solid fa-step-forward skip-next" data-action="next"></i>\n</div>\n').join("");n.R.querySelectorAll(".favorite-item").forEach(t=>{const e=parseInt(t.dataset.index);t.addEventListener("click",t=>{if(t.target.hasAttribute("data-action")){t.stopPropagation();const a=t.target.getAttribute("data-action");"remove"===a?u(e):"prev"===a?d(e>0?e-1:e.a.length-1):"next"===a&&d(e<e.a.length-1?e+1:0)}else d(e)})});const t=document.querySelector("#playFavoritesBtn");t&&t.addEventListener("click",m)}async function d(t){e.z=t;const a=e.a[t];n.B.textContent=a.title,n.C.textContent=a.artist,n.D.src=a.artwork?a.artwork.replace("100x100","600x600"):"",n.D.style.display=a.artwork?"block":"none",n.E.style.display=a.artwork?"none":"block";const c=e.a.some(t=>t.title===a.title&&t.artist===a.artist);e.b=c,n.P.className=c?"fa-solid fa-heart control-btn":"fa-regular fa-heart control-btn";const s=encodeURIComponent(a.title+" "+a.artist),r="tidal"===e.r?"/api/music-search-1/"+s+"&max=1&page=1":"/api/music-search-2/"+s+"?max=1&offset=0";try{const t=await fetch(r),e=await t.json();if(e){const t=i(e);t.length>0&&o(t[0])}}catch(t){console.error("Failed to fetch favorite track:",t)}}function u(n){e.a.splice(n,1),localStorage.setItem(t,JSON.stringify(e.a)),e.z>=e.a.length&&(e.z=-1),l()}function m(){0!==e.a.length&&d(0)}async function y(t,a){n.O.textContent="Loading lyrics...",e.g=[],e.f=-1,e.d=!1;const i=encodeURIComponent(""+t+" "+a);try{const t=await fetch("/api/verbal-lyrics/"+i),c=await t.json();let o=null;Array.isArray(c)&&c.length>0&&(o=c.find(t=>t.syncedLyrics&&t.trackName.toLowerCase()===a.toLowerCase()),!o&&(o=c[0])),o&&o.syncedLyrics?(function(t){const n=/^[(\d{2}):(\d{2}).(\d{2,3})](.*)/;e.g=[],t.split("\n").forEach(t=>{const a=t.match(n);if(a){const t=60*parseInt(a[1])+parseInt(a[2])+parseInt(3===a[3].length?a[3]:10*a[3])/1e3,n=a[4].trim();n&&e.g.push({time:t,text:n})}}})(o.syncedLyrics),n.O.innerHTML="",e.g.forEach((t,e)=>{const a=document.createElement("div");a.className="lyric-line",a.id="lyric-"+e,a.textContent=t.text,n.O.appendChild(a)}),e.d=!0):(n.O.innerHTML=o&&o.plainLyrics?o.plainLyrics.replace(/\n/g,"<br>"):"")}catch(t){n.O.textContent="No lyrics available."}}n.x.addEventListener("input",function(){clearTimeout(e.h),e.h=setTimeout(()=>{const t=n.x.value.trim();t.length>1?a(t):c()},500)}),n.x.addEventListener("keypress",function(t){"Enter"===t.key&&(clearTimeout(e.h),n.x.value.trim().length>1&&a(n.x.value.trim()))}),document.addEventListener("click",function(t){n.A.contains(t.target)||t.target===n.x&&(c(),n.R.classList.remove("active"))}),n.F.addEventListener("click",function(){n.y.src||0===e.m.length?n.y.src&&(n.y.paused?n.y.play():n.y.pause()):o(e.m[0])}),n.G.addEventListener("click",function(){e.i=!e.i,n.y.muted=e.i,n.G.className=e.i?"fa-solid fa-volume-xmark control-btn":"fa-solid fa-volume-high control-btn"}),n.H.addEventListener("mousedown",function(t){e.k=!0,s(t)}),document.addEventListener("mousemove",function(t){e.k&&s(t)}),document.addEventListener("mouseup",function(){e.k=!1}),n.L.addEventListener("click",function(){e.c=!e.c,e.c?(n.M.style.display="none",n.D.style.display="none",n.E.style.display="none",n.N.style.display="flex",y(n.C.textContent,n.B.textContent)):(n.M.style.display="flex",n.D.style.display="Not Playing"===n.B.textContent?"none":"block",n.E.style.display="Not Playing"===n.B.textContent?"block":"none",n.N.style.display="none")}),n.P.addEventListener("click",function(){if(e.a.length>=10)return void alert("Maximum 10 favorites allowed!");const a={title:n.B.textContent,artist:n.C.textContent,artwork:n.D.src,genre:""};e.b?e.a=e.a.filter(t=>t.title!==a.title||t.artist!==a.artist):e.a.push(a),localStorage.setItem(t,JSON.stringify(e.a)),e.b=!e.b,n.P.className=e.b?"fa-solid fa-heart control-btn":"fa-regular fa-heart control-btn",l()}),n.Q.addEventListener("click",function(){n.R.classList.toggle("active"),l()}),n.S.addEventListener("click",m),function(){document.querySelector("#backward10")?.addEventListener("click",()=>{n.y.currentTime=Math.max(0,n.y.currentTime-10)}),document.querySelector("#backward5")?.addEventListener("click",()=>{n.y.currentTime=Math.max(0,n.y.currentTime-5)}),document.querySelector("#forward5")?.addEventListener("click",()=>{n.y.currentTime=Math.min(n.y.duration,n.y.currentTime+5)}),document.querySelector("#forward10")?.addEventListener("click",()=>{n.y.currentTime=Math.min(n.y.duration,n.y.currentTime+10)});const t=document.querySelector("#loopToggle");t.addEventListener("click",()=>{e.j=!e.j,t.className=e.j?"fa-solid fa-repeat-1 control-btn":"fa-solid fa-repeat control-btn"})}(),n.y.addEventListener("loadedmetadata",function(){n.K.textContent="-"+r(n.y.duration),n.J.textContent="0:00"}),n.y.addEventListener("play",function(){n.F.classList.remove("fa-play"),n.F.classList.add("fa-pause")}),n.y.addEventListener("pause",function(){n.F.classList.remove("fa-pause"),n.F.classList.add("fa-play")}),n.y.addEventListener("ended",function(){if(e.j)return n.y.currentTime=0,void n.y.play();n.F.classList.remove("fa-pause"),n.F.classList.add("fa-play"),e.z>=0&&e.z<e.a.length-1&&(e.z<e.a.length-1?(e.z++,d(e.z)):(e.z=0,d(0)))}),n.y.addEventListener("timeupdate",function(){if(!e.k){const t=n.y.currentTime/n.y.duration*100;n.I.style.width=t+"%",n.J.textContent=r(n.y.currentTime),n.K.textContent="-"+r(n.y.duration-n.y.currentTime),function(t){if(!e.d||0===e.g.length)return;let n=-1;for(let a=0;a<e.g.length&&!(!(e.g[a].time>t));a++)n=a;n!==e.f&&(e.f=n,document.querySelectorAll(".lyric-line").forEach((t,a)=>{t.className="lyric-line",a<e.f?t.classList.add("prev"):a===e.f?(t.classList.add("active"),t.scrollIntoView({behavior:"smooth",block:"center"})):a===e.f+1&&t.classList.add("next")}))}}(n.y.currentTime)}}),l()}(); </script> </body>
+
+</html>

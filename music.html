@@ -37,6 +37,42 @@
                 padding: 20px
             }
 
+  .search-container {
+                width: 100%;
+                max-width: 560px;
+                margin-bottom: 20px;
+                z-index: 100;
+                position: absolute;
+                top: 20px;
+                left: 50%;
+                transform: translateX(-50%);
+                border: 1px solid rgba(255, 255, 255, .1);
+                border-radius: 12px
+            }
+
+            .search-input {
+                width: 100%;
+                padding: 12px 20px;
+                border-radius: 12px;
+                border: none;
+                font-family: Inter, sans-serif;
+                font-size: 14px;
+                background: rgba(255, 255, 255, .1);
+                color: var(--highlight);
+                outline: 0;
+                transition: all .2s ease;
+                backdrop-filter: blur(5px)
+            }
+
+            .search-input::placeholder {
+                color: rgba(255, 255, 255, .6)
+            }
+
+            .search-input:focus {
+                background: rgba(255, 255, 255, .2);
+                box-shadow: 0 0 15px rgba(0, 0, 0, .3)
+            }
+
             .search-results {
                 width: 100%;
                 max-width: 560px;

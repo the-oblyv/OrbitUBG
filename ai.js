@@ -1,4 +1,4 @@
-const POLL_TEXT_API = "https://text.pollinations.ai/openai";
+const POLL_TEXT_API = "https://text.pollinations.ai/prompt";
 const POLL_IMAGE_API = "https://image.pollinations.ai/prompt";
 
 const input = document.getElementById("aiInput");
@@ -11,13 +11,6 @@ const fileInput = document.getElementById("aiFile");
 
 let contents = JSON.parse(localStorage.getItem("orbitChat")) || [];
 let thinkingInterval = null;
-
-const systemPrompt = `
-You are Orbit AI.
-Respond clearly and professionally.
-Avoid roleplay unless asked.
-Use emojis sparingly.
-`;
 
 function saveChat() {
   localStorage.setItem("orbitChat", JSON.stringify(contents));
@@ -72,6 +65,7 @@ function stopThinkingAnimation() {
   clearInterval(thinkingInterval);
 }
 
+
 function fakeStreamText(fullText, bubble, speed = 12) {
   let index = 0;
   bubble.innerHTML = "";
@@ -88,34 +82,27 @@ function fakeStreamText(fullText, bubble, speed = 12) {
       scrollDown();
     }
   }
-
   type();
 }
 
+
 async function generateImage(prompt) {
-  const res = await fetch(
-    `${POLL_IMAGE_API}/${encodeURIComponent(prompt)}?width=1024&height=1024&nologo=true`
-  );
+  const url = `${POLL_IMAGE_API}/${encodeURIComponent(prompt)}?width=1024&height=1024&nologo=true`;
+  const res = await fetch(url);
   if (!res.ok) throw new Error("Image failed");
   const blob = await res.blob();
   return URL.createObjectURL(blob);
 }
 
-async function generateText(messages) {
-  const response = await fetch(POLL_TEXT_API, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      model: "openai-large",
-      messages
-    })
-  });
+async function generateText(prompt) {
+  const url = `${POLL_TEXT_API}?q=${encodeURIComponent(prompt)}`;
+  const res = await fetch(url);
 
-  if (!response.ok) throw new Error("API error");
-
-  const data = await response.json();
-  return data.choices?.[0]?.message?.content || "No response.";
+  if (!res.ok) throw new Error("Text API error");
+  const text = await res.text();
+  return text || "No response.";
 }
+
 
 async function sendToAI(userText) {
   addMessage("user", userText);
@@ -135,7 +122,6 @@ async function sendToAI(userText) {
     } catch {
       bubble.innerText = "Image generation failed.";
     }
-
     return;
   }
 
@@ -146,15 +132,11 @@ async function sendToAI(userText) {
 
   startThinkingAnimation(bubble);
 
-  const messages = [
-    { role: "system", content: systemPrompt },
-    ...contents,
-    { role: "user", content: userText }
-  ];
+  const historyText = contents.map(m => `${m.role}: ${m.content}`).join("\n");
+  const fullPrompt = `You are Orbit AI.\n${historyText}\nuser: ${userText}\nassistant:`;
 
   try {
-    const reply = await generateText(messages);
-
+    const reply = await generateText(fullPrompt);
     stopThinkingAnimation();
 
     fakeStreamText(reply, bubble, 12);
@@ -167,6 +149,7 @@ async function sendToAI(userText) {
     console.error(err);
   }
 }
+
 
 function sendMessage() {
   const text = input.value.trim();
@@ -186,9 +169,7 @@ imageBtn.addEventListener("click", () => {
   input.value = "Generate an image of ";
   input.focus();
 });
-
 attachBtn.addEventListener("click", () => fileInput.click());
-
 fileInput.addEventListener("change", () => {
   const files = Array.from(fileInput.files);
   files.forEach(file => {
@@ -199,10 +180,8 @@ fileInput.addEventListener("change", () => {
     reader.readAsDataURL(file);
   });
 });
-
 trashBtn.addEventListener("click", clearChat);
 sendBtn.addEventListener("click", sendMessage);
-
 input.addEventListener("keydown", e => {
   if (e.key === "Enter" && !e.shiftKey) {
     e.preventDefault();

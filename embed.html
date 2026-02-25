@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Scramjet Embed</title>
+<link rel="icon" href="favicon.webp" />
+<link rel="prefetch" href="/scram/scramjet.worker.js" />
+<link rel="prefetch" href="/scram/scramjet.shared.js" />
+
+<style>
+body,html{
+  margin:0;
+  padding:0;
+  width:100vw;
+  height:100vh;
+  overflow:hidden;
+  background:#000;
+}
+#iframe-container{
+  width:100%;
+  height:100%;
+}
+#iframe-container iframe{
+  width:100%;
+  height:100%;
+  border:none;
+  background:#fff;
+}
+</style>
+
+<script src="/baremux/index.js"></script>
+<script src="/scram/scramjet.all.js"></script>
+<script src="/stuff.js" defer></script>
+</head>
+
+<body>
+<div id="iframe-container"></div>
+
+<script>
+const { ScramjetController } = $scramjetLoadController();
+
+const scramjet = new ScramjetController({
+  prefix: '/scramjet/',
+  files: {
+    wasm: '/scram/scramjet.wasm.wasm',
+    all: '/scram/scramjet.all.js',
+    sync: '/scram/scramjet.sync.js'
+  }
+});
+
+scramjet.init();
+
+navigator.serviceWorker.register('/sw.js');
+
+function getTargetFromHash(){
+  const raw = location.hash.substring(1);
+  if(!raw) return "https://google.com/";
+  try{
+    const decoded = decodeURIComponent(raw);
+    if(!decoded.startsWith("http://") && !decoded.startsWith("https://")){
+      return "https://" + decoded;
+    }
+    return decoded;
+  }catch{
+    return "https://google.com/";
+  }
+}
+
+function loadFromHash(){
+  const container = document.getElementById("iframe-container");
+  container.innerHTML = "";
+
+  const target = getTargetFromHash();
+  const frame = scramjet.createFrame();
+  const iframe = frame.frame;
+
+  container.appendChild(iframe);
+  frame.go(target);
+}
+
+window.addEventListener("load", loadFromHash);
+window.addEventListener("hashchange", loadFromHash);
+</script>
+</body>
+</html>

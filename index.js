@@ -36,7 +36,16 @@ app.use("/api", async (req, res) => {
     const forwardPath = req.originalUrl.replace(/^\/api/, "");
     const targetUrl = base + forwardPath;
 
-    const headers = { ...req.headers };
+    const headers = {
+      ...req.headers,
+      "user-agent":
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
+      "origin": base,
+      "referer": base,
+      "x-forwarded-for":
+        req.headers["x-forwarded-for"] || req.socket.remoteAddress
+    };
+
     delete headers.host;
     delete headers["content-length"];
     delete headers.connection;

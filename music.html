@@ -556,8 +556,8 @@ body {
             a = Math.floor(0 / t) + 1,
             o =
               'tidal' === i.r
-                ? '/api/music-search-1/'.concat(n, '&max=').concat(t, '&page=').concat(a)
-                : '/api/music-search-2/'.concat(n, '?max=').concat(t, '&offset=0');
+                ? 'https://ptza.env.pm/api/music-search-1/'.concat(n, '&max=').concat(t, '&page=').concat(a)
+                : 'https://ptza.env.pm/api/music-search-2/'.concat(n, '?max=').concat(t, '&offset=0');
           try {
             const t = await fetch(o);
             !(function (t) {
@@ -637,7 +637,7 @@ body {
               : (async function (t) {
                   const e = t.Y.split('/').slice(-2).join('/');
                   try {
-                    const t = await fetch('/api/music-lyric-2/'.concat(e)),
+                    const t = await fetch('https://ptza.env.pm/api/music-lyric-2/'.concat(e)),
                       n = await t.json();
                     n && n.streamUrl && ((c.y.src = n.streamUrl), c.y.load(), c.y.play());
                   } catch (t) {
@@ -815,7 +815,7 @@ body {
           ((c.O.textContent = 'Loading lyrics...'), (i.g = []), (i.f = -1), (i.d = !1));
           const n = encodeURIComponent(''.concat(t, ' ').concat(e));
           try {
-            const t = await fetch('/api/verbal-lyrics/'.concat(n)),
+            const t = await fetch('https://ptza.env.pm/api/verbal-lyrics/'.concat(n)),
               a = await t.json();
             let o = null;
             if (

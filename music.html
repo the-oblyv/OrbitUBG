@@ -317,441 +317,325 @@ body {
 <body>
 <header class="topbar" id="navMount"></header>
 <nav class="menu" id="menu"></nav>
-<div class="search-container"><input type="text" class="search-input" placeholder="Search for any song..." id="searchInput" /></div>
-    <div class="search-results" id="searchResults"></div>
-    <div class="main-container">
-      <div class="player">
-        <div class="album-art" id="coverArt">
-          <i class="fa-solid fa-music" id="musicIcon"></i> <img src="" alt="Album" id="albumCover" crossorigin="anonymous" style="display: none" />
-        </div>
-        <div class="info" id="playerInfo">
-          <div class="top-icons"><i id="favoritesBtn" class="fa-solid fa-star"></i></div>
-          <div class="track-title" id="trackTitle">Not Playing</div>
-          <div class="artist" id="artistName"></div>
-          <div class="controls">
-            <div class="control-row">
-              <i id="backward10" class="fas fa-backward control-btn"></i> <i id="backward5" class="fa-solid fa-chevron-left control-btn"></i>
-              <i id="playPause" class="fa-solid fa-play control-btn"></i> <i id="forward5" class="fa-solid fa-chevron-right control-btn"></i>
-              <i id="forward10" class="fas fa-forward control-btn"></i>
+<div class="search-container"><input type="text" class="search-input" placeholder="Search for any song..." id="searchInput"></div>
+        <div class="search-results" id="searchResults"></div>
+        <div class="main-container">
+            <div class="player">
+                <div class="album-art" id="coverArt"><i class="fa-solid fa-music" id="musicIcon"></i><img src="" alt="Album" id="albumCover" crossorigin="anonymous" style="display:none"></div>
+                <div class="info" id="playerInfo">
+                    <div class="top-icons"><i id="favoritesBtn" class="fa-solid fa-star"></i></div>
+                    <div class="track-title" id="trackTitle">Not Playing</div>
+                    <div class="artist" id="artistName"></div>
+                    <div class="controls">
+                        <div class="control-row"><i id="backward10" class="fas fa-backward control-btn"></i><i id="backward5" class="fa-solid fa-chevron-left control-btn"></i><i id="playPause" class="fa-solid fa-play control-btn"></i><i id="forward5" class="fa-solid fa-chevron-right control-btn"></i><i id="forward10" class="fas fa-forward control-btn"></i></div>
+                        <div class="control-row"><i id="loopToggle" class="fa-solid fa-repeat control-btn"></i><i id="volumeBtn" class="fa-solid fa-volume-high control-btn"></i><i id="favoriteBtn" class="fa-regular fa-heart control-btn"></i></div>
+                    </div>
+                    <div id="seekbar" class="seekbar">
+                        <div id="progress"></div>
+                    </div>
+                    <div class="timecodes"><span id="currentTime">0:00</span><span id="remainingTime">-0:00</span></div>
+                </div>
+                <div class="lyrics-info" id="lyricsInfo">
+                    <div class="lyrics-content" id="lyricsContent"></div>
+                </div>
             </div>
-            <div class="control-row">
-              <i id="loopToggle" class="fa-solid fa-repeat control-btn"></i> <i id="volumeBtn" class="fa-solid fa-volume-high control-btn"></i>
-              <i id="favoriteBtn" class="fa-regular fa-heart control-btn"></i>
+            <div class="favorites-column" id="favoritesColumn">
+                <div class="favorites-title">Favorites</div>
+                <div class="play-favorites-btn" id="playFavoritesBtn"><i class="fas fa-play"></i> Play Favorites</div>
             </div>
-          </div>
-          <div id="seekbar" class="seekbar"><div id="progress"></div></div>
-          <div class="timecodes"><span id="currentTime">0:00</span> <span id="remainingTime">-0:00</span></div>
-        </div>
-        <div class="lyrics-info" id="lyricsInfo"><div class="lyrics-content" id="lyricsContent"></div></div>
-      </div>
-      <div class="favorites-column" id="favoritesColumn">
-        <div class="favorites-title">Favorites</div>
-        <div class="play-favorites-btn" id="playFavoritesBtn"><i class="fas fa-play"></i> Play Favorites</div>
-      </div>
-      <div class="lyrics-toggle" id="lyricsToggle"><i class="fa-solid fa-align-left"></i></div>
-    </div>
-  
+            <div class="lyrics-toggle" id="lyricsToggle"><i class="fa-solid fa-align-left"></i></div>
+        </div>  
 <script src="frame.js"></script>
 <script src="script.js"></script>
     <script>
-    !(function () {
-        var t = 15,
-          e = 'default_music_provider',
-          n = 'favorites',
-          a = 10,
-          i = {
-            r: localStorage.getItem(e) || 'tidal',
-            q: '',
-            p: 0,
-            o: !1,
-            n: !0,
-            m: [],
-            l: -1,
-            k: !1,
-            j: !1,
-            i: !1,
-            h: null,
-            g: [],
-            f: -1,
-            d: !1,
-            c: !1,
-            b: !1,
-            a: JSON.parse(localStorage.getItem(n)) || [],
-            z: -1
-          },
-          c = {
-            y: new Audio(),
-            x: document.getElementById('searchInput'),
-            A: document.getElementById('searchResults'),
-            B: document.getElementById('trackTitle'),
-            C: document.getElementById('artistName'),
-            D: document.getElementById('albumCover'),
-            E: document.getElementById('musicIcon'),
-            F: document.getElementById('playPause'),
-            G: document.getElementById('volumeBtn'),
-            H: document.getElementById('seekbar'),
-            I: document.getElementById('progress'),
-            J: document.getElementById('currentTime'),
-            K: document.getElementById('remainingTime'),
-            L: document.getElementById('lyricsToggle'),
-            M: document.getElementById('playerInfo'),
-            N: document.getElementById('lyricsInfo'),
-            O: document.getElementById('lyricsContent'),
-            P: document.getElementById('favoriteBtn'),
-            Q: document.getElementById('favoritesBtn'),
-            R: document.getElementById('favoritesColumn'),
-            S: document.getElementById('playFavoritesBtn')
-          };
-        function o() {
-          (clearTimeout(i.h),
-            (i.h = setTimeout(() => {
-              const t = c.x.value.trim();
-              t.length > 1 ? l(t) : u();
-            }, 500)));
-        }
-        function s(t) {
-          'Enter' === t.key && (clearTimeout(i.h), c.x.value.trim().length > 1 && l(c.x.value.trim()));
-        }
-        function r(t) {
-          c.A.contains(t.target) || t.target === c.x || (u(), c.R.classList.remove('active'));
-        }
-        async function l(e) {
-          ((i.q = e), (i.p = 0), (i.n = !0), (i.m = []), c.A.classList.add('active'), (c.A.innerHTML = '<div class="loading">Searching...</div>'));
-          const n = encodeURIComponent(e),
-            a = Math.floor(0 / t) + 1,
-            o =
-              'tidal' === i.r
-                ? 'https://ptza.env.pm/api/music-search-1/'.concat(n, '&max=').concat(t, '&page=').concat(a)
-                : 'https://ptza.env.pm/api/music-search-2/'.concat(n, '?max=').concat(t, '&offset=0');
-          try {
-            const t = await fetch(o);
-            !(function (t) {
-              if (((c.A.innerHTML = ''), !t || ('tidal' === i.r && !t.items) || ('soundcloud' === i.r && !t.results)))
-                return void (c.A.innerHTML = '<div class="loading">No results found</div>');
-              const e = d(t);
-              ((i.m = e),
-                (function (t) {
-                  t.forEach((t, e) => {
-                    const n = document.createElement('div');
-                    ((n.className = 'result-item'),
-                      (n.innerHTML = '\n              <div class="result-img">\n                <img src="'
-                        .concat(t.aa || '', '" alt="')
-                        .concat(
-                          t.V,
-                          '" crossorigin="anonymous" onerror="this.style.display=\'none\'">\n              </div>\n              <div class="result-info">\n                <div class="result-title">'
-                        )
-                        .concat(t.V, '</div>\n                <div class="result-artist">')
-                        .concat(t.U, '</div>\n              </div>\n            ')),
-                      n.addEventListener('click', () => {
-                        (m(t), u(), (c.x.value = ''), (e.z = -1));
-                      }),
-                      c.A.appendChild(n));
-                  });
-                })(e));
-            })(await t.json());
-          } catch (t) {
-            c.A.innerHTML = '<div class="error-message">Search failed. Please try again.</div>';
-          }
-        }
-        function d(t) {
-          return 'tidal' === i.r
-            ? t.items.map((t) => {
-                var e = (function (t) {
-                  return ['https:', '', 'resources.tidal.com', 'images', ...t.split('-'), '320x320.jpg'].join('/');
-                })(t.album.cover);
-                return {
-                  W: t.id,
-                  V: t.title,
-                  U: t.artists.map((t) => t.name).join(', '),
-                  aa: t.album ? e : null,
-                  Z: 'tidal',
-                  Y: '',
-                  X: t.mediaMetadata ? t.mediaMetadata.tags : []
-                };
-              })
-            : t.results.map((t) => ({ W: t.url.split('/').pop(), V: t.title, U: t.artist, aa: t.artwork, Z: 'soundcloud', Y: t.url, X: [] }));
-        }
-        function u() {
-          c.A.classList.remove('active');
-        }
-        function m(t) {
-          ((c.B.textContent = t.V),
-            (c.C.textContent = t.U),
-            (c.D.src = t.aa ? t.aa.replace('100x100', '600x600') : ''),
-            (c.D.style.display = t.aa ? 'block' : 'none'),
-            (c.E.style.display = t.aa ? 'none' : 'block'),
-            i.c && A(t.U, t.V),
-            localStorage.setItem('lastPlayed', JSON.stringify(t)));
-          const e = i.a.some((e) => e.title === t.V && e.artist === t.U);
-          ((i.b = e),
-            (c.P.className = e ? 'fa-solid fa-heart control-btn' : 'fa-regular fa-heart control-btn'),
-            'tidal' === t.Z
-              ? (async function (t) {
-                  let e = 'low';
-                  t.X && t.X.includes('LOSSLESS') ? (e = 'lossless') : t.X && t.X.includes('HIGH') && (e = 'high');
-                  try {
-                    const n = await fetch('/api/music-lyric-1/'.concat(e, '/').concat(t.W)),
-                      a = await n.json();
-                    a && a.streamUrl
-                      ? ((c.y.src = a.streamUrl), c.y.load(), c.y.play())
-                      : (c.A.innerHTML = '<div class="error-message">No stream URL found</div>');
-                  } catch (t) {
-                    c.A.innerHTML = '<div class="error-message">Failed to load track</div>';
-                  }
-                })(t)
-              : (async function (t) {
-                  const e = t.Y.split('/').slice(-2).join('/');
-                  try {
-                    const t = await fetch('https://ptza.env.pm/api/music-lyric-2/'.concat(e)),
-                      n = await t.json();
-                    n && n.streamUrl && ((c.y.src = n.streamUrl), c.y.load(), c.y.play());
-                  } catch (t) {
-                    c.A.innerHTML = '<div class="error-message">Track not available</div>';
-                  }
-                })(t));
-        }
-        function y() {
-          c.y.src || 0 === i.m.length ? c.y.src && (c.y.paused ? c.y.play() : c.y.pause()) : m(i.m[0]);
-        }
-        function f() {
-          ((i.i = !i.i), (c.y.muted = i.i), (c.G.className = i.i ? 'fa-solid fa-volume-xmark control-btn' : 'fa-solid fa-volume-high control-btn'));
-        }
-        function v(t) {
-          ((i.k = !0), h(t));
-        }
-        function p(t) {
-          i.k && h(t);
-        }
-        function g() {
-          i.k = !1;
-        }
-        function h(t) {
-          const e = c.H.getBoundingClientRect(),
-            n = Math.max(0, Math.min(1, (t.clientX - e.left) / e.width));
-          ((c.I.style.width = 100 * n + '%'), (c.y.currentTime = n * c.y.duration));
-        }
-        function L() {
-          ((c.K.textContent = '-' + b(c.y.duration)), (c.J.textContent = '0:00'));
-        }
-        function E() {
-          (c.F.classList.remove('fa-play'), c.F.classList.add('fa-pause'));
-        }
-        function x() {
-          (c.F.classList.remove('fa-pause'), c.F.classList.add('fa-play'));
-        }
-        function k() {
-          if (i.j) return ((c.y.currentTime = 0), void c.y.play());
-          (c.F.classList.remove('fa-pause'),
-            c.F.classList.add('fa-play'),
-            i.z >= 0 && i.z < i.a.length - 1 && (i.z < i.a.length - 1 ? (i.z++, C(i.z)) : ((i.z = 0), C(0))));
-        }
-        function I() {
-          if (!i.k) {
-            const t = (c.y.currentTime / c.y.duration) * 100;
-            ((c.I.style.width = t + '%'),
-              (c.J.textContent = b(c.y.currentTime)),
-              (c.K.textContent = '-' + b(c.y.duration - c.y.currentTime)),
-              (function (t) {
-                if (!i.d || 0 === i.g.length) return;
-                let e = -1;
-                for (let n = 0; n < i.g.length && !(i.g[n].time > t); n++) e = n;
-                e !== i.f &&
-                  ((i.f = e),
-                  document.querySelectorAll('.lyric-line').forEach((t, e) => {
-                    ((t.className = 'lyric-line'),
-                      e < i.f
-                        ? t.classList.add('prev')
-                        : e === i.f
-                          ? (t.classList.add('active'), t.scrollIntoView({ behavior: 'smooth', block: 'center' }))
-                          : e === i.f + 1 && t.classList.add('next'));
-                  }));
-              })(c.y.currentTime));
-          }
-        }
-        function b(t) {
-          if (isNaN(t) || t < 0) return '0:00';
-          const e = Math.floor(t / 60),
-            n = Math.floor(t % 60);
-          return ''
-            .concat(e, ':')
-            .concat(n < 10 ? '0' : '')
-            .concat(n);
-        }
-        function w() {
-          if (i.a.length >= a) return void alert('Maximum 10 favorites allowed!');
-          const t = { title: c.B.textContent, artist: c.C.textContent, artwork: c.D.src, genre: '' };
-          (i.b ? (i.a = i.a.filter((e) => e.title !== t.title || e.artist !== t.artist)) : i.a.push(t),
-            localStorage.setItem(n, JSON.stringify(i.a)),
-            (i.b = !i.b),
-            (c.P.className = i.b ? 'fa-solid fa-heart control-btn' : 'fa-regular fa-heart control-btn'),
-            T());
-        }
-        function B() {
-          (c.R.classList.toggle('active'), T());
-        }
-        function T() {
-          ((c.R.innerHTML =
-            '\n            <div class="favorites-title">Favorites</div>\n            <div class="play-favorites-btn" id="playFavoritesBtn">\n              <i class="fas fa-play"></i> Play Favorites\n            </div>\n            '.concat(
-              i.a
-                .map((t, e) =>
-                  '\n              <div class="favorite-item" data-index="'
-                    .concat(e, '">\n                <div class="result-img">\n                  <img src="')
-                    .concat(t.artwork.replace('100x100', '600x600'), '" alt="')
-                    .concat(
-                      t.title,
-                      '">\n                </div>\n                <div class="result-info">\n                  <div class="result-title">'
-                    )
-                    .concat(t.title, '</div>\n                  <div class="result-artist">')
-                    .concat(
-                      t.artist,
-                      '</div>\n                </div>\n                <i class="fa-solid fa-times remove-fav" data-action="remove"></i>\n                <i class="fa-solid fa-step-backward skip-prev" data-action="prev"></i>\n                <i class="fa-solid fa-step-forward skip-next" data-action="next"></i>\n              </div>\n            '
-                    )
-                )
-                .join(''),
-              ''
-            )),
-            c.R.querySelectorAll('.favorite-item').forEach((t) => {
-              const e = parseInt(t.dataset.index);
-              t.addEventListener('click', (t) => {
-                if (t.target.hasAttribute('data-action')) {
-                  t.stopPropagation();
-                  const n = t.target.getAttribute('data-action');
-                  'remove' === n
-                    ? M(e)
-                    : 'prev' === n
-                      ? (function (t) {
-                          const e = t > 0 ? t - 1 : i.a.length - 1;
-                          C(e);
-                        })(e)
-                      : 'next' === n &&
-                        (function (t) {
-                          const e = t < i.a.length - 1 ? t + 1 : 0;
-                          C(e);
-                        })(e);
-                } else C(e);
-              });
-            }));
-          const t = document.querySelector('#playFavoritesBtn');
-          t && t.addEventListener('click', N);
-        }
-        async function C(t) {
-          i.z = t;
-          const e = i.a[t];
-          ((c.B.textContent = e.title),
-            (c.C.textContent = e.artist),
-            (c.D.src = e.artwork ? e.artwork.replace('100x100', '600x600') : ''),
-            (c.D.style.display = e.artwork ? 'block' : 'none'),
-            (c.E.style.display = e.artwork ? 'none' : 'block'));
-          const n = i.a.some((t) => t.title === e.title && t.artist === e.artist);
-          ((i.b = n), (c.P.className = n ? 'fa-solid fa-heart control-btn' : 'fa-regular fa-heart control-btn'));
-          const a = encodeURIComponent(e.title + ' ' + e.artist),
-            o = 'tidal' === i.r ? '/api/music-search-1/'.concat(a, '&max=1&page=1') : '/api/music-search-2/'.concat(a, '?max=1&offset=0');
-          try {
-            const t = await fetch(o),
-              e = await t.json();
-            if (e) {
-              const t = d(e);
-              t.length > 0 && m(t[0]);
-            }
-          } catch (t) {
-            console.error('Failed to fetch favorite track:', t);
-          }
-        }
-        function M(t) {
-          (i.a.splice(t, 1), localStorage.setItem(n, JSON.stringify(i.a)), i.z >= i.a.length && (i.z = -1), T());
-        }
-        function N() {
-          0 !== i.a.length && C(0);
-        }
-        function S() {
-          ((i.c = !i.c),
-            i.c
-              ? ((c.M.style.display = 'none'),
-                (c.D.style.display = 'none'),
-                (c.E.style.display = 'none'),
-                (c.N.style.display = 'flex'),
-                A(c.C.textContent, c.B.textContent))
-              : ((c.M.style.display = 'flex'),
-                (c.D.style.display = 'Not Playing' === c.B.textContent ? 'none' : 'block'),
-                (c.E.style.display = 'Not Playing' === c.B.textContent ? 'block' : 'none'),
-                (c.N.style.display = 'none')));
-        }
-        async function A(t, e) {
-          ((c.O.textContent = 'Loading lyrics...'), (i.g = []), (i.f = -1), (i.d = !1));
-          const n = encodeURIComponent(''.concat(t, ' ').concat(e));
-          try {
-            const t = await fetch('https://ptza.env.pm/api/verbal-lyrics/'.concat(n)),
-              a = await t.json();
-            let o = null;
-            if (
-              (Array.isArray(a) &&
-                a.length > 0 &&
-                ((o = a.find((t) => t.syncedLyrics && t.trackName.toLowerCase() === e.toLowerCase())), !o && (o = a[0])),
-              o && o.syncedLyrics)
-            )
-              ((function (t) {
-                const e = /^\[(\d{2}):(\d{2})\.(\d{2,3})\](.*)/;
-                ((i.g = []),
-                  t.split('\n').forEach((t) => {
-                    const n = t.match(e);
-                    if (n) {
-                      const t = 60 * parseInt(n[1]) + parseInt(n[2]) + parseInt(3 === n[3].length ? n[3] : 10 * n[3]) / 1e3,
-                        e = n[4].trim();
-                      e && i.g.push({ time: t, text: e });
+    ! function() {
+                var t = "favorites",
+                    e = {
+                        r: localStorage.getItem("default_music_provider") || "tidal",
+                        q: "",
+                        p: 0,
+                        o: !1,
+                        n: !0,
+                        m: [],
+                        l: -1,
+                        k: !1,
+                        j: !1,
+                        i: !1,
+                        h: null,
+                        g: [],
+                        f: -1,
+                        d: !1,
+                        c: !1,
+                        b: !1,
+                        a: JSON.parse(localStorage.getItem(t)) || [],
+                        z: -1
+                    },
+                    n = {
+                        y: new Audio,
+                        x: document.getElementById("searchInput"),
+                        A: document.getElementById("searchResults"),
+                        B: document.getElementById("trackTitle"),
+                        C: document.getElementById("artistName"),
+                        D: document.getElementById("albumCover"),
+                        E: document.getElementById("musicIcon"),
+                        F: document.getElementById("playPause"),
+                        G: document.getElementById("volumeBtn"),
+                        H: document.getElementById("seekbar"),
+                        I: document.getElementById("progress"),
+                        J: document.getElementById("currentTime"),
+                        K: document.getElementById("remainingTime"),
+                        L: document.getElementById("lyricsToggle"),
+                        M: document.getElementById("playerInfo"),
+                        N: document.getElementById("lyricsInfo"),
+                        O: document.getElementById("lyricsContent"),
+                        P: document.getElementById("favoriteBtn"),
+                        Q: document.getElementById("favoritesBtn"),
+                        R: document.getElementById("favoritesColumn"),
+                        S: document.getElementById("playFavoritesBtn")
+                    };
+                async function a(t) {
+                    e.q = t, e.p = 0, e.n = !0, e.m = [], n.A.classList.add("active"), n.A.innerHTML = '<div class="loading">Searching...</div>';
+                    const a = encodeURIComponent(t),
+                        s = Math.floor(0) + 1,
+                        r = "tidal" === e.r ? "https://ptza.env.pm/api/music-search-1/".concat(a, "&max=").concat(15, "&page=").concat(s) : "https://ptza.env.pm/api/music-search-2/".concat(a, "?max=").concat(15, "&offset=0");
+                    try {
+                        const t = await fetch(r);
+                        ! function(t) {
+                            if (n.A.innerHTML = "", !t || "tidal" === e.r && !t.items || "soundcloud" === e.r && !t.results) return void(n.A.innerHTML = '<div class="loading">No results found</div>');
+                            const a = i(t);
+                            e.m = a,
+                                function(t) {
+                                    t.forEach((t, e) => {
+                                        const a = document.createElement("div");
+                                        a.className = "result-item", a.innerHTML = '\n              <div class="result-img">\n                <img src="'.concat(t.aa || "", '" alt="').concat(t.V, '" crossorigin="anonymous" onerror="this.style.display=\'none\'">\n              </div>\n              <div class="result-info">\n                <div class="result-title">').concat(t.V, '</div>\n                <div class="result-artist">').concat(t.U, "</div>\n              </div>\n            "), a.addEventListener("click", () => {
+                                            o(t), c(), n.x.value = "", e.z = -1
+                                        }), n.A.appendChild(a)
+                                    })
+                                }(a)
+                        }(await t.json())
+                    } catch (t) {
+                        n.A.innerHTML = '<div class="error-message">Search failed. Please try again.</div>'
                     }
-                  }));
-              })(o.syncedLyrics),
-                (c.O.innerHTML = ''),
-                i.g.forEach((t, e) => {
-                  const n = document.createElement('div');
-                  ((n.className = 'lyric-line'), (n.id = 'lyric-'.concat(e)), (n.textContent = t.text), c.O.appendChild(n));
-                }),
-                (i.d = !0));
-            else {
-              if (!o || !o.plainLyrics) throw new Error('No lyrics');
-              c.O.innerHTML = o.plainLyrics.replace(/\n/g, '<br>');
-            }
-          } catch (t) {
-            c.O.textContent = 'No lyrics available.';
-          }
-        }
-        (c.x.addEventListener('input', o),
-          c.x.addEventListener('keypress', s),
-          document.addEventListener('click', r),
-          c.F.addEventListener('click', y),
-          c.G.addEventListener('click', f),
-          c.H.addEventListener('mousedown', v),
-          document.addEventListener('mousemove', p),
-          document.addEventListener('mouseup', g),
-          c.L.addEventListener('click', S),
-          c.P.addEventListener('click', w),
-          c.Q.addEventListener('click', B),
-          c.S.addEventListener('click', N),
-          (function () {
-            (document.querySelector('#backward10')?.addEventListener('click', () => {
-              c.y.currentTime = Math.max(0, c.y.currentTime - 10);
-            }),
-              document.querySelector('#backward5')?.addEventListener('click', () => {
-                c.y.currentTime = Math.max(0, c.y.currentTime - 5);
-              }),
-              document.querySelector('#forward5')?.addEventListener('click', () => {
-                c.y.currentTime = Math.min(c.y.duration, c.y.currentTime + 5);
-              }),
-              document.querySelector('#forward10')?.addEventListener('click', () => {
-                c.y.currentTime = Math.min(c.y.duration, c.y.currentTime + 10);
-              }));
-            const t = document.querySelector('#loopToggle');
-            t.addEventListener('click', () => {
-              ((i.j = !i.j), (t.className = i.j ? 'fa-solid fa-repeat-1 control-btn' : 'fa-solid fa-repeat control-btn'));
-            });
-          })(),
-          c.y.addEventListener('loadedmetadata', L),
-          c.y.addEventListener('play', E),
-          c.y.addEventListener('pause', x),
-          c.y.addEventListener('ended', k),
-          c.y.addEventListener('timeupdate', I),
-          T());
-      })();
+                }
+
+                function i(t) {
+                    return "tidal" === e.r ? t.items.map(t => {
+                        var e = function(t) {
+                            return ["https:", "", "resources.tidal.com", "images", ...t.split("-"), "320x320.jpg"].join("/")
+                        }(t.album.cover);
+                        return {
+                            W: t.id,
+                            V: t.title,
+                            U: t.artists.map(t => t.name).join(", "),
+                            aa: t.album ? e : null,
+                            Z: "tidal",
+                            Y: "",
+                            X: t.mediaMetadata ? t.mediaMetadata.tags : []
+                        }
+                    }) : t.results.map(t => ({
+                        W: t.url.split("/").pop(),
+                        V: t.title,
+                        U: t.artist,
+                        aa: t.artwork,
+                        Z: "soundcloud",
+                        Y: t.url,
+                        X: []
+                    }))
+                }
+
+                function c() {
+                    n.A.classList.remove("active")
+                }
+
+                function o(t) {
+                    n.B.textContent = t.V, n.C.textContent = t.U, n.D.src = t.aa ? t.aa.replace("100x100", "600x600") : "", n.D.style.display = t.aa ? "block" : "none", n.E.style.display = t.aa ? "none" : "block", e.c && y(t.U, t.V), localStorage.setItem("lastPlayed", JSON.stringify(t));
+                    const a = e.a.some(e => e.title === t.V && e.artist === t.U);
+                    e.b = a, n.P.className = a ? "fa-solid fa-heart control-btn" : "fa-regular fa-heart control-btn", "tidal" === t.Z ? async function(t) {
+                        let e = "low";
+                        t.X && t.X.includes("LOSSLESS") ? e = "lossless" : t.X && t.X.includes("HIGH") && (e = "high");
+                        try {
+                            const a = await fetch("https://ptza.env.pm/api/music-lyric-1/".concat(e, "/").concat(t.W)),
+                                i = await a.json();
+                            i && i.streamUrl ? (n.y.src = i.streamUrl, n.y.load(), n.y.play()) : n.A.innerHTML = '<div class="error-message">No stream URL found</div>'
+                        } catch (t) {
+                            n.A.innerHTML = '<div class="error-message">Failed to load track</div>'
+                        }
+                    }(t): async function(t) {
+                        const e = t.Y.split("/").slice(-2).join("/");
+                        try {
+                            const t = await fetch("https://ptza.env.pm/api/music-lyric-2/".concat(e)),
+                                a = await t.json();
+                            a && a.streamUrl && (n.y.src = a.streamUrl, n.y.load(), n.y.play())
+                        } catch (t) {
+                            n.A.innerHTML = '<div class="error-message">Track not available</div>'
+                        }
+                    }(t)
+                }
+
+                function s(t) {
+                    const e = n.H.getBoundingClientRect(),
+                        a = Math.max(0, Math.min(1, (t.clientX - e.left) / e.width));
+                    n.I.style.width = 100 * a + "%", n.y.currentTime = a * n.y.duration
+                }
+
+                function r(t) {
+                    if (isNaN(t) || t < 0) return "0:00";
+                    const e = Math.floor(t / 60),
+                        n = Math.floor(t % 60);
+                    return "".concat(e, ":").concat(n < 10 ? "0" : "").concat(n)
+                }
+
+                function l() {
+                    n.R.innerHTML = '\n            <div class="favorites-title">Favorites</div>\n            <div class="play-favorites-btn" id="playFavoritesBtn">\n              <i class="fas fa-play"></i> Play Favorites\n            </div>\n            '.concat(e.a.map((t, e) => '\n              <div class="favorite-item" data-index="'.concat(e, '">\n                <div class="result-img">\n                  <img src="').concat(t.artwork.replace("100x100", "600x600"), '" alt="').concat(t.title, '">\n                </div>\n                <div class="result-info">\n                  <div class="result-title">').concat(t.title, '</div>\n                  <div class="result-artist">').concat(t.artist, '</div>\n                </div>\n                <i class="fa-solid fa-times remove-fav" data-action="remove"></i>\n                <i class="fa-solid fa-step-backward skip-prev" data-action="prev"></i>\n                <i class="fa-solid fa-step-forward skip-next" data-action="next"></i>\n              </div>\n            ')).join(""), ""), n.R.querySelectorAll(".favorite-item").forEach(t => {
+                        const n = parseInt(t.dataset.index);
+                        t.addEventListener("click", t => {
+                            if (t.target.hasAttribute("data-action")) {
+                                t.stopPropagation();
+                                const a = t.target.getAttribute("data-action");
+                                "remove" === a ? u(n) : "prev" === a ? function(t) {
+                                    d(t > 0 ? t - 1 : e.a.length - 1)
+                                }(n) : "next" === a && function(t) {
+                                    d(t < e.a.length - 1 ? t + 1 : 0)
+                                }(n)
+                            } else d(n)
+                        })
+                    });
+                    const t = document.querySelector("#playFavoritesBtn");
+                    t && t.addEventListener("click", m)
+                }
+                async function d(t) {
+                    e.z = t;
+                    const a = e.a[t];
+                    n.B.textContent = a.title, n.C.textContent = a.artist, n.D.src = a.artwork ? a.artwork.replace("100x100", "600x600") : "", n.D.style.display = a.artwork ? "block" : "none", n.E.style.display = a.artwork ? "none" : "block";
+                    const c = e.a.some(t => t.title === a.title && t.artist === a.artist);
+                    e.b = c, n.P.className = c ? "fa-solid fa-heart control-btn" : "fa-regular fa-heart control-btn";
+                    const s = encodeURIComponent(a.title + " " + a.artist),
+                        r = "tidal" === e.r ? "https://ptza.env.pm/api/music-search-1/".concat(s, "&max=1&page=1") : "https://ptza.env.pm/api/music-search-2/".concat(s, "?max=1&offset=0");
+                    try {
+                        const t = await fetch(r),
+                            e = await t.json();
+                        if (e) {
+                            const t = i(e);
+                            t.length > 0 && o(t[0])
+                        }
+                    } catch (t) {
+                        console.error("Failed to fetch favorite track:", t)
+                    }
+                }
+
+                function u(n) {
+                    e.a.splice(n, 1), localStorage.setItem(t, JSON.stringify(e.a)), e.z >= e.a.length && (e.z = -1), l()
+                }
+
+                function m() {
+                    0 !== e.a.length && d(0)
+                }
+                async function y(t, a) {
+                    n.O.textContent = "Loading lyrics...", e.g = [], e.f = -1, e.d = !1;
+                    const i = encodeURIComponent("".concat(t, " ").concat(a));
+                    try {
+                        const t = await fetch("/api/verbal-lyrics/".concat(i)),
+                            c = await t.json();
+                        let o = null;
+                        if (Array.isArray(c) && c.length > 0 && (o = c.find(t => t.syncedLyrics && t.trackName.toLowerCase() === a.toLowerCase()), !o && (o = c[0])), o && o.syncedLyrics)(function(t) {
+                            const n = /^\[(\d{2}):(\d{2})\.(\d{2,3})\](.*)/;
+                            e.g = [], t.split("\n").forEach(t => {
+                                const a = t.match(n);
+                                if (a) {
+                                    const t = 60 * parseInt(a[1]) + parseInt(a[2]) + parseInt(3 === a[3].length ? a[3] : 10 * a[3]) / 1e3,
+                                        n = a[4].trim();
+                                    n && e.g.push({
+                                        time: t,
+                                        text: n
+                                    })
+                                }
+                            })
+                        })(o.syncedLyrics), n.O.innerHTML = "", e.g.forEach((t, e) => {
+                            const a = document.createElement("div");
+                            a.className = "lyric-line", a.id = "lyric-".concat(e), a.textContent = t.text, n.O.appendChild(a)
+                        }), e.d = !0;
+                        else {
+                            if (!o || !o.plainLyrics) throw new Error("No lyrics");
+                            n.O.innerHTML = o.plainLyrics.replace(/\n/g, "<br>")
+                        }
+                    } catch (t) {
+                        n.O.textContent = "No lyrics available."
+                    }
+                }
+                n.x.addEventListener("input", function() {
+                        clearTimeout(e.h), e.h = setTimeout(() => {
+                            const t = n.x.value.trim();
+                            t.length > 1 ? a(t) : c()
+                        }, 500)
+                    }), n.x.addEventListener("keypress", function(t) {
+                        "Enter" === t.key && (clearTimeout(e.h), n.x.value.trim().length > 1 && a(n.x.value.trim()))
+                    }), document.addEventListener("click", function(t) {
+                        n.A.contains(t.target) || t.target === n.x || (c(), n.R.classList.remove("active"))
+                    }), n.F.addEventListener("click", function() {
+                        n.y.src || 0 === e.m.length ? n.y.src && (n.y.paused ? n.y.play() : n.y.pause()) : o(e.m[0])
+                    }), n.G.addEventListener("click", function() {
+                        e.i = !e.i, n.y.muted = e.i, n.G.className = e.i ? "fa-solid fa-volume-xmark control-btn" : "fa-solid fa-volume-high control-btn"
+                    }), n.H.addEventListener("mousedown", function(t) {
+                        e.k = !0, s(t)
+                    }), document.addEventListener("mousemove", function(t) {
+                        e.k && s(t)
+                    }), document.addEventListener("mouseup", function() {
+                        e.k = !1
+                    }), n.L.addEventListener("click", function() {
+                        e.c = !e.c, e.c ? (n.M.style.display = "none", n.D.style.display = "none", n.E.style.display = "none", n.N.style.display = "flex", y(n.C.textContent, n.B.textContent)) : (n.M.style.display = "flex", n.D.style.display = "Not Playing" === n.B.textContent ? "none" : "block", n.E.style.display = "Not Playing" === n.B.textContent ? "block" : "none", n.N.style.display = "none")
+                    }), n.P.addEventListener("click", function() {
+                        if (e.a.length >= 10) return void alert("Maximum 10 favorites allowed!");
+                        const a = {
+                            title: n.B.textContent,
+                            artist: n.C.textContent,
+                            artwork: n.D.src,
+                            genre: ""
+                        };
+                        e.b ? e.a = e.a.filter(t => t.title !== a.title || t.artist !== a.artist) : e.a.push(a), localStorage.setItem(t, JSON.stringify(e.a)), e.b = !e.b, n.P.className = e.b ? "fa-solid fa-heart control-btn" : "fa-regular fa-heart control-btn", l()
+                    }), n.Q.addEventListener("click", function() {
+                        n.R.classList.toggle("active"), l()
+                    }), n.S.addEventListener("click", m),
+                    function() {
+                        document.querySelector("#backward10")?.addEventListener("click", () => {
+                            n.y.currentTime = Math.max(0, n.y.currentTime - 10)
+                        }), document.querySelector("#backward5")?.addEventListener("click", () => {
+                            n.y.currentTime = Math.max(0, n.y.currentTime - 5)
+                        }), document.querySelector("#forward5")?.addEventListener("click", () => {
+                            n.y.currentTime = Math.min(n.y.duration, n.y.currentTime + 5)
+                        }), document.querySelector("#forward10")?.addEventListener("click", () => {
+                            n.y.currentTime = Math.min(n.y.duration, n.y.currentTime + 10)
+                        });
+                        const t = document.querySelector("#loopToggle");
+                        t.addEventListener("click", () => {
+                            e.j = !e.j, t.className = e.j ? "fa-solid fa-repeat-1 control-btn" : "fa-solid fa-repeat control-btn"
+                        })
+                    }(), n.y.addEventListener("loadedmetadata", function() {
+                        n.K.textContent = "-" + r(n.y.duration), n.J.textContent = "0:00"
+                    }), n.y.addEventListener("play", function() {
+                        n.F.classList.remove("fa-play"), n.F.classList.add("fa-pause")
+                    }), n.y.addEventListener("pause", function() {
+                        n.F.classList.remove("fa-pause"), n.F.classList.add("fa-play")
+                    }), n.y.addEventListener("ended", function() {
+                        if (e.j) return n.y.currentTime = 0, void n.y.play();
+                        n.F.classList.remove("fa-pause"), n.F.classList.add("fa-play"), e.z >= 0 && e.z < e.a.length - 1 && (e.z < e.a.length - 1 ? (e.z++, d(e.z)) : (e.z = 0, d(0)))
+                    }), n.y.addEventListener("timeupdate", function() {
+                        if (!e.k) {
+                            const t = n.y.currentTime / n.y.duration * 100;
+                            n.I.style.width = t + "%", n.J.textContent = r(n.y.currentTime), n.K.textContent = "-" + r(n.y.duration - n.y.currentTime),
+                                function(t) {
+                                    if (!e.d || 0 === e.g.length) return;
+                                    let n = -1;
+                                    for (let a = 0; a < e.g.length && !(e.g[a].time > t); a++) n = a;
+                                    n !== e.f && (e.f = n, document.querySelectorAll(".lyric-line").forEach((t, n) => {
+                                        t.className = "lyric-line", n < e.f ? t.classList.add("prev") : n === e.f ? (t.classList.add("active"), t.scrollIntoView({
+                                            behavior: "smooth",
+                                            block: "center"
+                                        })) : n === e.f + 1 && t.classList.add("next")
+                                    }))
+                                }(n.y.currentTime)
+                        }
+                    }), l()
+            }()
     </script>
 </body>
 </html>

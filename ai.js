@@ -124,29 +124,14 @@ async function generateImage(prompt) {
   return URL.createObjectURL(blob);
 }
 
-async function generateText(prompt) {
+async function generateText(userText) {
+  const prompt = `You are Orbit AI. Reply concisely.\n\n${userText}`;
   const url = `${POLL_TEXT_API}?q=${encodeURIComponent(prompt)}`;
+
   const res = await fetch(url);
   if (!res.ok) throw new Error("Text API error");
+
   return await res.text();
-}
-
-function buildPrompt(userText) {
-  const recentHistory = contents.slice(-6);
-
-  const transcript = recentHistory
-    .map(m => `${m.role === "user" ? "User" : "Assistant"}: ${m.content}`)
-    .join("\n");
-
-  return `
-You are Orbit AI.
-You are helpful, concise, and context aware.
-Respond directly to the user's last message.
-
-${transcript}
-User: ${userText}
-Assistant:
-`;
 }
 
 async function sendToAI(userText, regenerate = false) {
@@ -156,24 +141,6 @@ async function sendToAI(userText, regenerate = false) {
 
   lastUserMessage = userText;
 
-  if (userText.toLowerCase().startsWith("generate an image of")) {
-    const prompt = userText.replace("generate an image of", "").trim();
-    const bubble = addMessage("assistant", "Generating image...", false);
-
-    try {
-      const imgUrl = await generateImage(prompt);
-      bubble.innerHTML = `<img src="${imgUrl}" style="max-width:100%;border-radius:12px;">`;
-      contents.push({
-        role: "assistant",
-        content: `![${prompt}](${imgUrl})`
-      });
-      saveChat();
-    } catch {
-      bubble.innerText = "Image generation failed.";
-    }
-    return;
-  }
-
   const wrapper = createWrapper("assistant");
   const bubble = document.createElement("div");
   bubble.className = "aiMsg assistant";
@@ -182,8 +149,7 @@ async function sendToAI(userText, regenerate = false) {
   startThinkingAnimation(bubble);
 
   try {
-    const prompt = buildPrompt(userText);
-    const reply = await generateText(prompt);
+    const reply = await generateText(userText);
 
     stopThinkingAnimation();
 

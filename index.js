@@ -15,67 +15,6 @@ app.set("trust proxy", 1);
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true }));
 
-app.use("/api", async (req, res) => {
-  try {
-    const upstream = process.env.ORBIT_UPSTREAM;
-    if (!upstream) {
-      return res.status(500).json({ error: "No upstream configured" });
-    }
-
-    const base = upstream.endsWith("/")
-      ? upstream.slice(0, -1)
-      : upstream;
-
-    const forwardPath = req.originalUrl.replace(/^\/api/, "");
-    const targetUrl = base + forwardPath;
-
-    const headers = {
-      ...req.headers,
-      "user-agent":
-        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
-      "origin": base,
-      "referer": base,
-      "x-forwarded-for":
-        req.headers["x-forwarded-for"] || req.socket.remoteAddress
-    };
-
-    delete headers.host;
-    delete headers["content-length"];
-    delete headers.connection;
-
-    const response = await fetch(targetUrl, {
-      method: req.method,
-      headers,
-      body:
-        req.method === "GET" || req.method === "HEAD"
-          ? undefined
-          : req.body && Object.keys(req.body).length
-          ? JSON.stringify(req.body)
-          : undefined
-    });
-
-    res.status(response.status);
-
-    response.headers.forEach((value, key) => {
-      if (
-        key.toLowerCase() !== "transfer-encoding" &&
-        key.toLowerCase() !== "content-encoding"
-      ) {
-        res.setHeader(key, value);
-      }
-    });
-
-    const buffer = Buffer.from(await response.arrayBuffer());
-    res.send(buffer);
-  } catch (err) {
-    console.error("Proxy failure:", err);
-    res.status(502).json({
-      error: "Upstream request failed",
-      message: err.message
-    });
-  }
-});
-
 app.get("/g", (_, res) => res.sendFile("g.html", { root: "." }));
 app.get("/a", (_, res) => res.sendFile("a.html", { root: "." }));
 app.get("/s", (_, res) => res.sendFile("s.html", { root: "." }));

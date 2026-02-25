@@ -11,26 +11,49 @@ import wisp from "wisp-server-node";
 
 const app = express();
 app.set("trust proxy", 1);
-app.use(express.json());
+app.use(express.json({ limit: "10mb" }));
 
 app.use("/api", async (req, res) => {
   try {
-    const upstream = process.env.ORBIT_UPSTREAM; // Example: https://ptza.env.pm/
-    const path = req.originalUrl.replace(/^\/api/, ""); // remove /api prefix
-    const url = new URL(path, upstream).toString();
+    const upstream = process.env.ORBIT_UPSTREAM;
+    if (!upstream) {
+      return res.status(500).json({ error: "No upstream configured" });
+    }
 
-    const response = await fetch(url, {
+    const cleanedUpstream = upstream.endsWith("/")
+      ? upstream.slice(0, -1)
+      : upstream;
+
+    const forwardPath = req.originalUrl.replace(/^\/api/, "");
+
+    const targetUrl = cleanedUpstream + forwardPath;
+
+    const response = await fetch(targetUrl, {
       method: req.method,
-      headers: { ...req.headers, host: new URL(upstream).host },
-      body: ["GET", "HEAD"].includes(req.method) ? undefined : JSON.stringify(req.body),
+      headers: {
+        ...req.headers,
+        host: new URL(cleanedUpstream).host
+      },
+      body:
+        req.method === "GET" || req.method === "HEAD"
+          ? undefined
+          : JSON.stringify(req.body)
     });
 
-    const data = await response.arrayBuffer();
-    res.set("Content-Type", response.headers.get("content-type") || "application/json");
-    res.status(response.status).send(Buffer.from(data));
+    const buffer = await response.arrayBuffer();
+
+    res.status(response.status);
+
+    response.headers.forEach((value, key) => {
+      if (key.toLowerCase() !== "transfer-encoding") {
+        res.setHeader(key, value);
+      }
+    });
+
+    res.send(Buffer.from(buffer));
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Upstream failed" });
+    console.error("Proxy error:", err);
+    res.status(502).json({ error: "Upstream request failed" });
   }
 });
 
@@ -62,7 +85,9 @@ const server = createServer();
 server.on("request", (req, res) => {
   if (bare.shouldRoute(req)) {
     bare.routeRequest(req, res);
-  } else app(req, res);
+  } else {
+    app(req, res);
+  }
 });
 
 server.on("upgrade", (req, socket, head) => {
@@ -70,22 +95,17 @@ server.on("upgrade", (req, socket, head) => {
     bare.routeUpgrade(req, socket, head);
   } else if (req.url.endsWith("/wisp/")) {
     wisp.routeRequest(req, socket, head);
-  } else socket.end();
+  } else {
+    socket.end();
+  }
 });
 
 const port = Number(process.env.PORT) || 8080;
-server.listen({ port });
 
-server.on("listening", () => {
-  const address = server.address();
+server.listen(port, () => {
   console.log("Listening on:");
-  console.log(`\thttp://localhost:${address.port}`);
-  console.log(`\thttp://${hostname()}:${address.port}`);
-  console.log(
-    `\thttp://${
-      address.family === "IPv6" ? `[${address.address}]` : address.address
-    }:${address.port}`
-  );
+  console.log(`  http://localhost:${port}`);
+  console.log(`  http://${hostname()}:${port}`);
 });
 
 process.on("SIGINT", shutdown);

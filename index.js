@@ -16,16 +16,20 @@ app.use(express.json());
 app.use("/api", async (req, res) => {
   try {
     const upstream = process.env.ORBIT_UPSTREAM;
-    const url = `${upstream}${req.originalUrl.replace(/^\/api/, "")}`;
+    const path = req.originalUrl.replace(/^\/api/, "");
+    const url = new URL(path, upstream).toString();
+
     const response = await fetch(url, {
       method: req.method,
-      headers: { ...req.headers },
+      headers: { ...req.headers, host: new URL(upstream).host }, // replace host header
       body: ["GET", "HEAD"].includes(req.method) ? undefined : JSON.stringify(req.body),
     });
+
     const data = await response.arrayBuffer();
     res.set("Content-Type", response.headers.get("content-type") || "application/json");
-    res.send(Buffer.from(data));
-  } catch {
+    res.status(response.status).send(Buffer.from(data));
+  } catch (err) {
+    console.error(err);
     res.status(500).json({ error: "Upstream failed" });
   }
 });

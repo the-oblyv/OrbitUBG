@@ -15,13 +15,13 @@ app.use(express.json());
 
 app.use("/api", async (req, res) => {
   try {
-    const upstream = process.env.ORBIT_UPSTREAM;
-    const path = req.originalUrl.replace(/^\/api/, "");
+    const upstream = process.env.ORBIT_UPSTREAM; // Example: https://ptza.env.pm/
+    const path = req.originalUrl.replace(/^\/api/, ""); // remove /api prefix
     const url = new URL(path, upstream).toString();
 
     const response = await fetch(url, {
       method: req.method,
-      headers: { ...req.headers, host: new URL(upstream).host }, // replace host header
+      headers: { ...req.headers, host: new URL(upstream).host },
       body: ["GET", "HEAD"].includes(req.method) ? undefined : JSON.stringify(req.body),
     });
 

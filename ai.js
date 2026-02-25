@@ -1,4 +1,4 @@
-const POLL_TEXT_API = "https://text.pollinations.ai/prompt";
+const POLL_TEXT_API = "https://text.pollinations.ai/openai";
 const POLL_IMAGE_API = "https://image.pollinations.ai/prompt";
 
 const input = document.getElementById("aiInput");
@@ -10,13 +10,13 @@ const trashBtn = document.getElementById("trashBtn");
 const fileInput = document.getElementById("aiFile");
 
 let contents = JSON.parse(localStorage.getItem("orbitChat")) || [];
-let thinkingInterval = null;
+let controller = null;
 
 const systemPrompt = `
 You are Orbit AI.
 Respond clearly, professionally, and structured.
-Avoid roleplay unless specifically asked. Be empathetic but not overly dramatic.
-You may use emojis but try not to over use them.
+Avoid roleplay unless specifically asked.
+You may use emojis but do not overuse them.
 `;
 
 function saveChat() {
@@ -80,30 +80,66 @@ function addMessage(role, text, save = true) {
   return bubble;
 }
 
-function startThinkingAnimation(bubble) {
-  let dots = 1;
-  bubble.innerText = "Thinking.";
-  thinkingInterval = setInterval(() => {
-    dots = (dots % 3) + 1;
-    bubble.innerText = "Thinking" + ".".repeat(dots);
-  }, 400);
-}
-
-function stopThinkingAnimation() {
-  clearInterval(thinkingInterval);
-}
-
-async function generateText(prompt) {
-  const res = await fetch(POLL_TEXT_API + "?q=" + encodeURIComponent(prompt));
-  const data = await res.json();
-  return data.text || "No response.";
-}
-
 async function generateImage(prompt) {
-  const res = await fetch(POLL_IMAGE_API + "?q=" + encodeURIComponent(prompt));
+  const res = await fetch(
+    `${POLL_IMAGE_API}/${encodeURIComponent(prompt)}?width=1024&height=1024&nologo=true`
+  );
   if (!res.ok) throw new Error("Image failed");
   const blob = await res.blob();
   return URL.createObjectURL(blob);
+}
+
+async function streamText(messages, bubble) {
+  controller = new AbortController();
+
+  const response = await fetch(POLL_TEXT_API, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      model: "openai-large",
+      messages,
+      stream: true
+    }),
+    signal: controller.signal
+  });
+
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder("utf-8");
+
+  let fullText = "";
+
+  while (true) {
+    const { value, done } = await reader.read();
+    if (done) break;
+
+    const chunk = decoder.decode(value, { stream: true });
+
+    const lines = chunk.split("\n").filter(l => l.trim() !== "");
+
+    for (let line of lines) {
+      if (line.startsWith("data:")) {
+        const json = line.replace("data:", "").trim();
+        if (json === "[DONE]") break;
+
+        try {
+          const parsed = JSON.parse(json);
+          const token = parsed.choices?.[0]?.delta?.content;
+          if (token) {
+            fullText += token;
+            bubble.innerHTML = renderMarkdown(fullText);
+            scrollDown();
+          }
+        } catch {}
+      }
+    }
+  }
+
+  enhanceCodeBlocks(bubble);
+
+  contents.push({ role: "assistant", content: fullText });
+  saveChat();
 }
 
 async function sendToAI(userText) {
@@ -111,12 +147,15 @@ async function sendToAI(userText) {
 
   if (userText.toLowerCase().startsWith("generate an image of")) {
     const prompt = userText.replace("generate an image of", "").trim();
-    const bubble = addMessage("model", "Generating image...", false);
+    const bubble = addMessage("assistant", "Generating image...", false);
 
     try {
       const imgUrl = await generateImage(prompt);
       bubble.innerHTML = `<img src="${imgUrl}" style="max-width:100%;border-radius:12px;">`;
-      contents.push({ role: "model", content: `![${prompt}](${imgUrl})` });
+      contents.push({
+        role: "assistant",
+        content: `![${prompt}](${imgUrl})`
+      });
       saveChat();
     } catch {
       bubble.innerText = "Image generation failed.";
@@ -125,29 +164,20 @@ async function sendToAI(userText) {
     return;
   }
 
-  const wrapper = createWrapper("model");
+  const wrapper = createWrapper("assistant");
   const bubble = document.createElement("div");
-  bubble.className = "aiMsg model";
+  bubble.className = "aiMsg assistant";
   wrapper.appendChild(bubble);
 
-  startThinkingAnimation(bubble);
+  const messages = [
+    { role: "system", content: systemPrompt },
+    ...contents,
+    { role: "user", content: userText }
+  ];
 
   try {
-    const conversation =
-      systemPrompt +
-      "\n\n" +
-      contents.map(m => `${m.role.toUpperCase()}: ${m.content}`).join("\n") +
-      `\nUSER: ${userText}\nASSISTANT:`;
-
-    const reply = await generateText(conversation);
-    stopThinkingAnimation();
-    bubble.innerHTML = renderMarkdown(reply);
-    enhanceCodeBlocks(bubble);
-
-    contents.push({ role: "model", content: reply });
-    saveChat();
+    await streamText(messages, bubble);
   } catch {
-    stopThinkingAnimation();
     bubble.innerText = "Request failed.";
   }
 }
@@ -196,7 +226,7 @@ input.addEventListener("keydown", e => {
 
 window.addEventListener("load", () => {
   if (contents.length === 0) {
-    addMessage("model", "Hello. I'm **Orbit AI**. How can I assist you?", false);
+    addMessage("assistant", "Hello. I'm **Orbit AI**. How can I assist you?", false);
   } else {
     contents.forEach(msg => addMessage(msg.role, msg.content, false));
   }

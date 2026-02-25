@@ -360,6 +360,26 @@ toggleBtn.onclick=()=>{
   localStorage.setItem("orbitClockFormat",is12Hour?"12":"24");
   location.reload();
 };
+
+  function handleHashRoute() {
+  if (!location.hash) return;
+
+  const raw = location.hash.substring(1);
+  try {
+    const decoded = decodeURIComponent(raw);
+
+    if (decoded && decoded.trim()) {
+      input.value = decoded;
+      load(decoded);
+    }
+  } catch (err) {
+    console.warn("Invalid hash URL");
+  }
+}
+
+window.addEventListener("load", handleHashRoute);
+
+window.addEventListener("hashchange", handleHashRoute);
 </script>
 
 </body>

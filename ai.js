@@ -11,6 +11,7 @@ const fileInput = document.getElementById("aiFile");
 
 let contents = JSON.parse(localStorage.getItem("orbitChat")) || [];
 let thinkingInterval = null;
+let lastUserMessage = null;
 
 function saveChat() {
   localStorage.setItem("orbitChat", JSON.stringify(contents));
@@ -35,14 +36,38 @@ function createWrapper(role) {
   return wrapper;
 }
 
+function addControls(bubble, text) {
+  const controls = document.createElement("div");
+  controls.className = "aiControls";
+
+  const copyBtn = document.createElement("button");
+  copyBtn.textContent = "Copy";
+  copyBtn.onclick = () => navigator.clipboard.writeText(text);
+
+  const regenBtn = document.createElement("button");
+  regenBtn.textContent = "Regenerate";
+  regenBtn.onclick = () => {
+    if (lastUserMessage) sendToAI(lastUserMessage, true);
+  };
+
+  controls.appendChild(copyBtn);
+  controls.appendChild(regenBtn);
+  bubble.appendChild(controls);
+}
+
 function addMessage(role, text, save = true) {
   const wrapper = createWrapper(role);
   const bubble = document.createElement("div");
   bubble.className = `aiMsg ${role}`;
   bubble.innerHTML = renderMarkdown(text);
   wrapper.appendChild(bubble);
+
   enhanceCodeBlocks(bubble);
   scrollDown();
+
+  if (role === "assistant") {
+    addControls(bubble, text);
+  }
 
   if (save) {
     contents.push({ role, content: text });
@@ -65,26 +90,31 @@ function stopThinkingAnimation() {
   clearInterval(thinkingInterval);
 }
 
-
-function fakeStreamText(fullText, bubble, speed = 12) {
+function fakeStreamText(fullText, bubble, speed = 15) {
   let index = 0;
+  let buffer = "";
+
   bubble.innerHTML = "";
+  bubble.style.whiteSpace = "pre-wrap";
 
   function type() {
     if (index < fullText.length) {
-      bubble.innerText += fullText[index];
+      buffer += fullText[index];
+      bubble.textContent = buffer;
       index++;
       scrollDown();
       setTimeout(type, speed);
     } else {
+      bubble.style.whiteSpace = "";
       bubble.innerHTML = renderMarkdown(fullText);
       enhanceCodeBlocks(bubble);
+      addControls(bubble, fullText);
       scrollDown();
     }
   }
+
   type();
 }
-
 
 async function generateImage(prompt) {
   const url = `${POLL_IMAGE_API}/${encodeURIComponent(prompt)}?width=1024&height=1024&nologo=true`;
@@ -97,15 +127,34 @@ async function generateImage(prompt) {
 async function generateText(prompt) {
   const url = `${POLL_TEXT_API}?q=${encodeURIComponent(prompt)}`;
   const res = await fetch(url);
-
   if (!res.ok) throw new Error("Text API error");
-  const text = await res.text();
-  return text || "No response.";
+  return await res.text();
 }
 
+function buildPrompt(userText) {
+  const recentHistory = contents.slice(-6);
 
-async function sendToAI(userText) {
-  addMessage("user", userText);
+  const transcript = recentHistory
+    .map(m => `${m.role === "user" ? "User" : "Assistant"}: ${m.content}`)
+    .join("\n");
+
+  return `
+You are Orbit AI.
+You are helpful, concise, and context aware.
+Respond directly to the user's last message.
+
+${transcript}
+User: ${userText}
+Assistant:
+`;
+}
+
+async function sendToAI(userText, regenerate = false) {
+  if (!regenerate) {
+    addMessage("user", userText);
+  }
+
+  lastUserMessage = userText;
 
   if (userText.toLowerCase().startsWith("generate an image of")) {
     const prompt = userText.replace("generate an image of", "").trim();
@@ -132,14 +181,13 @@ async function sendToAI(userText) {
 
   startThinkingAnimation(bubble);
 
-  const historyText = contents.map(m => `${m.role}: ${m.content}`).join("\n");
-  const fullPrompt = `You are Orbit AI.\n${historyText}\nuser: ${userText}\nassistant:`;
-
   try {
-    const reply = await generateText(fullPrompt);
+    const prompt = buildPrompt(userText);
+    const reply = await generateText(prompt);
+
     stopThinkingAnimation();
 
-    fakeStreamText(reply, bubble, 12);
+    fakeStreamText(reply.trim(), bubble, 15);
 
     contents.push({ role: "assistant", content: reply });
     saveChat();
@@ -149,7 +197,6 @@ async function sendToAI(userText) {
     console.error(err);
   }
 }
-
 
 function sendMessage() {
   const text = input.value.trim();
@@ -165,12 +212,14 @@ function clearChat() {
   localStorage.removeItem("orbitChat");
 }
 
-imageBtn.addEventListener("click", () => {
+imageBtn.onclick = () => {
   input.value = "Generate an image of ";
   input.focus();
-});
-attachBtn.addEventListener("click", () => fileInput.click());
-fileInput.addEventListener("change", () => {
+};
+
+attachBtn.onclick = () => fileInput.click();
+
+fileInput.onchange = () => {
   const files = Array.from(fileInput.files);
   files.forEach(file => {
     const reader = new FileReader();
@@ -179,9 +228,11 @@ fileInput.addEventListener("change", () => {
     };
     reader.readAsDataURL(file);
   });
-});
-trashBtn.addEventListener("click", clearChat);
-sendBtn.addEventListener("click", sendMessage);
+};
+
+trashBtn.onclick = clearChat;
+sendBtn.onclick = sendMessage;
+
 input.addEventListener("keydown", e => {
   if (e.key === "Enter" && !e.shiftKey) {
     e.preventDefault();
@@ -189,10 +240,10 @@ input.addEventListener("keydown", e => {
   }
 });
 
-window.addEventListener("load", () => {
+window.onload = () => {
   if (contents.length === 0) {
     addMessage("assistant", "Hello. I'm **Orbit AI**. How can I assist you?", false);
   } else {
     contents.forEach(msg => addMessage(msg.role, msg.content, false));
   }
-});
+};

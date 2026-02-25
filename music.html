@@ -1,22 +1,20 @@
 <!doctype html>
-
 <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width,initial-scale=1">
-        <title>Games | Orbit</title>
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-        <link rel="stylesheet" href="style.css">
-        <link rel="icon" href="/res/orbit.png">
-        <link rel="preconnect" href="https://fonts.googleapis.com">
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-        <link href="https://fonts.googleapis.com/css2?family=Inconsolata:wght@400;700&display=swap" rel="stylesheet">
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@4.7.0/fonts/remixicon.css">
-        <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
-        <style>
-          :root {
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Music | Orbit</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="style.css">
+<link rel="icon" href="/res/orbit.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inconsolata:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@4.7.0/fonts/remixicon.css">
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
+<style>
+:root {
   --bg: #0f1420;
   --panel: #1b2133;
   --panel2: #232a40;
@@ -34,12 +32,97 @@ body {
   min-height: 100vh;
 }
 
+.topbar {
+  position: fixed;
+  top: 18px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: calc(100% - 40px);
+  max-width: 1200px;
+  background: var(--panel);
+  border-radius: 999px;
+  padding: 14px 26px;
+  z-index: 20;
+  box-shadow: 0 14px 35px rgba(0,0,0,.45);
+}
+
 .main-container {
   display: flex;
   justify-content: space-between;
   width: 100%;
   max-width: 1200px;
-  margin-top: 80px;
+  margin: 180px auto 40px;
+  gap: 20px;
+}
+
+.search-container {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  margin-top: 120px;
+  margin-bottom: 30px;
+}
+
+.search-input {
+  width: 100%;
+  max-width: 520px;
+  padding: 16px;
+  border-radius: 14px;
+  border: none;
+  outline: none;
+  background: var(--panel2);
+  color: var(--text);
+  font-size: 1rem;
+}
+
+.search-results {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto 30px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 16px;
+}
+
+.search-result-item {
+  background: var(--panel);
+  padding: 12px;
+  border-radius: 14px;
+  width: 160px;
+  text-align: center;
+  cursor: pointer;
+  transition: transform 0.15s;
+}
+
+.search-result-item:hover {
+  transform: translateY(-4px);
+}
+
+.search-result-item img {
+  width: 100%;
+  height: 160px;
+  object-fit: cover;
+  border-radius: 12px;
+  margin-bottom: 8px;
+}
+
+.search-result-title {
+  font-size: 0.95rem;
+  font-weight: 600;
+  margin-bottom: 4px;
+  color: var(--text);
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.search-result-artist {
+  font-size: 0.85rem;
+  color: var(--muted);
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
 }
 
 .favorites-column {
@@ -47,7 +130,6 @@ body {
   background: var(--panel2);
   border-radius: var(--radius);
   padding: 15px;
-  margin-left: 20px;
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -111,23 +193,6 @@ body {
   color: var(--muted);
 }
 
-.favorite-item .remove-fav,
-.favorite-item .skip-next,
-.favorite-item .skip-prev {
-  font-size: 12px;
-  opacity: 0.6;
-  margin-left: 5px;
-  cursor: pointer;
-  transition: opacity 0.2s;
-  color: var(--text);
-}
-
-.favorite-item .remove-fav:hover,
-.favorite-item .skip-next:hover,
-.favorite-item .skip-prev:hover {
-  opacity: 1;
-}
-
 .play-favorites-btn {
   padding: 8px;
   font-size: 16px;
@@ -145,10 +210,6 @@ body {
 
 .play-favorites-btn:hover {
   background: rgba(230, 233, 242, 0.15);
-}
-
-.play-favorites-btn:active {
-  transform: scale(0.95);
 }
 
 .player {
@@ -376,42 +437,74 @@ body {
   opacity: 0.55;
   filter: blur(1px);
 }
-          </style>
-    </head>
-    <body>
-        <header class="topbar" id="navMount"></header>
-        <nav class="menu" id="menu"></nav>
-        <div class="search-container"><input type="text" class="search-input" placeholder="Search for any song..." id="searchInput"></div>
-        <div class="search-results" id="searchResults"></div>
-        <div class="main-container">
-            <div class="player">
-                <div class="album-art" id="coverArt"><i class="fa-solid fa-music" id="musicIcon"></i><img src="" alt="Album" id="albumCover" crossorigin="anonymous" style="display:none"></div>
-                <div class="info" id="playerInfo">
-                    <div class="top-icons"><i id="favoritesBtn" class="fa-solid fa-star"></i></div>
-                    <div class="track-title" id="trackTitle">Not Playing</div>
-                    <div class="artist" id="artistName"></div>
-                    <div class="controls">
-                        <div class="control-row"><i id="backward10" class="fas fa-backward control-btn"></i><i id="backward5" class="fa-solid fa-chevron-left control-btn"></i><i id="playPause" class="fa-solid fa-play control-btn"></i><i id="forward5" class="fa-solid fa-chevron-right control-btn"></i><i id="forward10" class="fas fa-forward control-btn"></i></div>
-                        <div class="control-row"><i id="loopToggle" class="fa-solid fa-repeat control-btn"></i><i id="volumeBtn" class="fa-solid fa-volume-high control-btn"></i><i id="favoriteBtn" class="fa-regular fa-heart control-btn"></i></div>
-                    </div>
-                    <div id="seekbar" class="seekbar">
-                        <div id="progress"></div>
-                    </div>
-                    <div class="timecodes"><span id="currentTime">0:00</span><span id="remainingTime">-0:00</span></div>
-                </div>
-                <div class="lyrics-info" id="lyricsInfo">
-                    <div class="lyrics-content" id="lyricsContent"></div>
-                </div>
-            </div>
-            <div class="favorites-column" id="favoritesColumn">
-                <div class="favorites-title">Favorites</div>
-                <div class="play-favorites-btn" id="playFavoritesBtn"><i class="fas fa-play"></i> Play Favorites</div>
-            </div>
-            <div class="lyrics-toggle" id="lyricsToggle"><i class="fa-solid fa-align-left"></i></div>
+
+@media(max-width: 960px) {
+  .main-container {
+    flex-direction: column;
+    align-items: center;
+  }
+  .player, .favorites-column {
+    width: 90%;
+  }
+}
+</style>
+</head>
+<body>
+<header class="topbar" id="navMount"></header>
+<nav class="menu" id="menu"></nav>
+<div class="search-container">
+  <input type="text" class="search-input" placeholder="Search for any song..." id="searchInput">
+</div>
+<div class="search-results" id="searchResults"></div>
+<div class="main-container">
+  <div class="player">
+    <div class="album-art" id="coverArt">
+      <i class="fa-solid fa-music" id="musicIcon"></i>
+      <img src="" alt="Album" id="albumCover" crossorigin="anonymous" style="display:none">
+    </div>
+    <div class="info" id="playerInfo">
+      <div class="top-icons">
+        <i id="favoritesBtn" class="fa-solid fa-star"></i>
+      </div>
+      <div class="track-title" id="trackTitle">Not Playing</div>
+      <div class="artist" id="artistName"></div>
+      <div class="controls">
+        <div class="control-row">
+          <i id="backward10" class="fas fa-backward control-btn"></i>
+          <i id="backward5" class="fa-solid fa-chevron-left control-btn"></i>
+          <i id="playPause" class="fa-solid fa-play control-btn"></i>
+          <i id="forward5" class="fa-solid fa-chevron-right control-btn"></i>
+          <i id="forward10" class="fas fa-forward control-btn"></i>
         </div>
-        <script src="frame.js"></script>
-        <script src="script.js"></script>
-        <script>
+        <div class="control-row">
+          <i id="loopToggle" class="fa-solid fa-repeat control-btn"></i>
+          <i id="volumeBtn" class="fa-solid fa-volume-high control-btn"></i>
+          <i id="favoriteBtn" class="fa-regular fa-heart control-btn"></i>
+        </div>
+      </div>
+      <div id="seekbar" class="seekbar">
+        <div id="progress"></div>
+      </div>
+      <div class="timecodes">
+        <span id="currentTime">0:00</span>
+        <span id="remainingTime">-0:00</span>
+      </div>
+    </div>
+    <div class="lyrics-info" id="lyricsInfo">
+      <div class="lyrics-content" id="lyricsContent"></div>
+    </div>
+  </div>
+  <div class="favorites-column" id="favoritesColumn">
+    <div class="favorites-title">Favorites</div>
+    <div class="play-favorites-btn" id="playFavoritesBtn">
+      <i class="fas fa-play"></i> Play Favorites
+    </div>
+  </div>
+  <div class="lyrics-toggle" id="lyricsToggle"><i class="fa-solid fa-align-left"></i></div>
+</div>
+<script src="frame.js"></script>
+<script src="script.js"></script>
+<script>
 !function(){var t="favorites",e={r:localStorage.getItem("default_music_provider")||"tidal",q:"",p:0,o:!1,n:!0,m:[],l:-1,k:!1,j:!1,i:!1,h:null,g:[],f:-1,d:!1,c:!1,b:!1,a:JSON.parse(localStorage.getItem(t))||[],z:-1},n={y:new Audio,x:document.getElementById("searchInput"),A:document.getElementById("searchResults"),B:document.getElementById("trackTitle"),C:document.getElementById("artistName"),D:document.getElementById("albumCover"),E:document.getElementById("musicIcon"),F:document.getElementById("playPause"),G:document.getElementById("volumeBtn"),H:document.getElementById("seekbar"),I:document.getElementById("progress"),J:document.getElementById("currentTime"),K:document.getElementById("remainingTime"),L:document.getElementById("lyricsToggle"),M:document.getElementById("playerInfo"),N:document.getElementById("lyricsInfo"),O:document.getElementById("lyricsContent"),P:document.getElementById("favoriteBtn"),Q:document.getElementById("favoritesBtn"),R:document.getElementById("favoritesColumn"),S:document.getElementById("playFavoritesBtn")};async function a(t){e.q=t,e.p=0,e.n=!0,e.m=[],n.A.classList.add("active"),n.A.innerHTML='<div class="loading">Searching...</div>';const i=encodeURIComponent(t),s=Math.floor(0)+1,r="tidal"===e.r?"/api/music-search-1/"+i+"&max=15&page="+s:"/api/music-search-2/"+i+"?max=15&offset=0";try{const t=await fetch(r);!function(t){if(n.A.innerHTML="",!t||"tidal"===e.r&&!t.items||"soundcloud"===e.r&&!t.results)return void(n.A.innerHTML='<div class="loading">No results found</div>');const a=i(t);e.m=a,function(t){t.forEach((t,e)=>{const i=document.createElement("div");i.className="result-item",i.innerHTML='\n<div class="result-img">\n<img src="'+(t.aa||"")+'" alt="'+t.V+'" crossorigin="anonymous" onerror="this.style.display=\'none\'">\n</div>\n<div class="result-info">\n<div class="result-title">'+t.V+'</div>\n<div class="result-artist">'+t.U+"</div>\n</div>",i.addEventListener("click",()=>{o(t),c(),n.x.value="",e.z=-1}),n.A.appendChild(i)})}(a)}(await t.json())}catch(t){n.A.innerHTML='<div class="error-message">Search failed. Please try again.</div>'}}function i(t){return"tidal"===e.r?t.items.map(t=>{var e=function(t){return["https:","","resources.tidal.com","images",...t.split("-"),"320x320.jpg"].join("/")} (t.album.cover);return{W:t.id,V:t.title,U:t.artists.map(t=>t.name).join(", "),aa:t.album?e:null,Z:"tidal",Y:"",X:t.mediaMetadata?t.mediaMetadata.tags:[]}}):t.results.map(t=>({W:t.url.split("/").pop(),V:t.title,U:t.artist,aa:t.artwork,Z:"soundcloud",Y:t.url,X:[]}))}function c(){n.A.classList.remove("active")}function o(t){n.B.textContent=t.V,n.C.textContent=t.U,n.D.src=t.aa?t.aa.replace("100x100","600x600"):"",n.D.style.display=t.aa?"block":"none",n.E.style.display=t.aa?"none":"block",e.c&&y(t.U,t.V),localStorage.setItem("lastPlayed",JSON.stringify(t));const a=e.a.some(e=>e.title===t.V&&e.artist===t.U);e.b=a,n.P.className=a?"fa-solid fa-heart control-btn":"fa-regular fa-heart control-btn","tidal"===t.Z?async function(t){let e="low";t.X&&t.X.includes("LOSSLESS")?e="lossless":t.X&&t.X.includes("HIGH")&&(e="high");try{const a=await fetch("/api/music-lyric-1/"+e+"/"+t.W),i=await a.json();i&&i.streamUrl?(n.y.src=i.streamUrl,n.y.load(),n.y.play()):n.A.innerHTML='<div class="error-message">No stream URL found</div>'}catch(t){n.A.innerHTML='<div class="error-message">Failed to load track</
 
 

@@ -8,6 +8,13 @@ import { libcurlPath } from "@mercuryworkshop/libcurl-transport";
 import { bareModulePath } from "@mercuryworkshop/bare-as-module3";
 import { baremuxPath } from "@mercuryworkshop/bare-mux/node";
 import wisp from "wisp-server-node";
+import { Agent } from "undici";
+
+const apiAgent = new Agent({
+  keepAliveTimeout: 10000,
+  keepAliveMaxTimeout: 10000,
+  connections: 50
+});
 
 const app = express();
 app.set("trust proxy", 1);
@@ -32,10 +39,12 @@ app.use("/api", async (req, res) => {
     const headers = { ...req.headers };
     delete headers.host;
     delete headers["content-length"];
+    delete headers.connection;
 
     const response = await fetch(targetUrl, {
       method: req.method,
       headers,
+      dispatcher: apiAgent,
       body:
         req.method === "GET" || req.method === "HEAD"
           ? undefined
@@ -121,6 +130,7 @@ process.on("SIGINT", shutdown);
 process.on("SIGTERM", shutdown);
 
 function shutdown() {
+  apiAgent.close();
   server.close();
   bare.close();
   process.exit(0);

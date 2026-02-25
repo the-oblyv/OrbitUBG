@@ -10,13 +10,13 @@ const trashBtn = document.getElementById("trashBtn");
 const fileInput = document.getElementById("aiFile");
 
 let contents = JSON.parse(localStorage.getItem("orbitChat")) || [];
-let controller = null;
+let thinkingInterval = null;
 
 const systemPrompt = `
 You are Orbit AI.
-Respond clearly, professionally, and structured.
-Avoid roleplay unless specifically asked.
-You may use emojis but do not overuse them.
+Respond clearly and professionally.
+Avoid roleplay unless asked.
+Use emojis sparingly.
 `;
 
 function saveChat() {
@@ -33,27 +33,6 @@ function renderMarkdown(text) {
 
 function enhanceCodeBlocks(container) {
   Prism.highlightAllUnder(container);
-
-  container.querySelectorAll("pre").forEach(block => {
-    if (block.querySelector(".code-copy")) return;
-
-    const btn = document.createElement("button");
-    btn.innerText = "Copy";
-    btn.className = "code-copy";
-
-    btn.onclick = () => {
-      navigator.clipboard.writeText(block.innerText);
-      btn.innerText = "Copied";
-      setTimeout(() => (btn.innerText = "Copy"), 1200);
-    };
-
-    block.style.position = "relative";
-    btn.style.position = "absolute";
-    btn.style.top = "6px";
-    btn.style.right = "6px";
-
-    block.appendChild(btn);
-  });
 }
 
 function createWrapper(role) {
@@ -80,6 +59,39 @@ function addMessage(role, text, save = true) {
   return bubble;
 }
 
+function startThinkingAnimation(bubble) {
+  let dots = 1;
+  bubble.innerText = "Thinking.";
+  thinkingInterval = setInterval(() => {
+    dots = (dots % 3) + 1;
+    bubble.innerText = "Thinking" + ".".repeat(dots);
+  }, 400);
+}
+
+function stopThinkingAnimation() {
+  clearInterval(thinkingInterval);
+}
+
+function fakeStreamText(fullText, bubble, speed = 12) {
+  let index = 0;
+  bubble.innerHTML = "";
+
+  function type() {
+    if (index < fullText.length) {
+      bubble.innerText += fullText[index];
+      index++;
+      scrollDown();
+      setTimeout(type, speed);
+    } else {
+      bubble.innerHTML = renderMarkdown(fullText);
+      enhanceCodeBlocks(bubble);
+      scrollDown();
+    }
+  }
+
+  type();
+}
+
 async function generateImage(prompt) {
   const res = await fetch(
     `${POLL_IMAGE_API}/${encodeURIComponent(prompt)}?width=1024&height=1024&nologo=true`
@@ -89,57 +101,20 @@ async function generateImage(prompt) {
   return URL.createObjectURL(blob);
 }
 
-async function streamText(messages, bubble) {
-  controller = new AbortController();
-
+async function generateText(messages) {
   const response = await fetch(POLL_TEXT_API, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       model: "openai-large",
-      messages,
-      stream: true
-    }),
-    signal: controller.signal
+      messages
+    })
   });
 
-  const reader = response.body.getReader();
-  const decoder = new TextDecoder("utf-8");
+  if (!response.ok) throw new Error("API error");
 
-  let fullText = "";
-
-  while (true) {
-    const { value, done } = await reader.read();
-    if (done) break;
-
-    const chunk = decoder.decode(value, { stream: true });
-
-    const lines = chunk.split("\n").filter(l => l.trim() !== "");
-
-    for (let line of lines) {
-      if (line.startsWith("data:")) {
-        const json = line.replace("data:", "").trim();
-        if (json === "[DONE]") break;
-
-        try {
-          const parsed = JSON.parse(json);
-          const token = parsed.choices?.[0]?.delta?.content;
-          if (token) {
-            fullText += token;
-            bubble.innerHTML = renderMarkdown(fullText);
-            scrollDown();
-          }
-        } catch {}
-      }
-    }
-  }
-
-  enhanceCodeBlocks(bubble);
-
-  contents.push({ role: "assistant", content: fullText });
-  saveChat();
+  const data = await response.json();
+  return data.choices?.[0]?.message?.content || "No response.";
 }
 
 async function sendToAI(userText) {
@@ -169,6 +144,8 @@ async function sendToAI(userText) {
   bubble.className = "aiMsg assistant";
   wrapper.appendChild(bubble);
 
+  startThinkingAnimation(bubble);
+
   const messages = [
     { role: "system", content: systemPrompt },
     ...contents,
@@ -176,9 +153,18 @@ async function sendToAI(userText) {
   ];
 
   try {
-    await streamText(messages, bubble);
-  } catch {
+    const reply = await generateText(messages);
+
+    stopThinkingAnimation();
+
+    fakeStreamText(reply, bubble, 12);
+
+    contents.push({ role: "assistant", content: reply });
+    saveChat();
+  } catch (err) {
+    stopThinkingAnimation();
     bubble.innerText = "Request failed.";
+    console.error(err);
   }
 }
 

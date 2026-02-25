@@ -40,62 +40,101 @@
           .search-container {
     width: 100%;
     max-width: 560px;
-
+    margin-bottom: 24px;
+    z-index: 100;
     position: absolute;
-    top: 90px; /* move below navbar (adjust if navbar taller) */
+    top: 110px;
     left: 50%;
     transform: translateX(-50%);
-
-    z-index: 50;
-
     border: 1px solid rgba(255, 255, 255, .1);
     border-radius: 14px;
 }
 
 .search-input {
-    width: 100%;
-    padding: 16px;
-
-    border-radius: 14px;
-    border: none;
-    outline: none;
-
-    background: var(--panel2);
-    color: var(--text);
-
-    margin: 0;
+    width:100%;
+    padding:16px;
+    border-radius:14px;
+    border:none;
+    outline:none;
+    background:var(--panel2);
+    color:var(--text);
+    margin-bottom:24px;
 }
 
 .search-results {
     width: 100%;
+    max-width: 560px;
     max-height: 400px;
-
     background: rgba(10, 26, 46, .7);
     backdrop-filter: blur(10px);
-
-    border-radius: 12px;
+    border-radius: 8px;
     overflow-y: auto;
-
     opacity: 0;
+    transform: translateX(-50%) translateY(-7px);
     visibility: hidden;
-
-    transform: translateY(-6px);
     transition: all .2s ease;
-
+    z-index: 99;
     position: absolute;
-    top: calc(100% + 8px);
-    left: 0;
-
+    top: 165px; 
+    left: 50%;
     border: 1px solid rgba(255, 255, 255, .1);
-    z-index: 49;
 }
 
 .search-results.active {
     opacity: 1;
-    transform: translateY(0);
+    transform: translateX(-50%) translateY(0);
     visibility: visible;
 }
 
+  .result-item {
+                display: flex;
+                align-items: center;
+                padding: 10px 14px;
+                cursor: pointer;
+                transition: background .2s;
+                overflow: hidden
+            }
+
+            .result-item:hover {
+                background: rgba(255, 255, 255, .1)
+            }
+
+            .result-img {
+                width: 50px;
+                height: 50px;
+                border-radius: 6px;
+                overflow: hidden;
+                margin-right: 12px;
+                flex-shrink: 0
+            }
+
+            .result-img img {
+                width: 100%;
+                height: 100%;
+                object-fit: cover
+            }
+
+            .result-info {
+                flex: 1
+            }
+
+            .result-title {
+                font-weight: 600;
+                margin-bottom: 4px;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                color: var(--highlight);
+                font-size: 14px
+            }
+
+            .result-artist {
+                font-size: 12px;
+                opacity: .7;
+                color: var(--highlight)
+            }
+
+  
             .main-container {
                 display: flex;
                 justify-content: space-between;

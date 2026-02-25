@@ -11,7 +11,9 @@ import wisp from "wisp-server-node";
 
 const app = express();
 app.set("trust proxy", 1);
+
 app.use(express.json({ limit: "10mb" }));
+app.use(express.urlencoded({ extended: true }));
 
 app.use("/api", async (req, res) => {
   try {
@@ -20,40 +22,47 @@ app.use("/api", async (req, res) => {
       return res.status(500).json({ error: "No upstream configured" });
     }
 
-    const cleanedUpstream = upstream.endsWith("/")
+    const base = upstream.endsWith("/")
       ? upstream.slice(0, -1)
       : upstream;
 
     const forwardPath = req.originalUrl.replace(/^\/api/, "");
+    const targetUrl = base + forwardPath;
 
-    const targetUrl = cleanedUpstream + forwardPath;
+    const headers = { ...req.headers };
+    delete headers.host;
+    delete headers["content-length"];
 
     const response = await fetch(targetUrl, {
       method: req.method,
-      headers: {
-        ...req.headers,
-        host: new URL(cleanedUpstream).host
-      },
+      headers,
       body:
         req.method === "GET" || req.method === "HEAD"
           ? undefined
-          : JSON.stringify(req.body)
+          : req.body && Object.keys(req.body).length
+          ? JSON.stringify(req.body)
+          : undefined
     });
-
-    const buffer = await response.arrayBuffer();
 
     res.status(response.status);
 
     response.headers.forEach((value, key) => {
-      if (key.toLowerCase() !== "transfer-encoding") {
+      if (
+        key.toLowerCase() !== "transfer-encoding" &&
+        key.toLowerCase() !== "content-encoding"
+      ) {
         res.setHeader(key, value);
       }
     });
 
-    res.send(Buffer.from(buffer));
+    const buffer = Buffer.from(await response.arrayBuffer());
+    res.send(buffer);
   } catch (err) {
-    console.error("Proxy error:", err);
-    res.status(502).json({ error: "Upstream request failed" });
+    console.error("Proxy failure:", err);
+    res.status(502).json({
+      error: "Upstream request failed",
+      message: err.message
+    });
   }
 });
 

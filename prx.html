@@ -180,6 +180,7 @@ textarea{
   <button class="nav-btn" id="forwardBtn"><i class="fa-solid fa-arrow-right"></i></button>
   <button class="nav-btn" id="refreshBtn"><i class="fa-solid fa-rotate-right"></i></button>
   <input id="urlInput" type="text" placeholder="Search or enter URL">
+  <button class="nav-btn" id="devConsoleBtn"><i class="fa-solid fa-code"></i></button>
   <button class="nav-btn" id="optionsBtn"><i class="fa-solid fa-gear"></i></button>
 </div>
 
@@ -231,6 +232,7 @@ const closeOptions=document.getElementById("closeOptions");
 const proxyButtons=document.querySelectorAll(".proxy-btn");
 const runJS=document.getElementById("runJS");
 const jsEvalBox=document.getElementById("jsEvalBox");
+const devConsoleBtn=document.getElementById("devConsoleBtn");
 
 let currentProxy=localStorage.getItem("orbitProxy")||"uv";
 let historyStack=[];
@@ -320,6 +322,12 @@ proxyButtons.forEach(btn=>{
 runJS.onclick=()=>{
   const code=jsEvalBox.value.trim();
   if(!code||!iframe.contentWindow)return;
+  try{iframe.contentWindow.eval(code);}catch{}
+};
+
+devConsoleBtn.onclick=()=>{
+  if(!iframe.contentWindow)return;
+  const code="(function(){var s=document.createElement('script');s.src='https://cdn.jsdelivr.net/gh/SnowLord7/devconsole@master/main.js';document.head.appendChild(s);}())";
   try{iframe.contentWindow.eval(code);}catch{}
 };
 

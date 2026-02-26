@@ -78,6 +78,12 @@
     "url": "/games/bankrobbery/index.html"
   },
   {
+    "id": "roblox",
+    "name": "Roblox",
+    "image": "/games/roblox/roblox.png",
+    "url": "/embed.html#https://173.ip.nowgg.fun/apps/a/19900/b.html"
+  },
+  {
     "id": "slitherio",
     "name": "Slither.io",
     "image": "/games/slitherio/Screenshot_20260125-194917.png",

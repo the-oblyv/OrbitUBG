@@ -5,9 +5,6 @@
 <title>Scramjet Embed</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<link rel="prefetch" href="/scram/scramjet.worker.js" />
-<link rel="prefetch" href="/scram/scramjet.shared.js" />
-
 <style>
 html,body{
   margin:0;
@@ -17,103 +14,50 @@ html,body{
   background:#000;
   overflow:hidden;
 }
-#iframe-container{
-  width:100%;
-  height:100%;
-}
-#iframe-container iframe{
+#proxyFrame{
   width:100%;
   height:100%;
   border:none;
-  background:#fff;
+  background:#000;
 }
 </style>
-
-<script src="/baremux/index.js"></script>
-<script src="/scram/scramjet.all.js"></script>
-<script src="/stuff.js"></script>
 </head>
 
 <body>
-<div id="iframe-container"></div>
+<iframe id="proxyFrame" allowfullscreen></iframe>
+
+<script src="/scram/scramjet.all.js"></script>
 
 <script>
-const { ScramjetController } = $scramjetLoadController();
+const iframe = document.getElementById("proxyFrame");
 
-const scramjet = new ScramjetController({
-  prefix: '/scramjet/',
-  files: {
-    wasm: '/scram/scramjet.wasm.wasm',
-    all: '/scram/scramjet.all.js',
-    sync: '/scram/scramjet.sync.js'
-  }
-});
-
-scramjet.init();
-navigator.serviceWorker.register('/sw.js');
-
-const connection = new BareMux.BareMuxConnection('/baremux/worker.js');
-
-const store = {
-  wispurl: _CONFIG?.wispurl || (location.protocol === 'https:' ? 'wss' : 'ws') + '://' + location.host + '/wisp/',
-  bareurl: _CONFIG?.bareurl || (location.protocol === 'https:' ? 'https' : 'http') + '://' + location.host + '/bare/'
-};
+function normalize(value){
+  try { return new URL(value).toString(); } catch {}
+  try {
+    const url = new URL("http://" + value);
+    if (url.hostname.includes(".")) return url.toString();
+  } catch {}
+  return "https://duckduckgo.com/?q=" + encodeURIComponent(value);
+}
 
 function getTarget(){
-  if(!location.hash) return "https://start.duckduckgo.com/";
+  if(!location.hash) return "https://google.com/";
   try{
     const decoded = decodeURIComponent(location.hash.substring(1));
-    if(!decoded.startsWith("http://") && !decoded.startsWith("https://")){
-      return "https://" + decoded;
+    if(decoded && decoded.trim()){
+      return normalize(decoded);
     }
-    return decoded;
-  }catch{
-    return "https://start.duckduckgo.com/";
-  }
+  }catch{}
+  return "https://google.com/";
 }
 
-async function waitForTransport(){
-  let attempts = 0;
-  const maxAttempts = 10;
-
-  while(attempts < maxAttempts){
-    try{
-      await connection.setTransport('/epoxy/index.mjs', [{ wisp: store.wispurl }]);
-      return;
-    }catch{}
-
-    try{
-      await connection.setTransport('/baremod/index.mjs', [store.bareurl]);
-      return;
-    }catch{}
-
-    try{
-      await connection.setTransport('/libcurl/index.mjs', [{ wisp: store.wispurl }]);
-      return;
-    }catch{}
-
-    attempts++;
-    await new Promise(r => setTimeout(r, 100));
-  }
-
-  throw new Error('No transport available');
-}
-
-async function loadPage(){
-  const container = document.getElementById("iframe-container");
-  container.innerHTML = "";
-
+function loadFromHash(){
   const target = getTarget();
-
-  await waitForTransport();
-
-  const frame = scramjet.createFrame();
-  container.appendChild(frame.frame);
-  frame.go(target);
+  iframe.src = "/scramjet/" + target;
 }
 
-window.addEventListener("load", loadPage);
-window.addEventListener("hashchange", loadPage);
+window.addEventListener("load", loadFromHash);
+window.addEventListener("hashchange", loadFromHash);
 </script>
 
 </body>

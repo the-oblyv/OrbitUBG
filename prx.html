@@ -168,7 +168,7 @@ function search(value){
     const url=new URL("http://"+value);
     if(url.hostname.includes("."))return url.toString();
   }catch{}
-  return "https://www.google.com/search?q="+encodeURIComponent(value);
+  return "https://duckduckgo.com/search?q="+encodeURIComponent(value);
 }
 
 function load(url,addHistory=true){

@@ -5,6 +5,9 @@
 <title>Scramjet Embed</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+<link rel="prefetch" href="/scram/scramjet.worker.js" />
+<link rel="prefetch" href="/scram/scramjet.shared.js" />
+
 <style>
 html,body{
   margin:0;
@@ -22,6 +25,7 @@ html,body{
   width:100%;
   height:100%;
   border:none;
+  background:#fff;
 }
 </style>
 
@@ -48,6 +52,13 @@ const scramjet = new ScramjetController({
 scramjet.init();
 navigator.serviceWorker.register('/sw.js');
 
+const connection = new BareMux.BareMuxConnection('/baremux/worker.js');
+
+const store = {
+  wispurl: _CONFIG?.wispurl || (location.protocol === 'https:' ? 'wss' : 'ws') + '://' + location.host + '/wisp/',
+  bareurl: _CONFIG?.bareurl || (location.protocol === 'https:' ? 'https' : 'http') + '://' + location.host + '/bare/'
+};
+
 function getTarget(){
   if(!location.hash) return "https://google.com/";
   try{
@@ -61,11 +72,41 @@ function getTarget(){
   }
 }
 
-function loadPage(){
+async function waitForTransport(){
+  let attempts = 0;
+  const maxAttempts = 10;
+
+  while(attempts < maxAttempts){
+    try{
+      await connection.setTransport('/epoxy/index.mjs', [{ wisp: store.wispurl }]);
+      return;
+    }catch{}
+
+    try{
+      await connection.setTransport('/baremod/index.mjs', [store.bareurl]);
+      return;
+    }catch{}
+
+    try{
+      await connection.setTransport('/libcurl/index.mjs', [{ wisp: store.wispurl }]);
+      return;
+    }catch{}
+
+    attempts++;
+    await new Promise(r => setTimeout(r, 100));
+  }
+
+  throw new Error('No transport available');
+}
+
+async function loadPage(){
   const container = document.getElementById("iframe-container");
   container.innerHTML = "";
 
   const target = getTarget();
+
+  await waitForTransport();
+
   const frame = scramjet.createFrame();
   container.appendChild(frame.frame);
   frame.go(target);

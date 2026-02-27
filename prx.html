@@ -227,12 +227,48 @@ refreshBtn.onclick=()=>{
   if(historyIndex>=0)load(historyStack[historyIndex],false);
 };
 
-devConsoleBtn.onclick=()=>{
-  if(!iframe.contentWindow)return;
-  const code="(function(){var s=document.createElement('script');s.src='https://cdn.jsdelivr.net/gh/SnowLord7/devconsole@master/main.js';document.head.appendChild(s);}())";
-  try{iframe.contentWindow.eval(code);}catch{}
-};
+optionsBtn.onclick = () => {
+  const menu = document.createElement("div");
+  menu.style.position = "fixed";
+  menu.style.top = "170px";
+  menu.style.right = "20px";
+  menu.style.background = "var(--panel)";
+  menu.style.border = "1px solid var(--border)";
+  menu.style.padding = "12px";
+  menu.style.borderRadius = "10px";
+  menu.style.zIndex = "9999";
+  menu.innerHTML = `
+    <div style="margin-bottom:8px;font-weight:600;">Orbit Settings</div>
+    <button id="switchProxy" style="width:100%;margin-bottom:6px;">Switch Proxy</button>
+    <button id="closeMenu" style="width:100%;">Close</button>
+  `;
+  document.body.appendChild(menu);
 
+  document.getElementById("switchProxy").onclick = () => {
+    currentProxy = currentProxy === "uv" ? "scramjet" : "uv";
+    localStorage.setItem("orbitProxy", currentProxy);
+    alert("Switched to " + currentProxy);
+  };
+
+  document.getElementById("closeMenu").onclick = () => {
+    menu.remove();
+  };
+};
+  
+devConsoleBtn.onclick = () => {
+  if (!iframe.src) return;
+
+  try {
+    const script = document.createElement("script");
+    script.src = "https://cdn.jsdelivr.net/gh/SnowLord7/devconsole@master/main.js";
+    script.onload = () => console.log("Dev console loaded");
+    
+    iframe.contentWindow.document.body.appendChild(script);
+  } catch (err) {
+    alert("Dev console injection blocked by site.");
+  }
+};
+  
 const clock=document.getElementById("clock");
 const toggleBtn=document.getElementById("formatToggle");
 let is12Hour=localStorage.getItem("orbitClockFormat")==="12";

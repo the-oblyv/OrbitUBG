@@ -60,7 +60,7 @@ const store = {
 };
 
 function getTarget(){
-  if(!location.hash) return "https://google.com/";
+  if(!location.hash) return "https://start.duckduckgo.com/";
   try{
     const decoded = decodeURIComponent(location.hash.substring(1));
     if(!decoded.startsWith("http://") && !decoded.startsWith("https://")){
@@ -68,7 +68,7 @@ function getTarget(){
     }
     return decoded;
   }catch{
-    return "https://google.com/";
+    return "https://start.duckduckgo.com/";
   }
 }
 

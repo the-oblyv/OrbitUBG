@@ -9,8 +9,8 @@
 html,body{
   margin:0;
   padding:0;
-  width:100%;
   height:100%;
+  width:100%;
   background:#000;
   overflow:hidden;
 }
@@ -26,44 +26,49 @@ html,body{
 <body>
 <iframe id="proxyFrame" allowfullscreen></iframe>
 
+<!-- Same core scripts prx.html relies on -->
 <script src="/baremux/index.js" defer></script>
-<script src="/uv/uv.bundle.js" defer></script>
-<script src="/uv/uv.config.js" defer></script>
 <script src="/scram/scramjet.all.js" defer></script>
 <script src="/stuff.js" defer></script>
-<script src="frame.js"></script>
-<script src="script.js"></script>
+<script src="/frame.js"></script>
 
 <script>
 const iframe = document.getElementById("proxyFrame");
 
-function normalize(value){
-  try { return new URL(value).toString(); } catch {}
-  try {
-    const url = new URL("http://" + value);
-    if (url.hostname.includes(".")) return url.toString();
-  } catch {}
-  return "https://duckduckgo.com/?q=" + encodeURIComponent(value);
-}
-
-function getTarget(){
-  if(!location.hash) return "https://google.com/";
+function search(value){
+  try{return new URL(value).toString();}catch{}
   try{
-    const decoded = decodeURIComponent(location.hash.substring(1));
-    if(decoded && decoded.trim()){
-      return normalize(decoded);
-    }
+    const url=new URL("http://"+value);
+    if(url.hostname.includes("."))return url.toString();
   }catch{}
-  return "https://google.com/";
+  return "https://duckduckgo.com/search?q="+encodeURIComponent(value);
 }
 
-function loadFromHash(){
-  const target = getTarget();
-  iframe.src = "/scramjet/" + target;
+function load(url){
+  if(!url)return;
+  const finalURL=search(url);
+  iframe.src="/scramjet/"+finalURL;
+  location.hash=encodeURIComponent(finalURL);
 }
 
-window.addEventListener("load", loadFromHash);
-window.addEventListener("hashchange", loadFromHash);
+function handleHashRoute(){
+  if(!location.hash){
+    load("https://google.com/");
+    return;
+  }
+  const raw=location.hash.substring(1);
+  try{
+    const decoded=decodeURIComponent(raw);
+    if(decoded&&decoded.trim()){
+      load(decoded);
+    }
+  }catch{
+    load("https://google.com/");
+  }
+}
+
+window.addEventListener("load",handleHashRoute);
+window.addEventListener("hashchange",handleHashRoute);
 </script>
 
 </body>

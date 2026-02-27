@@ -7,7 +7,7 @@ const navHTML = `
     <a href="/a"><i class="fa-solid fa-archive"></i> Apps</a>
     <a href="/med"><i class="fa-solid fa-photo-film"></i> Media</a>
     <a href="/prx"><i class="fa-solid fa-globe"></i> Proxy</a>
-    <a href="/s"><i class="fa-solid fa-gear"></i> Settings</a>
+    <a href="/s"><i class="fa-solid fa-gear"></i></a>
   </div>
 </div>
 `;
@@ -18,7 +18,7 @@ const menuHTML = `
 <a href="/a"><i class="fa-solid fa-archive"></i> Apps</a>
 <a href="/med"><i class="fa-solid fa-photo-film"></i> Media</a>
 <a href="/prx"><i class="fa-solid fa-globe"></i> Proxy</a>
-<a href="/s"><i class="fa-solid fa-gear"></i> Settings</a>
+<a href="/s"><i class="fa-solid fa-gear"></i></a>
 `;
 
 const navMount = document.getElementById("navMount");

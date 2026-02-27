@@ -1,173 +1,335 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<title>AI | Orbit</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="UTF-8">
+    <title>AI | Orbit</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-<link rel="stylesheet" href="style.css">
-<link rel="icon" href="/res/orbit.png">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="/res/orbit.png">
 
-<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet"/>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet"/>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <style>
+      :root {
+        --bg:#0f1420;
+        --panel:#1b2133;
+        --panel2:#232a40;
+        --text:#e6e9f2;
+        --muted:#aab0c5;
+        --accent:#6c7cff;
+        --radius:22px;
+      }
 
-<style>
-.aiContainer{
-  max-width:900px;
-  margin:auto;
-  padding:140px 20px 160px;
-}
+      * {
+        box-sizing:border-box;
+      }
 
-#aiChat{
-  display:flex;
-  flex-direction:column;
-  gap:16px;
-}
+      body {
+        margin:0;
+        font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+        background:var(--bg);
+        color:var(--text);
+        min-height:100vh;
+      }
 
-.aiWrapper{
-  display:flex;
-  flex-direction:column;
-  max-width:85%;
-}
+      .chat-container {
+        overflow-y: auto;
+        max-height: 100vh;
+        padding-bottom: 150px;
+        padding-top: 120px;
+      }
+      :where(.chat-container, textarea)::-webkit-scrollbar {
+        width: 6px;
+      }
+      :where(.chat-container, textarea)::-webkit-scrollbar-track {
+        background: var(--bg);
+      }
+      :where(.chat-container, textarea)::-webkit-scrollbar-thumb {
+        background: var(--panel2);
+        border-radius: 25px;
+      }
+      
+      .default-text {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        height: 70vh;
+        padding: 0 10px;
+        text-align: center;
+        color: var(--text);
+      }
+      .default-text h1 {
+        font-size: 3.3rem;
+        margin: 0;
+      }
+      .default-text p {
+        margin-top: 10px;
+        font-size: 1.1rem;
+        color: var(--muted);
+      }
+      
+      .chat-container .chat {
+        padding: 20px 10px;
+        display: flex;
+        width: 100%;
+        max-width: 900px;
+        margin: 0 auto; 
+      }
+      
+      .chat .chat-content {
+        width: 100%;
+        display: block;
+      }
+      
+      .chat .chat-details {
+        display: block;
+      }
+      
+      .msg-markdown {
+        padding: 16px 24px;
+        border-radius: 22px; 
+        line-height: 1.6;
+        font-size: 1rem;
+        margin-bottom: 10px;
+        position: relative;
+        width: fit-content;
+        max-width: 100%;
+        word-wrap: break-word;
+      }
 
-.aiWrapper.user{ align-self:flex-end; }
-.aiWrapper.model{ align-self:flex-start; }
+      .chat.outgoing .msg-markdown {
+        background: var(--panel2);
+        color: var(--text);
+        margin-left: auto; 
+        border-bottom-right-radius: 6px;
+        text-align: right; 
+      }
 
-.aiMsg{
-  padding:14px 18px;
-  border-radius:16px;
-  line-height:1.5;
-  font-size:15px;
-  word-wrap:break-word;
-  position:relative;
-}
+      .chat.incoming .msg-markdown {
+        background: var(--panel);
+        color: var(--text);
+        margin-right: auto; 
+        border-bottom-left-radius: 6px;
+        text-align: left; 
+      }
+      
+      pre {
+        background: #000;
+        padding: 15px;
+        border-radius: 12px;
+        overflow-x: auto;
+        border: 1px solid var(--panel2);
+        margin: 10px 0;
+        position: relative; 
+      }
+      code {
+        font-family: monospace;
+      }
 
-.aiMsg.user{
-  background:linear-gradient(135deg,#5e5cff,#7a6bff);
-  color:white;
-}
+      .code-copy-btn {
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        background: var(--panel2);
+        border: 1px solid var(--accent);
+        color: var(--text);
+        border-radius: 6px;
+        padding: 4px 8px;
+        cursor: pointer;
+        font-size: 0.75rem;
+        opacity: 0.7;
+        transition: opacity 0.2s, background 0.2s;
+        z-index: 10;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+      }
+      .code-copy-btn:hover {
+        opacity: 1;
+        background: var(--accent);
+      }
 
-.aiMsg.model{
-  background:#1f2338;
-  color:#ddd;
-}
+      .typing-animation {
+        padding: 10px 0;
+        display: inline-flex;
+        gap: 6px;
+      }
+      .typing-dot {
+        height: 8px;
+        width: 8px;
+        border-radius: 50%;
+        background: var(--text);
+        opacity: 0.6;
+        animation: animateDots 1.5s infinite;
+      }
+      .typing-dot:nth-child(1) { animation-delay: 0.2s; }
+      .typing-dot:nth-child(2) { animation-delay: 0.3s; }
+      .typing-dot:nth-child(3) { animation-delay: 0.4s; }
 
-.aiMsg img{
-  max-width:100%;
-  height:auto;
-  border-radius:12px;
-  display:block;
-  margin-top:8px;
-}
+      @keyframes animateDots {
+        0%, 44% { transform: translateY(0); }
+        28% { transform: translateY(-8px); opacity: 0.3; }
+        44% { opacity: 0.1; }
+      }
 
-.aiInputBar{
-  position:fixed;
-  bottom:0;
-  left:0;
-  width:100%;
-  padding:18px 20px;
-  background:linear-gradient(to top,#0f1220 70%,transparent);
-  display:flex;
-  justify-content:center;
-}
+      .typing-container {
+        position: fixed;
+        bottom: 0;
+        width: 100%;
+        padding: 20px;
+        background: var(--bg);
+        border-top: 1px solid var(--panel2);
+        display: flex;
+        justify-content: center;
+        z-index: 100; 
+      }
+      .typing-content {
+        display: flex;
+        max-width: 950px;
+        width: 100%;
+        gap: 12px;
+        align-items: flex-end;
+      }
+      .typing-textarea {
+        flex: 1;
+        position: relative;
+      }
+      .typing-textarea textarea {
+        width: 100%;
+        resize: none;
+        height: 55px;
+        max-height: 200px;
+        padding: 15px 20px;
+        border: none;
+        outline: none;
+        background: var(--panel2);
+        color: var(--text);
+        border-radius: 14px;
+        font-size: 1rem;
+        font-family: inherit;
+        transition: border 0.2s;
+      }
+      .typing-textarea textarea:focus {
+        border: 1px solid var(--accent);
+      }
+      
+      #send-btn-wrapper {
+        background: var(--accent);
+        border-radius: 14px;
+        transition: background 0.2s;
+      }
+      #send-btn-wrapper:hover {
+        filter: brightness(1.1);
+      }
+      #send-btn-wrapper span {
+        color: white; 
+        background: transparent; 
+      }
 
-.aiInputWrapper{
-  display:flex;
-  align-items:center;
-  gap:10px;
-  width:100%;
-  max-width:900px;
-}
+      .typing-controls span {
+        height: 55px;
+        width: 55px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--panel2);
+        border-radius: 14px;
+        cursor: pointer;
+        color: var(--text);
+        font-size: 1.2rem;
+        transition: background 0.2s;
+      }
+      .typing-controls span:hover {
+        background: var(--panel);
+      }
 
-#aiInput{
-  flex:1;
-  padding:14px 18px;
-  border-radius:18px;
-  border:none;
-  outline:none;
-  background:#1f2338;
-  color:white;
-  font-size:15px;
-}
+      /* Actions on hover */
+      .chat-actions {
+        display: flex;
+        gap: 12px;
+        padding: 0 24px;
+        margin-top: -5px;
+        margin-bottom: 10px;
+        opacity: 0;
+        transition: opacity 0.2s;
+      }
+      .chat:hover .chat-actions {
+        opacity: 1;
+      }
+      .chat-actions span, .chat-actions select {
+        font-size: 0.85rem;
+        cursor: pointer;
+        color: var(--muted);
+        background: transparent;
+        border: none;
+        outline: none;
+      }
+      .chat-actions span:hover {
+        color: var(--accent);
+      }
+      .chat-actions select {
+        font-family: inherit;
+      }
+      .chat-actions select option {
+        background: var(--panel);
+        color: var(--text);
+      }
 
-.aiBtn{
-  background:#5e5cff;
-  border:none;
-  color:white;
-  width:44px;
-  height:44px;
-  border-radius:50%;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  cursor:pointer;
-  font-size:16px;
-}
+      .chat.outgoing .chat-actions {
+        justify-content: flex-end;
+      }
+      .chat.incoming .chat-actions {
+        justify-content: flex-start;
+      }
 
-.aiAttach{
-  background:#1f2338;
-}
-
-#aiFile{ display:none; }
-
-pre{
-  position:relative;
-  border-radius:14px;
-  overflow:auto;
-}
-
-.code-copy{
-  position:absolute;
-  top:8px;
-  right:8px;
-  background:#5e5cff;
-  border:none;
-  color:white;
-  font-size:12px;
-  padding:6px 10px;
-  border-radius:6px;
-  cursor:pointer;
-}
-</style>
-</head>
-<body>
-
-<header class="topbar" id="navMount"></header>
-<nav class="menu" id="menu"></nav>
-
-<main class="aiContainer">
-  <div id="aiChat"></div>
-</main>
-
-<div class="aiInputBar">
-  <div class="aiInputWrapper">
-    <button class="aiBtn aiAttach" id="attachBtn">
-      <i class="fa-solid fa-paperclip"></i>
-    </button>
-
-    <button class="aiBtn aiAttach" id="imageBtn">
-      <i class="fa-solid fa-image"></i>
-    </button>
-
-    <input type="file" id="aiFile" multiple>
-
-    <input id="aiInput" placeholder="Ask Orbit AI anything..." autocomplete="off">
-
-    <button class="aiBtn" id="sendBtn">
-      <i class="fa-solid fa-paper-plane"></i>
-    </button>
-
-    <button class="aiBtn aiAttach" id="trashBtn">
-      <i class="fa-solid fa-trash"></i>
-    </button>
-  </div>
-</div>
-
-<script src="frame.js"></script>
-<script src="ai.js"></script>
-<script src="script.js"></script>
-
+      @media(max-width: 600px) {
+        .typing-container {
+          padding: 15px 10px;
+        }
+        .default-text h1 {
+          font-size: 2.3rem;
+        }
+      }
+    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src='https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js'></script>
+    <script src="https://unpkg.com/showdown/dist/showdown.min.js"></script>
+    <script src="https://raw.githubusercontent.com/eligrey/FileSaver.js/refs/heads/master/dist/FileSaver.min.js"></script>
+  </head>
+  <body>
+    <header class="topbar" id="navMount"></header>
+    <nav class="menu" id="menu"></nav>
+    <textarea id="system-prompt" hidden></textarea>
+    
+    <div class="chat-container">
+      <div class="default-text">
+        <h1>Orbit AI</h1>
+        <p>Send a message to get started.</p>
+      </div>
+    </div>
+    
+    <div class="typing-container">
+      <div class="typing-content">
+        <div class="typing-controls">
+            <span id="image-btn" title="Generate Image"><i class="fas fa-image"></i></span>
+        </div>
+        <div class="typing-textarea">
+          <textarea id="chat-input" spellcheck="false" placeholder="Enter a prompt here" required></textarea>
+        </div>
+        <div class="typing-controls" id="send-btn-wrapper">
+            <span id="send-btn"><i class="fas fa-paper-plane"></i></span>
+        </div>
+        <div class="typing-controls">
+          <span id="delete-btn" title="Clear Chat"><i class="fas fa-trash"></i></span>
+        </div>
+      </div>
+    </div>
+   <script src="frame.js"></script>
+  <script src="ai.js"></script>
+ <script src="script.js"></script>
 </body>
 </html>

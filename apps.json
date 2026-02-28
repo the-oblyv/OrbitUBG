@@ -12,6 +12,12 @@
     "url": "/apps/file-uploader/index.html"
   },
   {
+    "id": "temp-mail",
+    "name": "Temp Mail",
+    "image": "/apps/temp-mail/favicon.ico",
+    "url": "/apps/temp-mail/index.html"
+  },
+  {
     "id": "discord",
     "name": "Discord",
     "image": "/apps/discord/discord-logo-icon-editorial-free-vector.jpg",

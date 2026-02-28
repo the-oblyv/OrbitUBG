@@ -10,5 +10,11 @@
     "name": "File Uploader",
     "image": "/apps/file-uploader/download (1).png",
     "url": "/apps/file-uploader/index.html"
+  },
+  {
+    "id": "discord",
+    "name": "Discord",
+    "image": "/apps/discord/discord-logo-icon-editorial-free-vector.jpg",
+    "url": "/apps/discord/index.html"
   }
 ]

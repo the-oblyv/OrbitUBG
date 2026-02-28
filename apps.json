@@ -4,5 +4,11 @@
     "name": "Soundboard",
     "image": "/apps/soundboard/179.png",
     "url": "/apps/soundboard/index.html"
+  },
+  {
+    "id": "file-uploader",
+    "name": "File Uploader",
+    "image": "/apps/file-uploader/download (1).png",
+    "url": "/apps/file-uploader/index.html"
   }
 ]

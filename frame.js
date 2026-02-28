@@ -5,6 +5,7 @@ const navHTML = `
     <a href="/"><i class="fa-solid fa-house"></i> Home</a>
     <a href="/g"><i class="fa-solid fa-gamepad"></i> Games</a>
     <a href="/a"><i class="fa-solid fa-archive"></i> Apps</a>
+    <a href="/ai"><i class="fa-solid fa-robot"></i> AI</a>
     <a href="/med"><i class="fa-solid fa-photo-film"></i> Media</a>
     <a href="/prx"><i class="fa-solid fa-globe"></i> Proxy</a>
     <a href="/s"><i class="fa-solid fa-gear"></i></a>
@@ -16,6 +17,7 @@ const menuHTML = `
 <a href="/"><i class="fa-solid fa-house"></i> Home</a>
 <a href="/g"><i class="fa-solid fa-gamepad"></i> Games</a>
 <a href="/a"><i class="fa-solid fa-archive"></i> Apps</a>
+<a href="/ai"><i class="fa-solid fa-robot"></i> AI</a>
 <a href="/med"><i class="fa-solid fa-photo-film"></i> Media</a>
 <a href="/prx"><i class="fa-solid fa-globe"></i> Proxy</a>
 <a href="/s"><i class="fa-solid fa-gear"></i></a>

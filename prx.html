@@ -270,38 +270,67 @@ devConsoleBtn.onclick = () => {
   
 const clock=document.getElementById("clock");
 const toggleBtn=document.getElementById("formatToggle");
+
 let is12Hour=localStorage.getItem("orbitClockFormat")==="12";
 
-function createColumn(max){
-  const section=document.createElement("div");
-  section.className="clock-section";
-  const track=document.createElement("div");
-  track.className="clock-track";
-  for(let i=0;i<max;i++){
-    const num=document.createElement("div");
-    num.className="clock-number";
-    num.textContent=i.toString().padStart(2,"0");
-    track.appendChild(num);
-  }
-  section.appendChild(track);
-  clock.appendChild(section);
-  return track;
+function createColumn(max,startAtOne=false){
+  const section=document.createElement("div");
+  section.className="clock-section";
+  const track=document.createElement("div");
+  track.className="clock-track";
+  for(let i=0;i<max;i++){
+    const num=document.createElement("div");
+    num.className="clock-number";
+    let value=startAtOne?i+1:i;
+    num.textContent=value.toString().padStart(2,"0");
+    track.appendChild(num);
+  }
+  section.appendChild(track);
+  clock.appendChild(section);
+  return track;
 }
 
-const hourTrack=createColumn(24);
-const minuteTrack=createColumn(60);
-const secondTrack=createColumn(60);
+function createSeparator(){
+  const sep=document.createElement("div");
+  sep.className="clock-separator";
+  sep.textContent=":";
+  clock.appendChild(sep);
+}
+
+clock.innerHTML="";
+
+let hourTrack=createColumn(is12Hour?12:24,is12Hour);
+createSeparator();
+let minuteTrack=createColumn(60);
+createSeparator();
+let secondTrack=createColumn(60);
+
+function rebuildClock(){
+  clock.innerHTML="";
+  hourTrack=createColumn(is12Hour?12:24,is12Hour);
+  createSeparator();
+  minuteTrack=createColumn(60);
+  createSeparator();
+  secondTrack=createColumn(60);
+}
 
 function updateClock(){
-  const now=new Date();
-  let hours=now.getHours();
-  const minutes=now.getMinutes();
-  const seconds=now.getSeconds();
-  if(is12Hour)hours=hours%12||12;
-  hourTrack.style.transform=`translateY(-${hours*5}rem)`;
-  minuteTrack.style.transform=`translateY(-${minutes*5}rem)`;
-  secondTrack.style.transform=`translateY(-${seconds*5}rem)`;
+  const now=new Date();
+  let hours=now.getHours();
+  const minutes=now.getMinutes();
+  const seconds=now.getSeconds();
+  if(is12Hour)hours=(hours%12)||12;
+  hourTrack.style.transform=`translateY(-${(is12Hour?hours-1:hours)*5}rem)`;
+  minuteTrack.style.transform=`translateY(-${minutes*5}rem)`;
+  secondTrack.style.transform=`translateY(-${seconds*5}rem)`;
 }
+
+toggleBtn.onclick=()=>{
+  is12Hour=!is12Hour;
+  localStorage.setItem("orbitClockFormat",is12Hour?"12":"24");
+  rebuildClock();
+  updateClock();
+};
 
 setInterval(updateClock,1000);
 updateClock();

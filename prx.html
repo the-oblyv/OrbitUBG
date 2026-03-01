@@ -7,6 +7,7 @@
 <link rel="icon" href="/res/orbit.png">
 <link rel="stylesheet" href="/style.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
 <style>
 :root{
   --main-bg:#0f1420;
@@ -79,34 +80,21 @@ html,body{
 }
 .clock{
   display:flex;
-  align-items:center;
-  justify-content:center;
-  gap:0.5rem;
+  gap:1rem;
   font-size:4rem;
   font-weight:600;
+  align-items:center;
 }
-.clock-section{
-  height:5rem;
-  overflow:hidden;
-}
-.clock-track{
-  display:flex;
-  flex-direction:column;
-  transition:transform 0.5s ease;
-}
+.clock-section{height:5rem;overflow:hidden;}
+.clock-track{transition:transform 0.5s ease;}
 .clock-number{
   height:5rem;
   display:flex;
   align-items:center;
   justify-content:center;
+  opacity:0.2;
 }
-.clock-separator{
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-size:4rem;
-  line-height:5rem;
-}
+.clock-separator{opacity:0.6;}
 .clock-toggle{
   position:absolute;
   bottom:40px;
@@ -119,9 +107,7 @@ html,body{
   color:var(--text);
   transition:0.2s;
 }
-.clock-toggle:hover{
-  border-color:var(--accent);
-}
+.clock-toggle:hover{border-color:var(--accent);}
 #proxyFrame{
   display:none;
   width:100%;
@@ -129,8 +115,61 @@ html,body{
   border:none;
   background:#000;
 }
+#optionsModal{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,0.6);
+  backdrop-filter:blur(6px);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  z-index:1000;
+}
+#optionsPanel{
+  width:420px;
+  background:var(--panel);
+  border:1px solid var(--border);
+  border-radius:16px;
+  padding:24px;
+  box-shadow:0 20px 60px rgba(0,0,0,0.5);
+}
+.option-group{margin-bottom:20px;}
+.proxy-buttons{display:flex;gap:10px;}
+.proxy-btn{
+  flex:1;
+  padding:10px;
+  border-radius:10px;
+  border:1px solid var(--border);
+  background:var(--panel2);
+  color:var(--text);
+  cursor:pointer;
+}
+.proxy-btn.active{
+  border-color:var(--accent);
+  box-shadow:0 0 0 2px rgba(108,124,255,0.25);
+}
+textarea{
+  width:100%;
+  height:100px;
+  background:var(--panel2);
+  border:1px solid var(--border);
+  border-radius:10px;
+  padding:10px;
+  color:var(--text);
+  resize:none;
+  margin-bottom:10px;
+}
+#runJS,#closeOptions{
+  padding:8px 12px;
+  border-radius:8px;
+  border:1px solid var(--border);
+  background:var(--panel2);
+  color:var(--text);
+  cursor:pointer;
+}
 </style>
 </head>
+
 <body>
 
 <header class="topbar" id="navMount"></header>
@@ -141,7 +180,6 @@ html,body{
   <button class="nav-btn" id="forwardBtn"><i class="fa-solid fa-arrow-right"></i></button>
   <button class="nav-btn" id="refreshBtn"><i class="fa-solid fa-rotate-right"></i></button>
   <input id="urlInput" type="text" placeholder="Search or enter URL">
-  <button class="nav-btn" id="devConsoleBtn"><i class="fa-solid fa-code"></i></button>
   <button class="nav-btn" id="optionsBtn"><i class="fa-solid fa-gear"></i></button>
 </div>
 
@@ -153,13 +191,33 @@ html,body{
   <iframe id="proxyFrame" allowfullscreen></iframe>
 </div>
 
-<script src="/baremux/index.js" defer></script> 
+<div id="optionsModal">
+  <div id="optionsPanel">
+    <h2>Options</h2>
+    <div class="option-group">
+      <h3>Proxy</h3>
+      <div class="proxy-buttons">
+        <button class="proxy-btn" data-proxy="uv">Ultraviolet</button>
+        <button class="proxy-btn" data-proxy="scramjet">Scramjet</button>
+      </div>
+    </div>
+    <div class="option-group">
+      <h3>Eval JS</h3>
+      <textarea id="jsEvalBox"></textarea>
+      <button id="runJS">Execute</button>
+    </div>
+    <button id="closeOptions">Close</button>
+  </div>
+</div>
+
+<script src="/baremux/index.js" defer></script>
 <script src="/uv/uv.bundle.js" defer></script>
-<script src="/uv/uv.config.js" defer></script> 
-<script src="/scram/scramjet.all.js" defer></script> 
-<script src="/stuff.js" defer></script> 
-<script src="frame.js"></script> 
+<script src="/uv/uv.config.js" defer></script>
+<script src="/scram/scramjet.all.js" defer></script>
+<script src="/stuff.js" defer></script>
+<script src="frame.js"></script>
 <script src="script.js"></script>
+
 <script>
 const input=document.getElementById("urlInput");
 const backBtn=document.getElementById("backBtn");
@@ -168,9 +226,13 @@ const refreshBtn=document.getElementById("refreshBtn");
 const iframe=document.getElementById("proxyFrame");
 const newtab=document.getElementById("newtab");
 const optionsBtn=document.getElementById("optionsBtn");
-const toggleBtn=document.getElementById("formatToggle");
+const optionsModal=document.getElementById("optionsModal");
+const closeOptions=document.getElementById("closeOptions");
+const proxyButtons=document.querySelectorAll(".proxy-btn");
+const runJS=document.getElementById("runJS");
+const jsEvalBox=document.getElementById("jsEvalBox");
 
-let is12Hour=localStorage.getItem("orbitClockFormat")==="12";
+let currentProxy=localStorage.getItem("orbitProxy")||"uv";
 let historyStack=[];
 let historyIndex=-1;
 
@@ -180,7 +242,7 @@ function search(value){
     const url=new URL("http://"+value);
     if(url.hostname.includes("."))return url.toString();
   }catch{}
-  return "https://start.duckduckgo.com/search?q="+encodeURIComponent(value);
+  return "https://www.google.com/search?q="+encodeURIComponent(value);
 }
 
 function load(url,addHistory=true){
@@ -188,7 +250,11 @@ function load(url,addHistory=true){
   const finalURL=search(url);
   newtab.style.display="none";
   iframe.style.display="block";
-  iframe.src=finalURL;
+  if(currentProxy==="uv"){
+    iframe.src=__uv$config.prefix+__uv$config.encodeUrl(finalURL);
+  }else{
+    iframe.src="/scramjet/"+finalURL;
+  }
   input.value=url;
   location.hash=encodeURIComponent(finalURL);
   if(addHistory){
@@ -197,6 +263,21 @@ function load(url,addHistory=true){
     historyIndex++;
   }
 }
+
+function handleHashRoute(){
+  if(!location.hash)return;
+  const raw=location.hash.substring(1);
+  try{
+    const decoded=decodeURIComponent(raw);
+    if(decoded&&decoded.trim()){
+      input.value=decoded;
+      load(decoded,false);
+    }
+  }catch{}
+}
+
+window.addEventListener("load",handleHashRoute);
+window.addEventListener("hashchange",handleHashRoute);
 
 input.addEventListener("keydown",e=>{
   if(e.key==="Enter")load(input.value);
@@ -208,96 +289,94 @@ backBtn.onclick=()=>{
     load(historyStack[historyIndex],false);
   }
 };
+
 forwardBtn.onclick=()=>{
   if(historyIndex<historyStack.length-1){
     historyIndex++;
     load(historyStack[historyIndex],false);
   }
 };
+
 refreshBtn.onclick=()=>{
   if(historyIndex>=0)load(historyStack[historyIndex],false);
 };
 
-function buildClock(){
-  const clock=document.getElementById("clock");
-  clock.innerHTML="";
-  const hourSection=document.createElement("div");
-  hourSection.className="clock-section";
-  const hourTrack=document.createElement("div");
-  hourTrack.className="clock-track";
-  const hourMax=is12Hour?12:24;
-  for(let i=0;i<hourMax;i++){
-    const n=document.createElement("div");
-    n.className="clock-number";
-    const val=is12Hour?i+1:i;
-    n.textContent=val.toString().padStart(2,"0");
-    hourTrack.appendChild(n);
+optionsBtn.onclick=()=>optionsModal.style.display="flex";
+closeOptions.onclick=()=>optionsModal.style.display="none";
+optionsModal.onclick=e=>{
+  if(e.target===optionsModal)optionsModal.style.display="none";
+};
+
+proxyButtons.forEach(btn=>{
+  btn.classList.toggle("active",btn.dataset.proxy===currentProxy);
+  btn.onclick=()=>{
+    currentProxy=btn.dataset.proxy;
+    localStorage.setItem("orbitProxy",currentProxy);
+    proxyButtons.forEach(b=>b.classList.remove("active"));
+    btn.classList.add("active");
+  };
+});
+
+runJS.onclick=()=>{
+  const code=jsEvalBox.value.trim();
+  if(!code||!iframe.contentWindow)return;
+  try{iframe.contentWindow.eval(code);}catch{}
+};
+
+const clock=document.getElementById("clock");
+const toggleBtn=document.getElementById("formatToggle");
+let is12Hour=localStorage.getItem("orbitClockFormat")==="12";
+
+function createColumn(max){
+  const section=document.createElement("div");
+  section.className="clock-section";
+  const track=document.createElement("div");
+  track.className="clock-track";
+  for(let i=0;i<max;i++){
+    const num=document.createElement("div");
+    num.className="clock-number";
+    num.textContent=i.toString().padStart(2,"0");
+    track.appendChild(num);
   }
-  hourSection.appendChild(hourTrack);
-  clock.appendChild(hourSection);
-
-  const sep1=document.createElement("div");
-  sep1.className="clock-separator";
-  sep1.textContent=":";
-  clock.appendChild(sep1);
-
-  const minuteSection=document.createElement("div");
-  minuteSection.className="clock-section";
-  const minuteTrack=document.createElement("div");
-  minuteTrack.className="clock-track";
-  for(let i=0;i<60;i++){
-    const n=document.createElement("div");
-    n.className="clock-number";
-    n.textContent=i.toString().padStart(2,"0");
-    minuteTrack.appendChild(n);
-  }
-  minuteSection.appendChild(minuteTrack);
-  clock.appendChild(minuteSection);
-
-  const sep2=document.createElement("div");
-  sep2.className="clock-separator";
-  sep2.textContent=":";
-  clock.appendChild(sep2);
-
-  const secondSection=document.createElement("div");
-  secondSection.className="clock-section";
-  const secondTrack=document.createElement("div");
-  secondTrack.className="clock-track";
-  for(let i=0;i<60;i++){
-    const n=document.createElement("div");
-    n.className="clock-number";
-    n.textContent=i.toString().padStart(2,"0");
-    secondTrack.appendChild(n);
-  }
-  secondSection.appendChild(secondTrack);
-  clock.appendChild(secondSection);
-
-  return {hourTrack,minuteTrack,secondTrack};
+  section.appendChild(track);
+  clock.appendChild(section);
+  return track;
 }
 
-let tracks=buildClock();
+const hourTrack=createColumn(24);
+const minuteTrack=createColumn(60);
+const secondTrack=createColumn(60);
 
 function updateClock(){
   const now=new Date();
   let hours=now.getHours();
   const minutes=now.getMinutes();
   const seconds=now.getSeconds();
-  if(is12Hour)hours=(hours%12)||12;
-  tracks.hourTrack.style.transform=`translateY(-${(is12Hour?hours-1:hours)*5}rem)`;
-  tracks.minuteTrack.style.transform=`translateY(-${minutes*5}rem)`;
-  tracks.secondTrack.style.transform=`translateY(-${seconds*5}rem)`;
+  if(is12Hour)hours=hours%12||12;
+  hourTrack.style.transform=`translateY(-${hours*5}rem)`;
+  minuteTrack.style.transform=`translateY(-${minutes*5}rem)`;
+  secondTrack.style.transform=`translateY(-${seconds*5}rem)`;
 }
+
+setInterval(updateClock,1000);
+updateClock();
+
+const sep1=document.createElement("div");
+sep1.className="clock-separator";
+sep1.textContent=":";
+clock.insertBefore(sep1,clock.children[1]);
+
+const sep2=document.createElement("div");
+sep2.className="clock-separator";
+sep2.textContent=":";
+clock.insertBefore(sep2,clock.children[3]);
 
 toggleBtn.onclick=()=>{
   is12Hour=!is12Hour;
   localStorage.setItem("orbitClockFormat",is12Hour?"12":"24");
-  tracks=buildClock();
-  updateClock();
+  location.reload();
 };
-
-setInterval(updateClock,1000);
-updateClock();
 </script>
-
+  
 </body>
 </html>

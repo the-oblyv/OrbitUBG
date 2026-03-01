@@ -66,10 +66,10 @@ body {
 }
 
 .nav-icon{
-  width:16px;
-  height:16px;
+  height:1em;
+  width:auto;
   margin-right:6px;
-  vertical-align:middle;
+  vertical-align:-0.125em;
 }
 
 .more-wrapper {

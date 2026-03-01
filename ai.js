@@ -312,42 +312,34 @@ When the user asks to generate an image, insert the following markdown "![{descr
     }
     
     
-    deleteButton.addEventListener("click", () => {
-        if (confirm("Are you sure you want to delete all the chats?")) {
-            chatHistory.clear();
-            chatHistory.save();
-            loadDataFromLocalstorage();
-        }
-    });
+    window.addEventListener("DOMContentLoaded", () => {
+  const chatInput = document.querySelector("#chat-input");
+  const sendButton = document.querySelector("#send-btn");
+  const deleteButton = document.querySelector("#delete-btn");
 
-    imageButton.addEventListener("click", () => {
-        chatInput.value += "Generate an image of ";
-        chatInput.focus();
-    });
-    
-    chatInput.addEventListener("input", () => {
-        chatInput.style.height = `${initialInputHeight}px`;
-        chatInput.style.height = `${chatInput.scrollHeight}px`;
-    });
-    
-    chatInput.addEventListener("keydown", (e) => {
-        if (e.key === "Enter" && !e.shiftKey && window.innerWidth > 800) {
-            e.preventDefault();
-            getChatResponse();
-        }
-    });
-    
-    sendButton.addEventListener("click", getChatResponse);
-    
-    const loadDataFromLocalstorage = () => {
-        const sysPromptEl = sysprompt();
-        if (sysPromptEl) {
-            sysPromptEl.value = localStorage.getItem("sys-prompt") ?? sysPromptEl.value;
-        }
-        chatHistory.history = chatHistory.load();
-        chatHistory.update();
-        chatContainer.scrollTo(0, chatContainer.scrollHeight);
+  const handleSend = () => {
+    if (chatInput.value.trim() === "") return;
+    getChatResponse();
+  };
+
+  sendButton.addEventListener("click", handleSend);
+
+  chatInput.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault(); // prevent newline
+      handleSend();
     }
+  });
+
+  deleteButton.addEventListener("click", () => {
+    if (confirm("Are you sure you want to delete all the chats?")) {
+      chatHistory.clear();
+      chatHistory.save();
+      chatContainer.innerHTML = defaultText;
+    }
+  });
+});
+
     window.onload = () => {
         const sysPromptEl = sysprompt();
         if (sysPromptEl) {

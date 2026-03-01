@@ -65,6 +65,13 @@ body {
   opacity:1;
 }
 
+.nav-icon{
+  width:16px;
+  height:16px;
+  margin-right:6px;
+  vertical-align:middle;
+}
+
 .more-wrapper {
   position: relative;
   display: flex;

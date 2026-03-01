@@ -24,8 +24,6 @@ const defaultTitle = document.title;
 let defaultIcon = document.querySelector("link[rel='icon']");
 defaultIcon = defaultIcon ? defaultIcon.href : null;
 
-let cloakInterval = null;
-
 function applyCloak() {
   document.title = settings.cloakTitle;
   let l = document.querySelector("link[rel='icon']");
@@ -48,15 +46,10 @@ function removeCloak() {
     }
     l.href = defaultIcon;
   }
-  if (cloakInterval) {
-    clearInterval(cloakInterval);
-    cloakInterval = null;
-  }
 }
 
 if (settings.cloak) {
   applyCloak();
-  cloakInterval = setInterval(applyCloak, 500);
 } else {
   removeCloak();
 }
@@ -70,60 +63,60 @@ if (settings.panic) {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
+
   let isMov = false;
+
   const menuBtn = document.getElementById("menuBtn");
   const menu = document.getElementById("menu");
   if (menuBtn) menuBtn.onclick = () => menu.classList.toggle("open");
 
- const search = document.getElementById("proxySearch");
+  const search = document.getElementById("proxySearch");
 
-if (search) {
-  function vigenereEncrypt(text, key) {
-    let result = "";
-    let j = 0;
-    for (let i = 0; i < text.length; i++) {
-      const c = text[i];
-      if (/[a-z]/i.test(c)) {
-        const isUpper = c === c.toUpperCase();
-        const base = isUpper ? 65 : 97;
-        const k = key[j % key.length].toLowerCase().charCodeAt(0) - 97;
-        const encoded = (c.charCodeAt(0) - base + k) % 26 + base;
-        result += String.fromCharCode(encoded);
-        j++;
-      } else {
-        result += c;
+  if (search) {
+
+    function vigenereEncrypt(text, key) {
+      let result = "";
+      let j = 0;
+      for (let i = 0; i < text.length; i++) {
+        const c = text[i];
+        if (/[a-z]/i.test(c)) {
+          const isUpper = c === c.toUpperCase();
+          const base = isUpper ? 65 : 97;
+          const k = key[j % key.length].toLowerCase().charCodeAt(0) - 97;
+          const encoded = (c.charCodeAt(0) - base + k) % 26 + base;
+          result += String.fromCharCode(encoded);
+          j++;
+        } else {
+          result += c;
+        }
       }
+      return result;
     }
-    return result;
+
+    function normalizeForSearch(value) {
+      value = value.trim();
+      if (!value) return null;
+      if (value.startsWith("http://") || value.startsWith("https://")) return value;
+      if (value.includes(".")) return "https://" + value;
+      return "https://start.duckduckgo.com/?q=" + encodeURIComponent(value);
+    }
+
+    search.addEventListener("keydown", e => {
+      if (e.key !== "Enter") return;
+      let q = search.value.trim();
+      if (!q) return;
+      const normalized = normalizeForSearch(q);
+      const encrypted = vigenereEncrypt(normalized, "orbit");
+      location.href = "/prx#" + encodeURIComponent(encrypted);
+    });
   }
-
-  function normalizeForSearch(value) {
-    value = value.trim();
-    if (!value) return null;
-
-    if (value.startsWith("http://") || value.startsWith("https://")) return value;
-    if (value.includes(".")) return "https://" + value;
-    return "https://start.duckduckgo.com/?q=" + encodeURIComponent(value);
-  }
-
-  search.addEventListener("keydown", e => {
-    if (e.key !== "Enter") return;
-
-    let q = search.value.trim();
-    if (!q) return;
-
-    const normalized = normalizeForSearch(q);
-    const encrypted = vigenereEncrypt(normalized, "orbit");
-
-    location.href = "/prx#" + encodeURIComponent(encrypted);
-  });
-}
 
   const gamesGrid = document.getElementById("gamesGrid");
   if (gamesGrid) {
     fetch("/games.json")
       .then(r => r.json())
       .then(games => {
+
         games.sort((a, b) => a.name.localeCompare(b.name));
 
         const renderGames = list => {
@@ -137,7 +130,7 @@ if (search) {
             <div class="card-title">!! DMCA</div>
           `;
           gamesGrid.appendChild(dmcaCard);
-          
+
           const requestCard = document.createElement("div");
           requestCard.className = "card";
           requestCard.onclick = () => window.open("https://forms.gle/WdSBv4jkFo3nwvFz8", "_blank");
@@ -146,7 +139,7 @@ if (search) {
             <div class="card-title">!! Request a Game</div>
           `;
           gamesGrid.appendChild(requestCard);
-          
+
           list.forEach(game => {
             const c = document.createElement("div");
             c.className = "card";
@@ -176,6 +169,7 @@ if (search) {
     fetch("/apps.json")
       .then(r => r.json())
       .then(apps => {
+
         apps.sort((a, b) => a.name.localeCompare(b.name));
 
         const renderApps = list => {
@@ -216,93 +210,79 @@ if (search) {
 
   const gameFrame = document.getElementById("gameFrame");
   const appFrame = document.getElementById("appFrame");
-
   const id = new URLSearchParams(location.search).get("id");
 
-if (id && gameFrame && appFrame) {
-  fetch("/games.json")
-    .then(r => r.json())
-    .then(games => {
-      const game = games.find(x => x.id === id);
-      if (game) {
-  isMov = false;
+  if (id && gameFrame && appFrame) {
+    fetch("/games.json")
+      .then(r => r.json())
+      .then(games => {
+        const game = games.find(x => x.id === id);
+        if (game) {
+          isMov = false;
+          gameFrame.removeAttribute("sandbox");
+          appFrame.removeAttribute("sandbox");
+          gameFrame.src = game.url;
+          gameFrame.style.display = "block";
+          appFrame.style.display = "none";
+          return Promise.reject("found");
+        }
+        return fetch("/apps.json")
+          .then(r => r.json())
+          .then(apps => {
+            const app = apps.find(x => x.id === id);
+            if (app) {
+              isMov = false;
+              appFrame.removeAttribute("sandbox");
+              gameFrame.removeAttribute("sandbox");
+              appFrame.src = app.url;
+              appFrame.style.display = "block";
+              gameFrame.style.display = "none";
+              return Promise.reject("found");
+            }
 
-  gameFrame.removeAttribute("sandbox");
-  appFrame.removeAttribute("sandbox");
-
-  gameFrame.src = game.url;
-  gameFrame.style.display = "block";
-  appFrame.style.display = "none";
-  return Promise.reject("found");
-}
-
-      return fetch("/apps.json")
-        .then(r => r.json())
-        .then(apps => {
-          const app = apps.find(x => x.id === id);
-          if (app) {
-  isMov = false;
-
-  appFrame.removeAttribute("sandbox");
-  gameFrame.removeAttribute("sandbox");
-
-  appFrame.src = app.url;
-  appFrame.style.display = "block";
-  gameFrame.style.display = "none";
-  return Promise.reject("found");
-}
-          
-          const movUrl = `/mov/p.html#${id}`;
-
-isMov = true;
-
-appFrame.src = movUrl;
-appFrame.style.display = "block";
-gameFrame.style.display = "none";
-
-appFrame.setAttribute(
-  "sandbox",
-  "allow-scripts allow-same-origin allow-presentation"
-);
-
-appFrame.onerror = () => {
-  location.href = "/404";
-};
-
-        });
-    })
-    .catch(err => {
-      if (err !== "found") {
-        location.href = "/404";
-      }
-    });
-}
+            const movUrl = `/mov/p.html#${id}`;
+            isMov = true;
+            appFrame.src = movUrl;
+            appFrame.style.display = "block";
+            gameFrame.style.display = "none";
+            appFrame.setAttribute("sandbox", "allow-scripts allow-same-origin allow-presentation");
+            appFrame.onerror = () => location.href = "/404";
+          });
+      })
+      .catch(err => {
+        if (err !== "found") location.href = "/404";
+      });
+  }
 
   const fsBtn = document.getElementById("fullscreenBtn");
-  if (fsBtn && gameFrame) fsBtn.onclick = () => (gameFrame.style.display !== "none" ? gameFrame.requestFullscreen?.() : appFrame.requestFullscreen?.());
+  if (fsBtn && gameFrame)
+    fsBtn.onclick = () =>
+      (gameFrame.style.display !== "none"
+        ? gameFrame.requestFullscreen?.()
+        : appFrame.requestFullscreen?.());
 
   const blankBtn = document.getElementById("blankBtn");
-if (blankBtn) {
-  blankBtn.onclick = () => {
+  if (blankBtn) {
+    blankBtn.onclick = () => {
 
-    if (isMov) {
-      alert("Opening movie embeds in about:blank is disabled for security reasons.");
-      return;
-    }
+      if (isMov) {
+        alert("Opening movie embeds in about:blank is disabled for security reasons.");
+        return;
+      }
 
-    const w = window.open("about:blank", "_blank");
-    if (!w) return;
+      const w = window.open("about:blank", "_blank");
+      if (!w) return;
 
-    const i = w.document.createElement("iframe");
-    i.src = gameFrame.style.display !== "none" ? gameFrame.src : appFrame.src;
-    i.style.border = "none";
-    i.style.width = "100%";
-    i.style.height = "100%";
+      const i = w.document.createElement("iframe");
+      i.src = gameFrame.style.display !== "none" ? gameFrame.src : appFrame.src;
+      i.style.border = "none";
+      i.style.width = "100%";
+      i.style.height = "100%";
 
-    w.document.body.style.margin = "0";
-    w.document.body.appendChild(i);
-  };
-}
+      w.document.body.style.margin = "0";
+      w.document.body.appendChild(i);
+    };
+  }
 
   const cloakToggle = document.getElementById("cloakToggle");
   const cloakTitleInput = document.getElementById("cloakTitleInput");
@@ -320,7 +300,8 @@ if (blankBtn) {
     cloakToggle.onchange = () => {
       settings.cloak = cloakToggle.checked;
       saveSettings(settings);
-      location.reload();
+      if (settings.cloak) applyCloak();
+      else removeCloak();
     };
 
     cloakTitleInput.oninput = () => {
@@ -362,4 +343,5 @@ if (blankBtn) {
       w.document.body.appendChild(i);
     };
   }
+
 });

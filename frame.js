@@ -13,7 +13,6 @@ const navHTML = `
 <i class="fa-solid fa-ellipsis"></i> More
 </button>
 <div class="more-dropdown">
-
 <a href="/partners"><i class="fa-solid fa-handshake-o"></i> Partners</a>
 <a href="/s"><i class="fa-solid fa-gear"></i> Settings</a>
 </div>
@@ -30,6 +29,7 @@ const menuHTML = `
 <a href="/med"><i class="fa-solid fa-photo-film"></i> Media</a>
 <a href="/prx"><i class="fa-solid fa-globe"></i> Proxy</a>
 <hr style="border:none;height:1px;background:rgba(255,255,255,.1);margin:10px 0;">
+<a href="/partners"><i class="fa-solid fa-handshake-o"></i> Partners</a>
 <a href="/s"><i class="fa-solid fa-gear"></i> Settings</a>
 `;
 

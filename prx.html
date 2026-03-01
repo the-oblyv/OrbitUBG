@@ -7,7 +7,6 @@
 <link rel="icon" href="/res/orbit.png">
 <link rel="stylesheet" href="/style.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-
 <style>
 :root{
   --main-bg:#0f1420;
@@ -82,39 +81,48 @@ html,body{
   display:flex;
   align-items:center;
   justify-content:center;
-  gap:0.8rem;
+  gap:0.5rem;
   font-size:4rem;
   font-weight:600;
 }
-
 .clock-section{
   height:5rem;
   overflow:hidden;
-  display:flex;
 }
-
 .clock-track{
   display:flex;
   flex-direction:column;
   transition:transform 0.5s ease;
 }
-
 .clock-number{
   height:5rem;
   display:flex;
   align-items:center;
   justify-content:center;
-  opacity:1;
 }
-
 .clock-separator{
   display:flex;
   align-items:center;
   justify-content:center;
-  height:5rem;
-  opacity:0.8;
+  font-size:4rem;
+  line-height:5rem;
 }
-  #proxyFrame{
+.clock-toggle{
+  position:absolute;
+  bottom:40px;
+  font-size:0.9rem;
+  padding:0.5rem 1rem;
+  background:var(--panel2);
+  border:1px solid var(--border);
+  border-radius:8px;
+  cursor:pointer;
+  color:var(--text);
+  transition:0.2s;
+}
+.clock-toggle:hover{
+  border-color:var(--accent);
+}
+#proxyFrame{
   display:none;
   width:100%;
   height:100%;
@@ -123,7 +131,6 @@ html,body{
 }
 </style>
 </head>
-
 <body>
 
 <header class="topbar" id="navMount"></header>
@@ -146,14 +153,6 @@ html,body{
   <iframe id="proxyFrame" allowfullscreen></iframe>
 </div>
 
-<script src="/baremux/index.js" defer></script>
-<script src="/uv/uv.bundle.js" defer></script>
-<script src="/uv/uv.config.js" defer></script>
-<script src="/scram/scramjet.all.js" defer></script>
-<script src="/stuff.js" defer></script>
-<script src="frame.js"></script>
-<script src="script.js"></script>
-
 <script>
 const input=document.getElementById("urlInput");
 const backBtn=document.getElementById("backBtn");
@@ -162,14 +161,9 @@ const refreshBtn=document.getElementById("refreshBtn");
 const iframe=document.getElementById("proxyFrame");
 const newtab=document.getElementById("newtab");
 const optionsBtn=document.getElementById("optionsBtn");
-const optionsModal=document.getElementById("optionsModal");
-const closeOptions=document.getElementById("closeOptions");
-const proxyButtons=document.querySelectorAll(".proxy-btn");
-const runJS=document.getElementById("runJS");
-const jsEvalBox=document.getElementById("jsEvalBox");
-const devConsoleBtn=document.getElementById("devConsoleBtn");
+const toggleBtn=document.getElementById("formatToggle");
 
-let currentProxy=localStorage.getItem("orbitProxy")||"uv";
+let is12Hour=localStorage.getItem("orbitClockFormat")==="12";
 let historyStack=[];
 let historyIndex=-1;
 
@@ -187,11 +181,7 @@ function load(url,addHistory=true){
   const finalURL=search(url);
   newtab.style.display="none";
   iframe.style.display="block";
-  if(currentProxy==="uv"){
-    iframe.src=__uv$config.prefix+__uv$config.encodeUrl(finalURL);
-  }else{
-    iframe.src="/scramjet/"+finalURL;
-  }
+  iframe.src=finalURL;
   input.value=url;
   location.hash=encodeURIComponent(finalURL);
   if(addHistory){
@@ -200,21 +190,6 @@ function load(url,addHistory=true){
     historyIndex++;
   }
 }
-
-function handleHashRoute(){
-  if(!location.hash)return;
-  const raw=location.hash.substring(1);
-  try{
-    const decoded=decodeURIComponent(raw);
-    if(decoded&&decoded.trim()){
-      input.value=decoded;
-      load(decoded,false);
-    }
-  }catch{}
-}
-
-window.addEventListener("load",handleHashRoute);
-window.addEventListener("hashchange",handleHashRoute);
 
 input.addEventListener("keydown",e=>{
   if(e.key==="Enter")load(input.value);
@@ -226,67 +201,23 @@ backBtn.onclick=()=>{
     load(historyStack[historyIndex],false);
   }
 };
-
 forwardBtn.onclick=()=>{
   if(historyIndex<historyStack.length-1){
     historyIndex++;
     load(historyStack[historyIndex],false);
   }
 };
-
 refreshBtn.onclick=()=>{
   if(historyIndex>=0)load(historyStack[historyIndex],false);
 };
 
-  optionsBtn.onclick=()=>optionsModal.style.display="flex";
-closeOptions.onclick=()=>optionsModal.style.display="none";
-optionsModal.onclick=e=>{
-  if(e.target===optionsModal)optionsModal.style.display="none";
-};
-
-proxyButtons.forEach(btn=>{
-  btn.classList.toggle("active",btn.dataset.proxy===currentProxy);
-  btn.onclick=()=>{
-    currentProxy=btn.dataset.proxy;
-    localStorage.setItem("orbitProxy",currentProxy);
-    proxyButtons.forEach(b=>b.classList.remove("active"));
-    btn.classList.add("active");
-  };
-});
-
-runJS.onclick=()=>{
-  const code=jsEvalBox.value.trim();
-  if(!code||!iframe.contentWindow)return;
-  try{iframe.contentWindow.eval(code);}catch{}
-};
-  
-devConsoleBtn.onclick = () => {
-  if (!iframe.src) return;
-
-  try {
-    const script = document.createElement("script");
-    script.src = "https://cdn.jsdelivr.net/gh/SnowLord7/devconsole@master/main.js";
-    script.onload = () => console.log("Dev console loaded");
-    
-    iframe.contentWindow.document.body.appendChild(script);
-  } catch (err) {
-    alert("Dev console injection blocked by site.");
-  }
-};
-  
-const clock=document.getElementById("clock");
-const toggleBtn=document.getElementById("formatToggle");
-
-let is12Hour=localStorage.getItem("orbitClockFormat")==="12";
-
 function buildClock(){
+  const clock=document.getElementById("clock");
   clock.innerHTML="";
-
   const hourSection=document.createElement("div");
   hourSection.className="clock-section";
   const hourTrack=document.createElement("div");
   hourTrack.className="clock-track";
-
   const hourMax=is12Hour?12:24;
   for(let i=0;i<hourMax;i++){
     const n=document.createElement("div");
@@ -295,7 +226,6 @@ function buildClock(){
     n.textContent=val.toString().padStart(2,"0");
     hourTrack.appendChild(n);
   }
-
   hourSection.appendChild(hourTrack);
   clock.appendChild(hourSection);
 
@@ -308,14 +238,12 @@ function buildClock(){
   minuteSection.className="clock-section";
   const minuteTrack=document.createElement("div");
   minuteTrack.className="clock-track";
-
   for(let i=0;i<60;i++){
     const n=document.createElement("div");
     n.className="clock-number";
     n.textContent=i.toString().padStart(2,"0");
     minuteTrack.appendChild(n);
   }
-
   minuteSection.appendChild(minuteTrack);
   clock.appendChild(minuteSection);
 
@@ -328,14 +256,12 @@ function buildClock(){
   secondSection.className="clock-section";
   const secondTrack=document.createElement("div");
   secondTrack.className="clock-track";
-
   for(let i=0;i<60;i++){
     const n=document.createElement("div");
     n.className="clock-number";
     n.textContent=i.toString().padStart(2,"0");
     secondTrack.appendChild(n);
   }
-
   secondSection.appendChild(secondTrack);
   clock.appendChild(secondSection);
 
@@ -349,17 +275,10 @@ function updateClock(){
   let hours=now.getHours();
   const minutes=now.getMinutes();
   const seconds=now.getSeconds();
-
   if(is12Hour)hours=(hours%12)||12;
-
-  tracks.hourTrack.style.transform=
-    `translateY(-${(is12Hour?hours-1:hours)*5}rem)`;
-
-  tracks.minuteTrack.style.transform=
-    `translateY(-${minutes*5}rem)`;
-
-  tracks.secondTrack.style.transform=
-    `translateY(-${seconds*5}rem)`;
+  tracks.hourTrack.style.transform=`translateY(-${(is12Hour?hours-1:hours)*5}rem)`;
+  tracks.minuteTrack.style.transform=`translateY(-${minutes*5}rem)`;
+  tracks.secondTrack.style.transform=`translateY(-${seconds*5}rem)`;
 }
 
 toggleBtn.onclick=()=>{

@@ -436,28 +436,14 @@ a.partner-card{
   text-decoration:none;
 }
 
-a.partner-card .partner-title{
+.partner-card .partner-title{
   display:block;
   width:100%;
-  color:inherit;
-  text-decoration:none;
-  position:relative;
   padding-bottom:12px;
   margin-bottom:12px;
+  border-bottom:1px solid rgba(255,255,255,.15);
 }
 
-a.partner-card .partner-title::after{
-  content:"";
-  position:absolute;
-  left:15%;
-  right:15%;
-  bottom:0;
-  height:1px;
-  background:rgba(255,255,255,.15);
-  border-radius:2px;
-}
-
-a.partner-card .partner-description{
-  color:inherit;
-  text-decoration:none;
+.partner-card .partner-description{
+  padding-top:4px;
 }

@@ -66,11 +66,10 @@ body {
 }
 
 .partner-img{
-  width:40px;
-  max-width:100%;
-  height:auto;
-  display:block;
-  margin:0 auto 14px auto;
+  width:20px;
+  height:20px;
+  margin-right:6px;
+  vertical-align:middle;
 }
 
 .more-wrapper {

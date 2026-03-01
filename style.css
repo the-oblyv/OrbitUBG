@@ -423,3 +423,13 @@ a.app-card .app-title{
   color:inherit;
   text-decoration:none;
 }
+
+a.partner-card{
+  color:inherit;
+  text-decoration:none;
+}
+
+a.partner-card .partner-title{
+  color:inherit;
+  text-decoration:none;
+}

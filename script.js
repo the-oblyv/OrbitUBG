@@ -208,7 +208,34 @@ document.addEventListener("DOMContentLoaded", () => {
       });
   }
 
-  const gameFrame = document.getElementById("gameFrame");
+  const partnersGrid = document.getElementById("partnersGrid");
+  if (partnersGrid) {
+    fetch("/partners.json")
+      .then(r => r.json())
+      .then(partners => {
+
+        partners.sort((a, b) => a.name.localeCompare(b.name));
+
+        const renderPartners = list => {
+          partnersGrid.innerHTML = "";
+
+          list.forEach(partner => {
+            const c = document.createElement("div");
+            c.className = "card";
+            c.onclick = () => location.href = `${partner.url}`;
+            c.innerHTML = `
+              <img class="thumb" src="${partner.image}">
+              <div class="card-title">${partner.name}</div>
+              <div class="partner-description">${partner.description}</div>
+            `;
+            partnersGrid.appendChild(c);
+          });
+        };
+
+        renderPartners(partners);
+
+
+  const gameFrame = document.getElementById("gameFrame");  
   const appFrame = document.getElementById("appFrame");
   const id = new URLSearchParams(location.search).get("id");
 

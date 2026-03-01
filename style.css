@@ -65,11 +65,12 @@ body {
   opacity:1;
 }
 
-.nav-icon{
-  height:1em;
-  width:auto;
-  margin-right:6px;
-  vertical-align:-0.125em;
+.partner-card img{
+  width:40%;
+  max-width:100px;
+  height:auto;
+  display:block;
+  margin:0 auto 12px auto;
 }
 
 .more-wrapper {

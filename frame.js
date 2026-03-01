@@ -13,6 +13,8 @@ const navHTML = `
 <i class="fa-solid fa-ellipsis"></i> More
 </button>
 <div class="more-dropdown">
+
+<a href="/partners"><i class="fa-solid fa-handshake-o"></i> Partners</a>
 <a href="/s"><i class="fa-solid fa-gear"></i> Settings</a>
 </div>
 </div>

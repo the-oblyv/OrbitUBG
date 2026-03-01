@@ -224,9 +224,10 @@ if (partnersGrid) {
           c.className = "card";
           c.onclick = () => location.href = partner.url;
           c.innerHTML = `
-            <img class="thumb" src="${partner.image}">
-            <div class="card-title">${partner.name}</div>
-            <div class="partner-description">${partner.description}</div>
+          <img class="thumb" src="${partner.image}">
+          <div class="card-title">${partner.name}</div>
+          <hr class="partner-divider">
+          <div class="partner-description">${partner.description}</div>
           `;
           partnersGrid.appendChild(c);
         });

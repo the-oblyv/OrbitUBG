@@ -80,35 +80,41 @@ html,body{
 }
 .clock{
   display:flex;
-  gap:1rem;
+  align-items:center;
+  justify-content:center;
+  gap:0.8rem;
   font-size:4rem;
   font-weight:600;
-  align-items:center;
 }
-.clock-section{height:5rem;overflow:hidden;}
-.clock-track{transition:transform 0.5s ease;}
+
+.clock-section{
+  height:5rem;
+  overflow:hidden;
+  display:flex;
+}
+
+.clock-track{
+  display:flex;
+  flex-direction:column;
+  transition:transform 0.5s ease;
+}
+
 .clock-number{
   height:5rem;
   display:flex;
   align-items:center;
   justify-content:center;
-  opacity:0.2;
+  opacity:1;
 }
-.clock-separator{opacity:0.6;}
-.clock-toggle{
-  position:absolute;
-  bottom:40px;
-  font-size:0.9rem;
-  padding:0.5rem 1rem;
-  background:var(--panel2);
-  border:1px solid var(--border);
-  border-radius:8px;
-  cursor:pointer;
-  color:var(--text);
-  transition:0.2s;
+
+.clock-separator{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  height:5rem;
+  opacity:0.8;
 }
-.clock-toggle:hover{border-color:var(--accent);}
-#proxyFrame{
+  #proxyFrame{
   display:none;
   width:100%;
   height:100%;
@@ -273,63 +279,94 @@ const toggleBtn=document.getElementById("formatToggle");
 
 let is12Hour=localStorage.getItem("orbitClockFormat")==="12";
 
-function createColumn(max,startAtOne=false){
-  const section=document.createElement("div");
-  section.className="clock-section";
-  const track=document.createElement("div");
-  track.className="clock-track";
-  for(let i=0;i<max;i++){
-    const num=document.createElement("div");
-    num.className="clock-number";
-    let value=startAtOne?i+1:i;
-    num.textContent=value.toString().padStart(2,"0");
-    track.appendChild(num);
-  }
-  section.appendChild(track);
-  clock.appendChild(section);
-  return track;
+function buildClock(){
+  clock.innerHTML="";
+
+  const hourSection=document.createElement("div");
+  hourSection.className="clock-section";
+  const hourTrack=document.createElement("div");
+  hourTrack.className="clock-track";
+
+  const hourMax=is12Hour?12:24;
+  for(let i=0;i<hourMax;i++){
+    const n=document.createElement("div");
+    n.className="clock-number";
+    const val=is12Hour?i+1:i;
+    n.textContent=val.toString().padStart(2,"0");
+    hourTrack.appendChild(n);
+  }
+
+  hourSection.appendChild(hourTrack);
+  clock.appendChild(hourSection);
+
+  const sep1=document.createElement("div");
+  sep1.className="clock-separator";
+  sep1.textContent=":";
+  clock.appendChild(sep1);
+
+  const minuteSection=document.createElement("div");
+  minuteSection.className="clock-section";
+  const minuteTrack=document.createElement("div");
+  minuteTrack.className="clock-track";
+
+  for(let i=0;i<60;i++){
+    const n=document.createElement("div");
+    n.className="clock-number";
+    n.textContent=i.toString().padStart(2,"0");
+    minuteTrack.appendChild(n);
+  }
+
+  minuteSection.appendChild(minuteTrack);
+  clock.appendChild(minuteSection);
+
+  const sep2=document.createElement("div");
+  sep2.className="clock-separator";
+  sep2.textContent=":";
+  clock.appendChild(sep2);
+
+  const secondSection=document.createElement("div");
+  secondSection.className="clock-section";
+  const secondTrack=document.createElement("div");
+  secondTrack.className="clock-track";
+
+  for(let i=0;i<60;i++){
+    const n=document.createElement("div");
+    n.className="clock-number";
+    n.textContent=i.toString().padStart(2,"0");
+    secondTrack.appendChild(n);
+  }
+
+  secondSection.appendChild(secondTrack);
+  clock.appendChild(secondSection);
+
+  return {hourTrack,minuteTrack,secondTrack};
 }
 
-function createSeparator(){
-  const sep=document.createElement("div");
-  sep.className="clock-separator";
-  sep.textContent=":";
-  clock.appendChild(sep);
-}
-
-clock.innerHTML="";
-
-let hourTrack=createColumn(is12Hour?12:24,is12Hour);
-createSeparator();
-let minuteTrack=createColumn(60);
-createSeparator();
-let secondTrack=createColumn(60);
-
-function rebuildClock(){
-  clock.innerHTML="";
-  hourTrack=createColumn(is12Hour?12:24,is12Hour);
-  createSeparator();
-  minuteTrack=createColumn(60);
-  createSeparator();
-  secondTrack=createColumn(60);
-}
+let tracks=buildClock();
 
 function updateClock(){
-  const now=new Date();
-  let hours=now.getHours();
-  const minutes=now.getMinutes();
-  const seconds=now.getSeconds();
-  if(is12Hour)hours=(hours%12)||12;
-  hourTrack.style.transform=`translateY(-${(is12Hour?hours-1:hours)*5}rem)`;
-  minuteTrack.style.transform=`translateY(-${minutes*5}rem)`;
-  secondTrack.style.transform=`translateY(-${seconds*5}rem)`;
+  const now=new Date();
+  let hours=now.getHours();
+  const minutes=now.getMinutes();
+  const seconds=now.getSeconds();
+
+  if(is12Hour)hours=(hours%12)||12;
+
+  tracks.hourTrack.style.transform=
+    `translateY(-${(is12Hour?hours-1:hours)*5}rem)`;
+
+  tracks.minuteTrack.style.transform=
+    `translateY(-${minutes*5}rem)`;
+
+  tracks.secondTrack.style.transform=
+    `translateY(-${seconds*5}rem)`;
 }
 
 toggleBtn.onclick=()=>{
-  is12Hour=!is12Hour;
-  localStorage.setItem("orbitClockFormat",is12Hour?"12":"24");
-  rebuildClock();
-  updateClock();
+  is12Hour=!is12Hour;
+  localStorage.setItem("orbitClockFormat",is12Hour?"12":"24");
+  tracks=buildClock();
+  updateClock();
 };
 
 setInterval(updateClock,1000);

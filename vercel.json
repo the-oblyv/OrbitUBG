@@ -4,6 +4,7 @@
     { "source": "/a", "destination": "/a.html" },
     { "source": "/s", "destination": "/s.html" },
     { "source": "/p", "destination": "/p.html" },
+    { "source": "/partners", "destination": "/partners.html" },
     { "source": "/pr", "destination": "/pr.html" },
     { "source": "/ai", "destination": "/ai.html" },
     { "source": "/mov", "destination": "/mov.html" },

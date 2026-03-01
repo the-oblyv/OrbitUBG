@@ -19,6 +19,7 @@ app.get("/g", (_, res) => res.sendFile("g.html", { root: "." }));
 app.get("/a", (_, res) => res.sendFile("a.html", { root: "." }));
 app.get("/s", (_, res) => res.sendFile("s.html", { root: "." }));
 app.get("/p", (_, res) => res.sendFile("p.html", { root: "." }));
+app.get("/partners", (_, res) => res.sendFile("partners.html", { root: "." }));
 app.get("/pr", (_, res) => res.sendFile("pr.html", { root: "." }));
 app.get("/ai", (_, res) => res.sendFile("ai.html", { root: "." }));
 app.get("/mov", (_, res) => res.sendFile("mov.html", { root: "." }));

@@ -209,31 +209,36 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   const partnersGrid = document.getElementById("partnersGrid");
-  if (partnersGrid) {
-    fetch("/partners.json")
-      .then(r => r.json())
-      .then(partners => {
+if (partnersGrid) {
+  fetch("/partners.json")
+    .then(r => r.json())
+    .then(partners => {
 
-        partners.sort((a, b) => a.name.localeCompare(b.name));
+      partners.sort((a, b) => a.name.localeCompare(b.name));
 
-        const renderPartners = list => {
-          partnersGrid.innerHTML = "";
+      const renderPartners = list => {
+        partnersGrid.innerHTML = "";
 
-          list.forEach(partner => {
-            const c = document.createElement("div");
-            c.className = "card";
-            c.onclick = () => location.href = `${partner.url}`;
-            c.innerHTML = `
-              <img class="thumb" src="${partner.image}">
-              <div class="card-title">${partner.name}</div>
-              <div class="partner-description">${partner.description}</div>
-            `;
-            partnersGrid.appendChild(c);
-          });
-        };
+        list.forEach(partner => {
+          const c = document.createElement("div");
+          c.className = "card";
+          c.onclick = () => location.href = partner.url;
+          c.innerHTML = `
+            <img class="thumb" src="${partner.image}">
+            <div class="card-title">${partner.name}</div>
+            <div class="partner-description">${partner.description}</div>
+          `;
+          partnersGrid.appendChild(c);
+        });
+      };
 
-        renderPartners(partners);
+      renderPartners(partners);
 
+    })
+    .catch(() => {
+      console.error("Failed to load partners.json");
+    });
+}
 
   const gameFrame = document.getElementById("gameFrame");  
   const appFrame = document.getElementById("appFrame");

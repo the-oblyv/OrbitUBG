@@ -29,6 +29,7 @@ app.get("/prx", (_, res) => res.sendFile("prx.html", { root: "." }));
 app.get("/mov/", (_, res) => res.sendFile("mov.html", { root: "." }));
 app.get("/mov/p", (_, res) => res.sendFile("mov/p.html", { root: "." }));
 app.get("/404", (_, res) => res.sendFile("404.html", { root: "." }));
+app.get("/yt", (_, res) => res.sendFile("yt.html", { root: "." }));
 
 app.use(express.static("."));
 app.use("/uv/", express.static(uvPath));

@@ -13,6 +13,7 @@
     { "source": "/prx", "destination": "/prx.html" },
     { "source": "/mov/", "destination": "/mov.html" },
     { "source": "/mov/p", "destination": "/mov/p.html" },
+    { "source": "/yt", "destination": "/yt.html" },
     { "source": "/404", "destination": "/404.html" }
   ]
 }

@@ -9,18 +9,18 @@
     "id": "file-uploader",
     "name": "File Uploader",
     "image": "/apps/file-uploader/download (1).png",
-    "url": "/apps/file-uploader/index.html"
+    "url": "/embed.html#https://perchance.org/upload"
   },
   {
     "id": "temp-mail",
     "name": "Temp Mail",
     "image": "/apps/temp-mail/favicon.ico",
-    "url": "/apps/temp-mail/index.html"
+    "url": "/embed.html#https://mail.tm/"
   },
   {
     "id": "discord",
     "name": "Discord",
     "image": "/apps/discord/discord-logo-icon-editorial-free-vector.jpg",
-    "url": "/apps/discord/index.html"
+    "url": "/embed.html#https://canary.discord.com/"
   }
 ]

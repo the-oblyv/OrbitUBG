@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="UTF-8">
+    <title>YT | Orbit</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="/res/orbit.png">
+
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet"/>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <style>
+  :root {
+    --bg: #0f1420;
+    --panel: #1b2133;
+    --panel2: #232a40;
+    --text: #e6e9f2;
+    --muted: #aab0c5;
+    --accent: #6c7cff;
+    --radius: 22px;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    margin: 0;
+    font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow: hidden;
+    height: 100vh;
+    width: 100vw;
+  }
+  
+  #browserViewEl {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    width: 100%;
+    opacity: 1;
+    transition: opacity 0.4s ease;
+    padding-top: 130px;
+  }
+  
+  .search-bar {
+    padding: 0 16px 24px;
+    display: flex;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  
+  .search-bar input {
+    width: 100%;
+    max-width: 520px;
+    padding: 16px;
+    border-radius: 14px;
+    border: none;
+    outline: none;
+    background: var(--panel2);
+    color: var(--text);
+    font-size: 16px;
+    transition: background 0.2s;
+  }
+  
+  .search-bar input:focus {
+    background: #1a2035;
+  }
+  
+  #gridEl {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0 16px 40px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+    gap: 18px;
+    align-content: start;
+    min-height: 0;
+    width: 100%;
+    box-sizing: border-box;
+    position: relative;
+  }
+  
+  #gridEl::-webkit-scrollbar {
+    width: 8px;
+  }
+  
+  #gridEl::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  
+  #gridEl::-webkit-scrollbar-thumb {
+    background: var(--panel2);
+    border-radius: 4px;
+  }
+  
+  #gridEl::-webkit-scrollbar-thumb:hover {
+    background: var(--panel);
+  }
+  
+  .card {
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
+  
+  .youtube-card {
+    height: auto;
+    width: 100%;
+    padding: 14px;
+    background: var(--panel);
+    border-radius: 18px;
+    transition: transform 0.15s;
+    overflow: visible;
+    display: flex;
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .youtube-card:hover {
+    transform: translateY(-4px);
+  }
+  
+  .thumbnail-container {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    position: relative;
+    background-color: var(--panel2);
+    border-radius: 14px;
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+  
+  .thumbnail-container img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  
+  .video-info {
+    padding: 10px 0 0 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex: 1;
+    text-align: left;
+  }
+  
+  .card-name {
+    font-size: 0.95rem;
+    font-weight: 600; 
+    line-height: 1.4;
+    color: var(--text);
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    margin: 0;
+    text-overflow: ellipsis;
+  }
+  
+  .channel-name {
+    font-size: 0.9rem;
+    color: var(--muted);
+    opacity: 0.8;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
+  #loadingSpinnerEl {
+    display: none;
+    grid-column: 1 / -1;
+    justify-content: center;
+    padding: 60px;
+  }
+  
+  #loadingSpinnerEl.active {
+    display: flex;
+  }
+  
+  .spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid var(--panel2);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+  
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+  
+  .no-results-message {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 60px;
+    color: var(--muted);
+    display: none;
+  }
+  
+  #playbackOverlayEl {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: var(--bg);
+    display: none;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    z-index: 1000;
+    flex-direction: column;
+    padding-top: 130px;
+  }
+  
+  #playbackOverlayEl.active {
+    opacity: 1;
+  }
+  
+  .player-header {
+    display: flex;
+    align-items: center;
+    padding: 16px 24px;
+    gap: 16px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    background: var(--bg);
+    flex-shrink: 0;
+    height: 60px;
+    box-sizing: border-box;
+  }
+  
+  #backBtnEl {
+    background: var(--panel2);
+    border: none;
+    color: var(--text);
+    width: 40px;
+    height: 40px;
+    font-size: 18px;
+    cursor: pointer;
+    border-radius: 14px;
+    transition: background 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+    flex-shrink: 0;
+  }
+  
+  #backBtnEl:hover {
+    background: var(--panel);
+  }
+  
+  #nowPlayingEl {
+    font-size: 16px;
+    font-weight: 500;
+    max-width: 80%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: var(--muted);
+  }
+  
+  #playerContainerEl {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    width: 100%;
+    background: black;
+    min-height: 0;
+  }
+  
+  #playerContainerEl .plyr {
+    width: 100%;
+    height: 100%;
+    max-width: 100%;
+    max-height: 100%;
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  
+  #rippleLoaderEl {
+    position: absolute;
+    display: none;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+  
+  #rippleLoaderEl.active {
+    display: block;
+  }
+  
+  .ripple {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    border: 4px solid var(--accent);
+    animation: ripple 1.2s ease-out infinite;
+  }
+  
+  @keyframes ripple {
+    0% { transform: scale(0.8); opacity: 1; }
+    100% { transform: scale(1.5); opacity: 0; }
+  }
+  
+  .player-error {
+    color: #ff6b6b;
+    text-align: center;
+    padding: 30px;
+    background: rgba(255,107,107,0.1);
+    border-radius: 18px;
+    margin: 20px;
+    max-width: 600px;
+    line-height: 1.5;
+  }
+  
+  @media (max-width: 720px) {
+    #browserViewEl {
+      padding-top: 110px;
+    }
+    
+    #playbackOverlayEl {
+      padding-top: 110px;
+    }
+    
+    .search-bar input {
+      font-size: 1rem;
+    }
+    
+    #gridEl {
+      padding: 0 16px 32px;
+    }
+  }
+</style>
+
+<script src="https://cdn.plyr.io/3.7.8/plyr.js"></script>
+<link rel="stylesheet" href="https://cdn.plyr.io/3.7.8/plyr.css">
+
+<body>
+<header class="topbar" id="navMount"></header>
+<nav class="menu" id="menu"></nav>
+<div id="browserViewEl">
+  <div class="search-bar">
+    <input type="text" id="searchInputEl" placeholder="Search videos...">
+  </div>
+  
+  <div id="gridEl">
+    <div id="loadingSpinnerEl">
+      <div class="spinner"></div>
+    </div>
+    <div class="no-results-message" id="noResultsEl">No results found.</div>
+  </div>
+</div>
+
+<div id="playbackOverlayEl">
+  <div class="player-header">
+    <button id="backBtnEl">←</button>
+    <span id="nowPlayingEl">Now Playing</span>
+  </div>
+  <div id="playerContainerEl">
+    <div id="rippleLoaderEl"><div class="ripple"></div></div>
+  </div>
+</div>
+   <script src="frame.js"></script>
+  <script src="yt.js"></script>
+ <script src="script.js"></script>
+</body>
+</html>

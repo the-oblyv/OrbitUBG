@@ -22,20 +22,19 @@ try {
 }
 
 const connection = new BareMux.BareMuxConnection("/baremux/worker.js");
-const wispUrl =
-  (location.protocol === "https:" ? "wss" : "ws") +
-  "://" +
-  location.host +
-  "/wisp/";
+
+const wispUrl = "wss://scramjet-uv-example-production.up.railway.app/wisp/";
 
 async function setTransport(transportsel) {
   switch (transportsel) {
     case "epoxy":
       await connection.setTransport("/epoxy/index.mjs", [{ wisp: wispUrl }]);
       break;
+
     case "libcurl":
       await connection.setTransport("/libcurl/index.mjs", [{ websocket: wispUrl }]);
       break;
+
     default:
       await connection.setTransport("/bareasmodule/index.mjs", [bareUrl]);
       break;
